@@ -12,10 +12,9 @@ import com.xuggle.xuggler.IStream;
 import com.xuggle.xuggler.IStreamCoder;
 import com.xuggle.xuggler.IVideoPicture;
 import com.xuggle.xuggler.IVideoResampler;
-import com.xuggle.xuggler.Utils;
 
-import dk.localghost.hold17.base.video.ImageListener;
-import dk.localghost.hold17.base.video.VideoDecoder;
+import com.xuggle.xuggler.video.ConverterFactory;
+import com.xuggle.xuggler.video.IConverter;
 import dk.localghost.hold17.base.video.ImageListener;
 import dk.localghost.hold17.base.video.VideoDecoder;
 
@@ -64,7 +63,7 @@ public class XugglerDecoder implements VideoDecoder
 		 * Now we have found the video stream in this file. Let's open up our
 		 * decoder so it can do work.
 		 */
-		if (videoCoder.open() < 0)
+		if (videoCoder.open(null, null) < 0)
 			throw new RuntimeException("could not open video decoder for container");
 
 		IVideoResampler resampler = null;
@@ -186,10 +185,12 @@ public class XugglerDecoder implements VideoDecoder
 //									}
 								}
 							}
+
+							IConverter converter = ConverterFactory.createConverter(ConverterFactory.XUGGLER_BGR_24, picture);
 	
 							// And finally, convert the BGR24 to an Java buffered image
 //							System.out.println("3 create BufferedImage");
-							BufferedImage javaImage = Utils.videoPictureToImage(newPic);
+							BufferedImage javaImage = converter.toImage(newPic);
 	
 							// and display it on the Java Swing window
 							if (listener != null)
