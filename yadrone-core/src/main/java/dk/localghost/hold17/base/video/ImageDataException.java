@@ -16,11 +16,11 @@ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PRO
  */
 package dk.localghost.hold17.base.video;
 
-public class ImageDataException extends Exception{
-	
-	private static final long serialVersionUID = -3948568506319692544L;
+public class ImageDataException extends Exception {
 
-	public ImageDataException(String message){
-		super(message);
-	}
+    private static final long serialVersionUID = -3948568506319692544L;
+
+    public ImageDataException(String message) {
+        super(message);
+    }
 }

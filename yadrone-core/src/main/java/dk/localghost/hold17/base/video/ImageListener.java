@@ -19,5 +19,5 @@ package dk.localghost.hold17.base.video;
 import java.awt.image.BufferedImage;
 
 public interface ImageListener {
-	void imageUpdated(BufferedImage image);
+    void imageUpdated(BufferedImage image);
 }

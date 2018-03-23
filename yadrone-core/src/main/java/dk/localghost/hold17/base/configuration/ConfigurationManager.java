@@ -18,106 +18,94 @@ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PRO
 
 package dk.localghost.hold17.base.configuration;
 
+import dk.localghost.hold17.base.command.CommandManager;
+import dk.localghost.hold17.base.command.ControlCommand;
+import dk.localghost.hold17.base.command.ControlMode;
+import dk.localghost.hold17.base.exception.ConfigurationException;
+import dk.localghost.hold17.base.exception.IExceptionListener;
+import dk.localghost.hold17.base.manager.AbstractTCPManager;
+import dk.localghost.hold17.base.utils.ARDroneUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 
-import dk.localghost.hold17.base.command.CommandManager;
-import dk.localghost.hold17.base.command.ControlCommand;
-import dk.localghost.hold17.base.command.ControlMode;
-import dk.localghost.hold17.base.exception.ConfigurationException;
-import dk.localghost.hold17.base.exception.IExceptionListener;
-import dk.localghost.hold17.base.manager.AbstractTCPManager;
-import dk.localghost.hold17.base.utils.ARDroneUtils;
-import dk.localghost.hold17.base.command.CommandManager;
-import dk.localghost.hold17.base.command.ControlCommand;
-import dk.localghost.hold17.base.command.ControlMode;
-import dk.localghost.hold17.base.exception.ConfigurationException;
-import dk.localghost.hold17.base.exception.IExceptionListener;
-import dk.localghost.hold17.base.manager.AbstractTCPManager;
-import dk.localghost.hold17.base.utils.ARDroneUtils;
-
 // TODO consider to connect to the control port permanently
-public class ConfigurationManager extends AbstractTCPManager
-{
-	private IExceptionListener excListener;
-	
-	private CommandManager manager = null;
+public class ConfigurationManager extends AbstractTCPManager {
+    private IExceptionListener excListener;
 
-	public ConfigurationManager(InetAddress inetaddr, CommandManager manager, IExceptionListener excListener) 
-	{
-		super(inetaddr);
-		this.manager = manager;
-		this.excListener = excListener;
-	}
+    private CommandManager manager = null;
 
-	public void run() 
-	{
-		try
-		{
-			connect(ARDroneUtils.CONTROL_PORT);
-		}
-		catch(Exception exc)
-		{
-			exc.printStackTrace();
-			excListener.exeptionOccurred(new ConfigurationException(exc));
-		}
-	}
+    public ConfigurationManager(InetAddress inetaddr, CommandManager manager, IExceptionListener excListener) {
+        super(inetaddr);
+        this.manager = manager;
+        this.excListener = excListener;
+    }
 
-	/**
-	 * Note: not thread-safe!
-	 */
-	private String getControlCommandResult(ControlMode p1, int p2, final ConfigurationListener listener) {
-		manager.setCommand(new ControlCommand(p1, p2));
+    @Override
+    public void run() {
+        try {
+            connect(ARDroneUtils.CONTROL_PORT);
+        } catch (Exception exc) {
+            exc.printStackTrace();
+            excListener.exeptionOccurred(new ConfigurationException(exc));
+        }
+    }
 
-		Thread t = new Thread() {
+    /**
+     * Note: not thread-safe!
+     */
+    private String getControlCommandResult(ControlMode p1, int p2, final ConfigurationListener listener) {
+        manager.setCommand(new ControlCommand(p1, p2));
 
-			public void run() {
-				try {
+        Thread t = new Thread() {
 
-					InputStream inputStream = getInputStream();
-					// TODO better getInputStream throw IOException to fail
-					if (inputStream != null) {
-						byte[] buf = new byte[1024];
-						int n = 0;
-						StringBuilder builder = new StringBuilder();
-						try {
-							while ((n = inputStream.read(buf)) != -1) {
-								// output: multiple rows of "Parameter = value"
-								builder.append(new String(buf, 0, n, "ASCII"));
-							}
-						} catch (SocketTimeoutException e) {
-							// happens if the last byte happens to coincide with the end of the buffer
-						}
-						String s = builder.toString();
-						if (listener != null) {
-							listener.result(s);
-						}
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		};
-		t.start();
-		return "";
+            public void run() {
+                try {
 
-	}
+                    InputStream inputStream = getInputStream();
+                    // TODO better getInputStream throw IOException to fail
+                    if (inputStream != null) {
+                        byte[] buf = new byte[1024];
+                        int n = 0;
+                        StringBuilder builder = new StringBuilder();
+                        try {
+                            while ((n = inputStream.read(buf)) != -1) {
+                                // output: multiple rows of "Parameter = value"
+                                builder.append(new String(buf, 0, n, "ASCII"));
+                            }
+                        } catch (SocketTimeoutException e) {
+                            // happens if the last byte happens to coincide with the end of the buffer
+                        }
+                        String s = builder.toString();
+                        if (listener != null) {
+                            listener.result(s);
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        t.start();
+        return "";
 
-	public String getCustomCofigurationIds(ConfigurationListener listener) {
-		String s = getControlCommandResult(ControlMode.CUSTOM_CFG_GET, 0, listener);
-		return s;
-	}
+    }
 
-	public String getPreviousRunLogs(ConfigurationListener listener) {
-		String s = getControlCommandResult(ControlMode.LOGS_GET, 0, listener);
-		return s;
-	}
+    public String getCustomCofigurationIds(ConfigurationListener listener) {
+        String s = getControlCommandResult(ControlMode.CUSTOM_CFG_GET, 0, listener);
+        return s;
+    }
 
-	public String getConfiguration(ConfigurationListener listener) {
-		String s = getControlCommandResult(ControlMode.CFG_GET, 0, listener);
-		return s;
-	}
+    public String getPreviousRunLogs(ConfigurationListener listener) {
+        String s = getControlCommandResult(ControlMode.LOGS_GET, 0, listener);
+        return s;
+    }
+
+    public String getConfiguration(ConfigurationListener listener) {
+        String s = getControlCommandResult(ControlMode.CFG_GET, 0, listener);
+        return s;
+    }
 
 }

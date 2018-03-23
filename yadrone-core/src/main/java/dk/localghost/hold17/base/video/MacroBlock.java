@@ -20,28 +20,28 @@ package dk.localghost.hold17.base.video;
 //specific prior written permission.
 
 public class MacroBlock {
-	// /#//#region ants
+    // /#//#region ants
 
-	// private int _BlockWidth = 8;
-	// private int _BlockSize = 64;
+    // private int _BlockWidth = 8;
+    // private int _BlockSize = 64;
 
-	// //#endregion
+    // //#endregion
 
-	// //#region Properties
+    // //#region Properties
 
-	short[][] DataBlocks;
+    short[][] DataBlocks;
 
-	// //#endregion
+    // //#endregion
 
-	// //#region ruction
+    // //#region ruction
 
-	MacroBlock() {
-		DataBlocks = new short[6][];
+    MacroBlock() {
+        DataBlocks = new short[6][];
 
-		for (int index = 0; index < 6; index++) {
-			DataBlocks[index] = new short[64];
-		}
-	}
+        for (int index = 0; index < 6; index++) {
+            DataBlocks[index] = new short[64];
+        }
+    }
 
-	// //#endregion
+    // //#endregion
 }

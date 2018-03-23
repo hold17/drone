@@ -2,18 +2,18 @@ package dk.localghost.hold17.base.command;
 
 public class KeepAliveCommand extends ATCommand {
 
-	@Override
-	protected String getID() {
-		return "COMWDG";
-	}
+    @Override
+    protected String getID() {
+        return "COMWDG";
+    }
 
-	@Override
-	protected Object[] getParameters() {
-		return new Object[] {};
-	}
+    @Override
+    protected Object[] getParameters() {
+        return new Object[]{};
+    }
 
-	@Override
-	public Priority getPriority() {
-		return Priority.VERY_HIGH_PRIORITY;
-	}
+    @Override
+    public Priority getPriority() {
+        return Priority.VERY_HIGH_PRIORITY;
+    }
 }

@@ -26,58 +26,83 @@ import dk.localghost.hold17.base.navdata.NavDataManager;
 import dk.localghost.hold17.base.video.VideoManager;
 
 
-
 public interface IARDrone {
 
-	public CommandManager getCommandManager();
-	public NavDataManager getNavDataManager();
-	public VideoManager getVideoManager();
-	public ConfigurationManager getConfigurationManager();
-	
-	
-	//TODO: cleanup, if kept, factory method should be created for ARDroneInterface
-	
-	public void start();
-	public void stop();
-	public void stopController();
-        public void startController();
-        public void startVideomanager();
-        public void stopVideomanager();
-        
-	//camera
-	public void setHorizontalCamera();//setFrontCameraStreaming()
-	public void setVerticalCamera();//setBellyCameraStreaming()
-	public void setHorizontalCameraWithVertical();//setFrontCameraWithSmallBellyStreaming()
-	public void setVerticalCameraWithHorizontal();//setBellyCameraWithSmallFrontStreaming()
-	public void toggleCamera();
-	
-	//control command
-	public void landing();
-	public void takeOff();
-	public void reset();
-	public void forward();
-	public void backward();
-	public void spinRight();
-	public void spinLeft();
-	public void up();
-	public void down();
-	public void goRight();
-	public void goLeft();
-	public void freeze();
-	public void hover();
-	
-	//getter
-	public int getSpeed();
-	public void setSpeed(int speed);
-	public void addSpeedListener(ARDrone.ISpeedListener speedListener);
-	public void removeSpeedListener(ARDrone.ISpeedListener speedListener);
-	
-	public void addExceptionListener(IExceptionListener exceptionListener);
-	public void removeExceptionListener(IExceptionListener exceptionListener);
-	
-	//set max/min altitude
-	public void setMaxAltitude(int altitude);
-	public void setMinAltitude(int altitude);
-	
-	public void move3D(int speedX, int speedY, int speedZ, int speedSpin);
+    public CommandManager getCommandManager();
+
+    public NavDataManager getNavDataManager();
+
+    public VideoManager getVideoManager();
+
+    public ConfigurationManager getConfigurationManager();
+
+
+    //TODO: cleanup, if kept, factory method should be created for ARDroneInterface
+
+    public void start();
+
+    public void stop();
+
+    public void disconnect();
+
+    public void restart();
+
+    //camera
+    public void setHorizontalCamera();//setFrontCameraStreaming()
+
+    public void setVerticalCamera();//setBellyCameraStreaming()
+
+    public void setHorizontalCameraWithVertical();//setFrontCameraWithSmallBellyStreaming()
+
+    public void setVerticalCameraWithHorizontal();//setBellyCameraWithSmallFrontStreaming()
+
+    public void toggleCamera();
+
+    //control command
+    public void landing();
+
+    public void takeOff();
+
+    public void reset();
+
+    public void forward();
+
+    public void backward();
+
+    public void spinRight();
+
+    public void spinLeft();
+
+    public void up();
+
+    public void down();
+
+    public void goRight();
+
+    public void goLeft();
+
+    public void freeze();
+
+    public void hover();
+
+    //getter
+    public int getSpeed();
+
+    public void setSpeed(int speed);
+
+    public void addSpeedListener(ISpeedListener speedListener);
+
+    public void removeSpeedListener(ISpeedListener speedListener);
+
+    public void addExceptionListener(IExceptionListener exceptionListener);
+
+    public void removeExceptionListener(IExceptionListener exceptionListener);
+
+    //set max/min altitude
+    public void setMaxAltitude(int altitude);
+
+    public void setMinAltitude(int altitude);
+
+    public void move3D(int speedX, int speedY, int speedZ, int speedSpin);
+
 }

@@ -20,13 +20,13 @@ package dk.localghost.hold17.base.video;
 //specific prior written permission.
 
 public class ImageSlice {
-	MacroBlock[] MacroBlocks;
+    MacroBlock[] MacroBlocks;
 
-	ImageSlice(int macroBlockCount) {
-		MacroBlocks = new MacroBlock[macroBlockCount];
+    ImageSlice(int macroBlockCount) {
+        MacroBlocks = new MacroBlock[macroBlockCount];
 
-		for (int index = 0; index < macroBlockCount; index++) {
-			MacroBlocks[index] = new MacroBlock();
-		}
-	}
+        for (int index = 0; index < macroBlockCount; index++) {
+            MacroBlocks[index] = new MacroBlock();
+        }
+    }
 }
