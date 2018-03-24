@@ -28,15 +28,10 @@ import java.nio.ByteBuffer;
 //specific prior written permission.
 
 public class uint {
-
-
-    public String toString() {
-        return Integer.toString(base2, 2);
-    }
+    private int base2;
 
     public uint(int base) {
         this.base2 = base;
-
     }
 
     public uint(uint that) {
@@ -60,7 +55,6 @@ public class uint {
         }
     }
 
-
     public uint(ByteBuffer bp, int start) {
         try {
             ByteBuffer bb = ByteBuffer.allocate(4);
@@ -75,7 +69,9 @@ public class uint {
         }
     }
 
-    private int base2;
+    public String toString() {
+        return Integer.toString(base2, 2);
+    }
 
     public short times(short i) {
         return (short) (intValue() * i);
@@ -111,7 +107,6 @@ public class uint {
 
     public int intValue() {
         return base2;
-
     }
 
     public uint and(int andval) {
@@ -139,6 +134,5 @@ public class uint {
         int retval = base2 | orval.base2;
         return new uint(retval);
     }
-
 
 }

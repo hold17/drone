@@ -1,6 +1,5 @@
 package dk.localghost.hold17.apps.controlcenter;
 
-
 import dk.localghost.hold17.apps.controlcenter.plugins.pluginmanager.PluginManager;
 import dk.localghost.hold17.base.ARDrone;
 

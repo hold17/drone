@@ -14,7 +14,7 @@ public class TutorialMain {
             // Tutorial Section 1
             drone = new ARDrone();
             drone.addExceptionListener(new IExceptionListener() {
-                public void exeptionOccurred(ARDroneException exc) {
+                public void exceptionOccurred(ARDroneException exc) {
                     exc.printStackTrace();
                 }
             });
@@ -22,10 +22,10 @@ public class TutorialMain {
             drone.start();
 
             // Tutorial Section 2
-            new TutorialAttitudeListener(drone);
+//            new TutorialAttitudeListener(drone);
 
             // Tutorial Section 3
-//			new TutorialVideoListener(drone);
+			new TutorialVideoListener(drone);
 
             // Tutorial Section 4
 //			TutorialCommander commander = new TutorialCommander(drone);

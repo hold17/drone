@@ -23,7 +23,7 @@ public class XugglerDecoder implements VideoDecoder {
 
         // Open up the container
         if (container.open(is, null) < 0)
-            throw new IllegalArgumentException("could not open inpustream");
+            throw new IllegalArgumentException("could not open inputstream");
 
         // query how many streams the call to open found
         int numStreams = container.getNumStreams();
@@ -68,7 +68,7 @@ public class XugglerDecoder implements VideoDecoder {
         IPacket packet = IPacket.make();
         long firstTimestampInStream = Global.NO_PTS;
         long systemClockStartTime = 0;
-        // System.out.println("XugglerDecoder: Waiting to read first packet");
+//         System.out.println("XugglerDecoder: Waiting to read first packet");
         while (!doStop && container.readNextPacket(packet) >= 0) {
 //			System.out.println("read next packet");
             /*
@@ -87,7 +87,7 @@ public class XugglerDecoder implements VideoDecoder {
                         /*
                          * Now, we decode the video, checking for any errors.
                          */
-//						System.out.println("2 Need to decode");
+//						System.out.println("1 Need to decode");
                         int bytesDecoded = videoCoder.decodeVideo(picture, packet, offset);
                         if (bytesDecoded < 0)
                             throw new RuntimeException("got an error decoding single video frame");
@@ -100,7 +100,7 @@ public class XugglerDecoder implements VideoDecoder {
                          * from the decoder
                          */
                         if (picture.isComplete()) {
-//							System.out.println("1 Picture complete");
+//							System.out.println("2 Picture complete");
                             IVideoPicture newPic = picture;
                             /*
                              * If the resampler is not null, that means we didn't
@@ -108,7 +108,7 @@ public class XugglerDecoder implements VideoDecoder {
                              * into BGR24 format.
                              */
                             if (resampler != null) {
-//								System.out.println("2 Need to resample");
+//								System.out.println("Need to resample");
                                 // we must resample
                                 newPic = IVideoPicture.make(resampler.getOutputPixelFormat(), picture.getWidth(), picture.getHeight());
                                 if (resampler.resample(newPic, picture) < 0)
@@ -147,25 +147,26 @@ public class XugglerDecoder implements VideoDecoder {
                                 // remember that IVideoPicture and IAudioSamples timestamps are always in MICROSECONDS,
                                 // so we divide by 1000 to get milliseconds.
                                 long millisecondsStreamTimeSinceStartOfVideo = (picture.getTimeStamp() - firstTimestampInStream) / 1000;
-                                final long millisecondsTolerance = 50; // and we give ourselfs 50 ms of tolerance
+                                final long millisecondsTolerance = 50; // and we give ourselves 50 ms of tolerance
                                 final long millisecondsToSleep = (millisecondsStreamTimeSinceStartOfVideo - (millisecondsClockTimeSinceStartofVideo + millisecondsTolerance));
-//                                if (millisecondsToSleep > 0) {
-//									try
-//									{
-//										Thread.sleep(millisecondsToSleep);
-//									}
-//									catch (InterruptedException e)
-//									{
-//										// we might get this when the user closes the dialog box, so just return from the method.
-//										return;
-//									}
-//                                }
+                                if (millisecondsToSleep > 0) {
+									try
+									{
+										Thread.sleep(millisecondsToSleep);
+									}
+									catch (InterruptedException e)
+									{
+										// we might get this when the user closes the dialog box, so just return from the method.
+										return;
+									}
+                                }
                             }
 
-                            IConverter converter = ConverterFactory.createConverter(ConverterFactory.XUGGLER_BGR_24, picture);
+                            //IConverter converter = ConverterFactory.createConverter(ConverterFactory.XUGGLER_BGR_24, picture);
 
                             // And finally, convert the BGR24 to an Java buffered image
 //							System.out.println("3 create BufferedImage");
+                            IConverter converter = ConverterFactory.createConverter(ConverterFactory.XUGGLER_BGR_24, newPic);
                             BufferedImage javaImage = converter.toImage(newPic);
 
                             // and display it on the Java Swing window
@@ -175,11 +176,11 @@ public class XugglerDecoder implements VideoDecoder {
                     } // end of while
                 } catch (Exception exc) {
                     // hopefully nothing really bad (probably failed to decode single video frame)
-//					System.err.println("XugglerDecoder: Exception while decoding video: " + exc.getMessage());
+                    System.err.println("XugglerDecoder: Exception while decoding video: " + exc);
 //					exc.printStackTrace();
                 }
             } else {
-                // System.out.println("Packet does not belong to video stream");
+                System.out.println("Packet does not belong to video stream");
                 /*
                  * This packet isn't part of our video stream, so we just
                  * silently drop it.
@@ -189,7 +190,7 @@ public class XugglerDecoder implements VideoDecoder {
             }
 
         }
-        System.out.println("XugglerDecoder: clean up and close stream ...");
+        System.out.println("XugglerDecoder: loop quit: doStop=" + doStop + "; clean up and close stream ...");
         /*
          * Technically since we're exiting anyway, these will be cleaned up by
          * the garbage collector... but because we're nice people and want to be

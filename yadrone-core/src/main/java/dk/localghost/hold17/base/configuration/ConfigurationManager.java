@@ -15,7 +15,6 @@ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PRO
  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package dk.localghost.hold17.base.configuration;
 
 import dk.localghost.hold17.base.command.CommandManager;
@@ -49,7 +48,7 @@ public class ConfigurationManager extends AbstractTCPManager {
             connect(ARDroneUtils.CONTROL_PORT);
         } catch (Exception exc) {
             exc.printStackTrace();
-            excListener.exeptionOccurred(new ConfigurationException(exc));
+            excListener.exceptionOccurred(new ConfigurationException(exc));
         }
     }
 

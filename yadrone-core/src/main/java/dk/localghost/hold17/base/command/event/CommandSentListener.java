@@ -1,6 +1,3 @@
-/**
- *
- */
 package dk.localghost.hold17.base.command.event;
 
 import dk.localghost.hold17.base.command.ATCommand;

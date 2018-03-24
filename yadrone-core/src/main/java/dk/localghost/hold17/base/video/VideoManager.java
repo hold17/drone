@@ -53,7 +53,7 @@ public class VideoManager extends AbstractTCPManager implements ImageListener {
     }
 
     /**
-     * Called only by decoder to inform all the other listener
+     * Called only by decoder to inform all the other listeners
      */
     public void imageUpdated(BufferedImage image) {
         for (int i = 0; i < listener.size(); i++) {
@@ -93,7 +93,7 @@ public class VideoManager extends AbstractTCPManager implements ImageListener {
             decoder.decode(getInputStream());
         } catch (Exception exc) {
             exc.printStackTrace();
-            excListener.exeptionOccurred(new VideoException(exc));
+            excListener.exceptionOccurred(new VideoException(exc));
             connectionStateEvent.stateDisconnected();
         }
         close();

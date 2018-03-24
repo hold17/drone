@@ -1,6 +1,3 @@
-/**
- *
- */
 package dk.localghost.hold17.base.navdata.common;
 
 import dk.localghost.hold17.base.navdata.*;

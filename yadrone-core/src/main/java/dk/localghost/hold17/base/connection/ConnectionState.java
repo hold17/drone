@@ -1,6 +1,3 @@
-/**
- *
- */
 package dk.localghost.hold17.base.connection;
 
 /**

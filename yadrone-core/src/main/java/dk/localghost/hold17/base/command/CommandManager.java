@@ -197,6 +197,7 @@ public class CommandManager extends AbstractUDPManager {
         return this;
     }
 
+	/** params are fractions of maximum speed in range 0..1 */
     public CommandManager move(float lrtilt, float fbtilt, float vspeed, float aspeed) {
         lrtilt = limit(lrtilt, -1f, 1f);
         fbtilt = limit(fbtilt, -1f, 1f);
@@ -207,6 +208,12 @@ public class CommandManager extends AbstractUDPManager {
         return this;
     }
 
+	/** params are percentages in range 0..100 of the maximum value.
+	 * @param speedX f->b axis
+	 * @param speedY r->l axis
+	 * @param speedZ t->b axis
+	 * @param speedSpin l--r axis
+	 */
     public CommandManager move(int speedX, int speedY, int speedZ, int speedSpin) {
         return move(-perc2float(speedY), -perc2float(speedX), -perc2float(speedZ), -perc2float(speedSpin));
     }
@@ -220,6 +227,10 @@ public class CommandManager extends AbstractUDPManager {
         q.add(new HoverCommand());
         return this;
     }
+	public CommandManager hoverSticky() {
+		q.add(new HoverCommand.StickyHover());
+		return this;
+	}
 
     private float perc2float(int speed) {
         return (float) (speed / 100.0f);
@@ -239,7 +250,6 @@ public class CommandManager extends AbstractUDPManager {
 
     /**
      * Set the current FPS of the live video codec.
-     *
      * @param fps frames per second (min=15, max=30)
      */
     public CommandManager setVideoCodecFps(int fps) {
@@ -251,7 +261,6 @@ public class CommandManager extends AbstractUDPManager {
     /**
      * Sets the automatic bitrate control of the video stream. Enabling this configuration will reduce the bandwidth
      * used by the video stream under bad Wi-Fi conditions, reducing the commands latency.
-     *
      * @param mode VideoBitRateMode.DISABLED  Bitrate set to video:max_bitrate
      *             VideoBitRateMode.DYNAMIC  Video bitrate varies in [250;video:max_bitrate] kbps
      *             VideoBitRateMode.MANUAL  Video stream bitrate is fixed by the video:bitrate key
@@ -263,7 +272,6 @@ public class CommandManager extends AbstractUDPManager {
 
     /**
      * Sets the current bitrate of the video transmission (kilobits per second)
-     *
      * @param rate bitrate (min=250, max=4000)
      */
     public CommandManager setVideoBitrate(int rate) {
@@ -274,7 +282,6 @@ public class CommandManager extends AbstractUDPManager {
 
     /**
      * Sets the maximum bitrate of the video transmission (kilobits per second)
-     *
      * @param rate bitrate (min=250, max=4000)
      */
     public CommandManager setMaxVideoBitrate(int rate) {
@@ -291,7 +298,6 @@ public class CommandManager extends AbstractUDPManager {
      * MP4_360P_H264_720P_CODEC : Live stream with MPEG4.2 soft encoder. Record stream with H264 hardware encoder in 720p mode.
      * H264_720P_CODEC : Live stream with H264 hardware encoder configured in 720p mode. No record stream.
      * MP4_360P_H264_360P_CODEC : Live stream with MPEG4.2 soft encoder. Record stream with H264 hardware encoder in 360p mode.
-     *
      * @param c The video codec to use.
      */
     public CommandManager setVideoCodec(VideoCodec c) {
@@ -302,7 +308,6 @@ public class CommandManager extends AbstractUDPManager {
     /**
      * If this key is set to "TRUE" and a USB key with >100Mb of freespace is connected, the record
      * video stream will be recorded on the USB key.
-     *
      * @param b If TRUE, video stream will be recorded
      */
     public CommandManager setVideoOnUsb(boolean b) {
@@ -318,7 +323,6 @@ public class CommandManager extends AbstractUDPManager {
     /**
      * The drone can either send a reduced set of navigation data (navdata) to its clients, or send all the available information
      * which contain many debugging information that are useless for everyday flights.
-     *
      * @param b If set to TRUE, a reduced set is sent. If set to FALSE, all the available data are sent.
      */
     public CommandManager setNavDataDemo(boolean b) {
@@ -328,7 +332,6 @@ public class CommandManager extends AbstractUDPManager {
 
     /**
      * When using navdata_demo, this configuration allows the application to ask for others navdata packets.
-     *
      * @param mask I honestly do not know, where values for this mask are defined. Have a look at the User Guide (page 74 in v2.0.1)
      */
     public CommandManager setNavDataOptions(int mask) {
@@ -338,7 +341,6 @@ public class CommandManager extends AbstractUDPManager {
 
     /**
      * Animate the LED lights.
-     *
      * @param anim     The animation.
      * @param freq     It's frequency
      * @param duration The duration in seconds
@@ -350,7 +352,6 @@ public class CommandManager extends AbstractUDPManager {
 
     /**
      * Activate this in order to detect outdoor hulls. Deactivate to detect indoor hulls.
-     *
      * @param b TRUE for outdoor, FALSE for indoor hulls
      */
     public CommandManager setDetectEnemyWithoutShell(boolean b) {
@@ -365,7 +366,6 @@ public class CommandManager extends AbstractUDPManager {
 
     /**
      * The color of the hulls you want to detect.
-     *
      * @param c Possible values are green (1), yellow (2) and blue (3)
      */
     public CommandManager setEnemyColors(EnemyColor c) {
@@ -376,8 +376,8 @@ public class CommandManager extends AbstractUDPManager {
     /**
      * Select the detection that should be enabled
      * Note: It is advised to enable the multiple detection mode, and then configure the detection needed using the following keys.
-     * <p>
-     * NOTE: The multiple detection mode allow the selection of different detections on each camera.
+	 *
+	 * NOTE: The multiple detection mode allow the selection of different detections on each camera.
      * Note that you should NEVER enable two similar detection on both cameras, as this will cause failures in the algorithms
      */
     public CommandManager setDetectionType(CadType type) {
@@ -390,8 +390,8 @@ public class CommandManager extends AbstractUDPManager {
     /**
      * Select the detection that should be enabled
      * Note: It is advised to enable the multiple detection mode, and then configure the detection needed using the following keys.
-     * <p>
-     * NOTE: The multiple detection mode allow the selection of different detections on each camera.
+	 *
+	 * NOTE: The multiple detection mode allow the selection of different detections on each camera.
      * Note that you should NEVER enable two similar detection on both cameras, as this will cause failures in the algorithms
      */
     public CommandManager setDetectionType(DetectionType dt, VisionTagType[] tagtypes) {
@@ -428,10 +428,9 @@ public class CommandManager extends AbstractUDPManager {
     }
 
     /**
-     * This configuration describes how the drone will interprete the progressive commands from the user.
+     * This configuration describes how the drone will interpret the progressive commands from the user.
      * In the combined yaw mode, the roll commands are used to generate roll+yaw based turns.
      * This is intended to be an easier control mode for racing games.
-     *
      * @param b TRUE, to enable combined raw mode, FALSE to disable.
      */
     public CommandManager setEnableCombinedYaw(boolean b) {
@@ -446,10 +445,9 @@ public class CommandManager extends AbstractUDPManager {
     /**
      * Since 1.5.1 firmware, the AR.Drone has two different flight modes. The first is the legacy FreeFlight mode, where the
      * user controls the drone, an a new semi-autonomous mode, called "HOVER_ON_TOP_OF_ROUNDEL", where the
-     * drones will hover on top of a ground tag. This new flying mode was developped for 2011 CES autonomous demonstration.
-     * Since 2.0 and 1.10 firmwares, a third mode, called "HOVER_ON_TOP_OF_ORIENTED_ROUDNEL", was
+     * drones will hover on top of a ground tag. This new flying mode was developed for 2011 CES autonomous demonstration.
+     * Since 2.0 and 1.10 firmwares, a third mode, called "HOVER_ON_TOP_OF_ORIENTED_ROUNDEL", was
      * added. This mode is the same as the previous one, except that the AR.Drone will always face the same direction.
-     *
      * @param mode
      */
     public CommandManager setFlyingMode(FlyingMode mode) {
@@ -460,7 +458,6 @@ public class CommandManager extends AbstractUDPManager {
     /**
      * This setting is used when CONTROL:flying_mode is set to "HOVER_ON_TOP_OF_(ORIENTED_)ROUNDEL". It
      * gives the AR.Drone the maximum distance (in millimeters) allowed between the AR.Drone and the oriented roundel.
-     *
      * @param range maximum distance (in millimeters)
      */
     public CommandManager setHoveringRange(int range) {
@@ -470,7 +467,6 @@ public class CommandManager extends AbstractUDPManager {
 
     /**
      * Set the maximum bending angle (euler angle).
-     *
      * @param angle Maximum bending angle for the drone in radians, for both pitch and roll angles.
      *              This parameter is a positive floating-point value between 0 and 0.52 (ie. 30 deg).
      */
@@ -481,7 +477,6 @@ public class CommandManager extends AbstractUDPManager {
 
     /**
      * Set the maximum bending angle (euler angle).
-     *
      * @param l
      * @param angle Maximum bending angle for the drone in radians, for both pitch and roll angles.
      *              This parameter is a positive floating-point value between 0 and 0.52 (ie. 30 deg).
@@ -496,7 +491,6 @@ public class CommandManager extends AbstractUDPManager {
 
     /**
      * Set a maximum altitude for the drone.
-     *
      * @param altitude Altitude in millimeters (max. 100000 = 100m)
      */
     public CommandManager setMaxAltitude(int altitude) {
@@ -506,7 +500,6 @@ public class CommandManager extends AbstractUDPManager {
 
     /**
      * Set a maximum altitude for the drone.
-     *
      * @param l
      * @param altitude Altitude in millimeters (max. 100000 = 100m)
      */
@@ -520,7 +513,6 @@ public class CommandManager extends AbstractUDPManager {
 
     /**
      * Set a minimum altitude for the drone.
-     *
      * @param altitude Altitude in millimeters
      */
     public CommandManager setMinAltitude(int altitude) {
@@ -530,7 +522,6 @@ public class CommandManager extends AbstractUDPManager {
 
     /**
      * Set a minimum altitude for the drone.
-     *
      * @param l
      * @param altitude Altitude in millimeters
      */
@@ -543,9 +534,8 @@ public class CommandManager extends AbstractUDPManager {
 
     /**
      * Set the maximum vertical speed of the drone.
-     *
-     * @param speed Maximum vertical speed of the AR.Drone, in milimeters per second.
-     *              Recommanded values goes from 200 to 2000. Others values may cause instability.
+     * @param speed Maximum vertical speed of the AR.Drone, in millimeters per second.
+     *              Recommended values goes from 200 to 2000. Others values may cause instability.
      */
     public CommandManager setMaxVz(int speed) {
         setMaxVz(Location.CURRENT, speed);
@@ -554,10 +544,9 @@ public class CommandManager extends AbstractUDPManager {
 
     /**
      * Set the maximum vertical speed of the drone.
-     *
      * @param l
-     * @param speed Maximum vertical speed of the AR.Drone, in milimeters per second.
-     *              Recommanded values goes from 200 to 2000. Others values may cause instability.
+     * @param speed Maximum vertical speed of the AR.Drone, in millimeters per second.
+     *              Recommended values goes from 200 to 2000. Others values may cause instability.
      */
     public CommandManager setMaxVz(Location l, int speed) {
         speed = limit(speed, 0, 2000);
@@ -569,7 +558,6 @@ public class CommandManager extends AbstractUDPManager {
 
     /**
      * Set the maximum yaw speed of the AR.Drone, in radians per second.
-     *
      * @param speed Maximum yaw speed of the AR.Drone, in radians per second.
      *              Recommended values go from 40/s to 350/s (approx 0.7rad/s to 6.11rad/s). Others values may cause instability.
      */
@@ -580,7 +568,6 @@ public class CommandManager extends AbstractUDPManager {
 
     /**
      * Set the maximum yaw speed of the AR.Drone, in radians per second.
-     *
      * @param l
      * @param speed Maximum yaw speed of the AR.Drone, in radians per second.
      *              Recommended values go from 40/s to 350/s (approx 0.7rad/s to 6.11rad/s). Others values may cause instability.
@@ -599,7 +586,6 @@ public class CommandManager extends AbstractUDPManager {
 
     /**
      * This settings tells the control loop if the AR.Drone is flying outside with or without it outdoor hull.
-     *
      * @param flying_outdoor TRUE, if flying outdoor. FALSE, if flying indoor
      * @param outdoor_hull   TRUE, if outdoor shell is used. FALSE, if indoor shell is used.
      */
@@ -615,7 +601,7 @@ public class CommandManager extends AbstractUDPManager {
 //		q.add(new ConfigureCommand("control:autonomous_flight", b));
 //	}
 
-//	Shoud not be used with commercial AR.Drones
+//	Should not be used with commercial AR.Drones
 //	public void setManualTrim(boolean b) {
 //		q.add(new ConfigureCommand("control:manual_trim", b));
 //	}
@@ -640,7 +626,6 @@ public class CommandManager extends AbstractUDPManager {
     /**
      * Set the frequency of the ultrasound measures for altitude. Using two different frequencies can reduce significantly the
      * ultrasound perturbations between two AR.Drones.
-     *
      * @param f Only two frequencies are availaible : 22:22 and 25 Hz.
      */
     public CommandManager setUltrasoundFrequency(UltrasoundFrequency f) {
@@ -650,7 +635,6 @@ public class CommandManager extends AbstractUDPManager {
 
     /**
      * The AR.Drone SSID. Changes are applied on reboot.
-     *
      * @param ssid The new SSID, e.g. "myArdroneNetwork"
      */
     public CommandManager setSSIDSinglePlayer(String ssid) {
@@ -660,7 +644,6 @@ public class CommandManager extends AbstractUDPManager {
 
     /**
      * The AR.Drone SSID for multi player. Currently unused.
-     *
      * @param ssid The new SSID, e.g. "myArdroneNetwork"
      */
     public CommandManager setSSIDMultiPlayer(String ssid) {
@@ -675,7 +658,6 @@ public class CommandManager extends AbstractUDPManager {
      * 0 : The drone is the access point of the network
      * 1 : The drone creates (or join) the network in Ad-Hoc mode
      * 2 : The drone tries to join the network as a station
-     *
      * @param mode
      */
     public CommandManager setWifiMode(WifiMode mode) {
@@ -685,7 +667,6 @@ public class CommandManager extends AbstractUDPManager {
 
     /**
      * Set the MAC address paired with the AR.Drone. Set to "00:00:00:00:00:00" to unpair the AR.Drone.
-     *
      * @param mac The new MAC address.
      */
     public CommandManager setOwnerMac(String mac) {
@@ -717,108 +698,6 @@ public class CommandManager extends AbstractUDPManager {
                 + String.valueOf(delay) + "," + String.valueOf(nshots) + "," + label));
         return this;
     }
-
-//	public URL[] getRecordedNavDataURLs() throws IOException {
-//		URLRetriever r = new URLRetriever(inetaddr, "anonymous", "");
-//		return r.getURLs(new NavDataFileFilter());
-//	}
-//
-//	private static class URLRetriever {
-//		private String user;
-//		private String pass;
-//		private InetAddress address;
-//
-//		public URLRetriever(InetAddress address, String user, String pass) {
-//			this.address = address;
-//			this.user = user;
-//			this.pass = pass;
-//		}
-//
-//		public String getUserBoxDir() {
-//			return "/boxes/";
-//		}
-//
-//		public URL[] getURLs(FTPFileFilter filter) throws IOException {
-//			FTPClient ftp = login();
-//
-//			ArrayList<URL> urls = new ArrayList<URL>();
-//			FTPFile[] dirs = ftp.listFiles("", new UserboxFileFilter());
-//			for (FTPFile dir : dirs) {
-//				FTPFile[] files = ftp.listFiles(getUserBoxDir() + dir.getName(), filter);
-//				for (FTPFile file : files) {
-//					try {
-//						URL url = new URL("ftp://" + user + ":" + pass + "@" + address.getHostName() + getUserBoxDir()
-//								+ dir.getName() + File.separator + file.getName());
-//						System.out.println("PICTURE: " + url);
-//						urls.add(url);
-//					} catch (MalformedURLException e) {
-//						e.printStackTrace();
-//					}
-//				}
-//			}
-//
-//			logout(ftp);
-//
-//			return urls.toArray(new URL[urls.size()]);
-//		}
-//
-//		public Bitmap[] getBitmaps() throws IOException {
-//			FTPClient ftp = login();
-//
-//			ArrayList<Bitmap> bmps = new ArrayList<Bitmap>();
-//			FTPFile[] dirs = ftp.listFiles(getUserBoxDir(), new UserboxFileFilter());
-//			for (FTPFile dir : dirs) {
-//				FTPFile[] files = ftp.listFiles(getUserBoxDir() + dir.getName(), new JPEGFileFilter());
-//				for (FTPFile file : files) {
-//					try {
-//						InputStream is = ftp.retrieveFileStream(getUserBoxDir() + dir.getName() + File.separator
-//								+ file.getName());
-//						Bitmap bmp = BitmapFactory.decodeStream(is);
-//						bmps.add(bmp);
-//						is.close();
-//						ftp.completePendingCommand();
-//					} catch (MalformedURLException e) {
-//						e.printStackTrace();
-//					}
-//				}
-//			}
-//
-//			logout(ftp);
-//
-//			return bmps.toArray(new Bitmap[bmps.size()]);
-//		}
-//
-//		private FTPClient login() throws SocketException, IOException {
-//			FTPClient ftp = new FTPClient();
-//			ftp.connect(address);
-//
-//			int reply = ftp.getReplyCode();
-//			if (!FTPReply.isPositiveCompletion(reply)) {
-//				ftp.disconnect();
-//				throw new IOException("FTP server refused connection.");
-//			}
-//
-//			ftp.enterLocalPassiveMode();
-//			ftp.login(user, pass);
-//
-//			return ftp;
-//		}
-//
-//		private void logout(FTPClient ftp) throws IOException {
-//			ftp.logout();
-//		}
-//
-//	}
-//
-//	public Bitmap[] getRecordedPictures() throws IOException {
-//		URLRetriever r = new URLRetriever(inetaddr, "anonymous", "");
-//		return r.getBitmaps();
-//	}
-//
-//	public URL[] getRecordedPictureURLs() throws IOException {
-//		URLRetriever r = new URLRetriever(inetaddr, "anonymous", "");
-//		return r.getURLs(new JPEGFileFilter());
-//	}
 
     // AT*MISC undocumented, but needed to initialize
     // see https://github.com/bklang/ARbDrone/wiki/UndocumentedCommands
@@ -895,11 +774,11 @@ public class CommandManager extends AbstractUDPManager {
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 doStop = true;
-                excListener.exeptionOccurred(new CommandException(e));
+                excListener.exceptionOccurred(new CommandException(e));
                 connectionStateEvent.stateDisconnected();
             } catch (Throwable t) {
                 t.printStackTrace();
-                excListener.exeptionOccurred(new CommandException(t));
+                excListener.exceptionOccurred(new CommandException(t));
                 connectionStateEvent.stateDisconnected();
             }
         }
@@ -974,7 +853,7 @@ public class CommandManager extends AbstractUDPManager {
             }
             if (n == 0 && controlAck != b) {
                 System.err.println("Control ack timeout " + String.valueOf(b));
-                excListener.exeptionOccurred(new CommandException(new RuntimeException("Control ACK timeout")));
+                excListener.exceptionOccurred(new CommandException(new RuntimeException("Control ACK timeout")));
                 connectionStateEvent.stateDisconnected();
             }
         }

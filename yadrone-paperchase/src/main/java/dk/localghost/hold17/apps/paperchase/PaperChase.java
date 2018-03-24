@@ -8,8 +8,8 @@ import dk.localghost.hold17.base.IARDrone;
 import dk.localghost.hold17.base.command.VideoChannel;
 
 public class PaperChase {
-    public final static int IMAGE_WIDTH = 640; // 640 or 1280
-    public final static int IMAGE_HEIGHT = 360; // 360 or 720
+    public final static int IMAGE_WIDTH = 1280; // 640 or 1280
+    public final static int IMAGE_HEIGHT = 720; // 360 or 720
 
     public final static int TOLERANCE = 40;
 
@@ -20,7 +20,7 @@ public class PaperChase {
     public PaperChase() {
         drone = new ARDrone();
         drone.start();
-        drone.getCommandManager().setVideoChannel(VideoChannel.VERT);
+        drone.getCommandManager().setVideoChannel(VideoChannel.HORI);
 
         PaperChaseGUI gui = new PaperChaseGUI(drone, this);
 

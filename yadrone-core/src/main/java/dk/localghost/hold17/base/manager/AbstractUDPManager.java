@@ -23,7 +23,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
-// TODO: investigate if we can refactor common parts with AbstractTCPManager
 public abstract class AbstractUDPManager extends AbstractManager {
 
 

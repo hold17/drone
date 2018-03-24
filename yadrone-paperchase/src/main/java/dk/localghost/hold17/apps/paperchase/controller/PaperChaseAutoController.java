@@ -46,7 +46,7 @@ public class PaperChaseAutoController extends PaperChaseAbstractController imple
     }
 
     public void onTag(Result result, float orientation) {
-        if (result == null) // ToDo: do not call if no tag is present
+        if (result == null) // TODO: do not call if no tag is present
             return;
 
         System.out.println("PaperChaseAutoController: Tag found");

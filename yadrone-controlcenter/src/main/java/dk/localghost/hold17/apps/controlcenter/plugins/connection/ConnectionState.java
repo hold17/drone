@@ -33,7 +33,7 @@ public class ConnectionState extends JPanel implements ICCPlugin {
         videoLabel = new JLabel("Video Channel", greenIcon, SwingConstants.LEFT);
 
         exceptionListener = new IExceptionListener() {
-            public void exeptionOccurred(ARDroneException exc) {
+            public void exceptionOccurred(ARDroneException exc) {
                 if (exc instanceof ConfigurationException) {
                     configurationLabel.setIcon(redIcon);
                     configurationLabel.setToolTipText(exc + "");

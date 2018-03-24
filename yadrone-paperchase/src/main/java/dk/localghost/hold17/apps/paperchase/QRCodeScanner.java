@@ -3,6 +3,7 @@ package dk.localghost.hold17.apps.paperchase;
 import com.google.zxing.*;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
+import com.google.zxing.qrcode.QRCodeReader;
 import dk.localghost.hold17.base.video.ImageListener;
 
 import java.awt.image.BufferedImage;
@@ -24,7 +25,7 @@ public class QRCodeScanner implements ImageListener {
         BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
 
         // decode the barcode (if only QR codes are used, the QRCodeReader might be a better choice)
-        MultiFormatReader reader = new MultiFormatReader();
+        QRCodeReader reader = new QRCodeReader();
 
         double theta = Double.NaN;
         try {
@@ -54,7 +55,7 @@ public class QRCodeScanner implements ImageListener {
             scanResult = null;
         }
 
-        // inform all listener
+        // inform all listeners
         for (int i = 0; i < listener.size(); i++) {
             listener.get(i).onTag(scanResult, (float) theta);
         }

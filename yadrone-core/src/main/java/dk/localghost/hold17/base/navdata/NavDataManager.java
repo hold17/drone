@@ -489,7 +489,7 @@ public class NavDataManager extends AbstractUDPManager {
                 }
             } catch (SocketTimeoutException t) {
                 System.err.println("Navdata reception timeout");
-                excListener.exeptionOccurred(new dk.localghost.hold17.base.exception.NavDataException(t));
+                excListener.exceptionOccurred(new dk.localghost.hold17.base.exception.NavDataException(t));
                 connectionStateEvent.stateDisconnected();
                 this.ticklePort(ARDroneUtils.NAV_PORT);
             } catch (Throwable t) {
@@ -841,7 +841,7 @@ public class NavDataManager extends AbstractUDPManager {
             // assumption: does not exceed Integer.MAX_INT
             int frame_number = b.getInt();
 
-            // atmcd ref sequence number
+            // atcmd ref sequence number
             // assumption: does not exceed Integer.MAX_INT
             int atcmd_ref_seq = b.getInt();
 

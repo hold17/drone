@@ -1,6 +1,5 @@
 package dk.localghost.hold17.apps.controlcenter.plugins.video;
 
-
 import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.IMediaWriter;
 import com.xuggle.mediatool.MediaListenerAdapter;
@@ -11,6 +10,7 @@ import com.xuggle.xuggler.ICodec;
 import dk.localghost.hold17.apps.controlcenter.CCPropertyManager;
 import dk.localghost.hold17.apps.controlcenter.ICCPlugin;
 import dk.localghost.hold17.base.IARDrone;
+import dk.localghost.hold17.base.command.VideoBitRateMode;
 import dk.localghost.hold17.base.command.VideoCodec;
 import dk.localghost.hold17.base.video.ImageListener;
 
@@ -28,6 +28,11 @@ public class VideoPanel extends JPanel implements ICCPlugin, ImageListener {
     public final static String FORMAT_MP4 = "MPEG-4";
     public final static String FORMAT_H264 = "H.264";
     public final static String FORMAT_MP4_USB = "MPEG-4 + USB";
+    public final static String FORMAT_H264_1000kbs = FORMAT_H264 + "@1000kbs";
+    public final static String FORMAT_H264_2000kbs = FORMAT_H264 + "@2000kbs";
+    public final static String FORMAT_H264_3000kbs = FORMAT_H264 + "@3000kbs";
+    public final static String FORMAT_H264_4000kbs = FORMAT_H264 + "@4000kbs";
+
 
     private VideoCanvas video;
     private IARDrone drone;
@@ -64,19 +69,50 @@ public class VideoPanel extends JPanel implements ICCPlugin, ImageListener {
 
         // record -----------------------------------------------------------------------
 
-        recordFormatComboBox = new JComboBox(new String[]{FORMAT_MP4, FORMAT_H264}); // + FORMAT_MP4_USB,
+        recordFormatComboBox = new JComboBox(new String[]{FORMAT_MP4, FORMAT_H264_1000kbs, FORMAT_H264_2000kbs, FORMAT_H264_3000kbs, FORMAT_H264_4000kbs}); // + FORMAT_MP4_USB,
         recordFormatComboBox.setSelectedItem(props.getVideoFormat());
         recordFormatComboBox.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
                 props.setVideoFormat(recordFormatComboBox.getSelectedItem() + "");
 
-                if (recordFormatComboBox.getSelectedItem().equals(FORMAT_MP4))
-                    drone.getCommandManager().setVideoCodec(VideoCodec.MP4_360P);
-                else if (recordFormatComboBox.getSelectedItem().equals(FORMAT_H264))
-                    drone.getCommandManager().setVideoCodec(VideoCodec.H264_720P);
-                else if (recordFormatComboBox.getSelectedItem().equals(FORMAT_MP4_USB))
-                    drone.getCommandManager().setVideoCodec(VideoCodec.MP4_360P_H264_360P);
+                drone.getCommandManager().setVideoBitrateControl(VideoBitRateMode.MANUAL);
+                drone.getCommandManager().setMaxVideoBitrate(4000);
+
+                switch (recordFormatComboBox.getSelectedItem().toString()) {
+                    case FORMAT_MP4: {
+                        drone.getCommandManager().setVideoCodec(VideoCodec.MP4_360P);
+                        drone.getCommandManager().setVideoBitrate(1000);
+                    }
+                    case FORMAT_H264_1000kbs: {
+                        drone.getCommandManager().setVideoCodec(VideoCodec.H264_720P);
+                        drone.getCommandManager().setVideoBitrate(1000);
+                    }
+                    case FORMAT_H264_2000kbs: {
+                        drone.getCommandManager().setVideoCodec(VideoCodec.H264_720P);
+                        drone.getCommandManager().setVideoBitrate(2000);
+                    }
+                    case FORMAT_H264_3000kbs: {
+                        drone.getCommandManager().setVideoCodec(VideoCodec.H264_720P);
+                        drone.getCommandManager().setVideoBitrate(3000);
+                    }
+                    case FORMAT_H264_4000kbs: {
+                        drone.getCommandManager().setVideoCodec(VideoCodec.H264_720P);
+                        drone.getCommandManager().setVideoBitrate(4000);
+                    }
+                    default: {
+                        drone.getCommandManager().setVideoCodec(VideoCodec.H264_720P);
+                        drone.getCommandManager().setVideoBitrate(1000);
+                    }
+                }
+
+
+//                if (recordFormatComboBox.getSelectedItem().equals(FORMAT_MP4))
+//                    drone.getCommandManager().setVideoCodec(VideoCodec.MP4_360P);
+//                else if (recordFormatComboBox.getSelectedItem().equals(FORMAT_H264))
+//                    drone.getCommandManager().setVideoCodec(VideoCodec.H264_720P);
+//                else if (recordFormatComboBox.getSelectedItem().equals(FORMAT_MP4_USB))
+//                    drone.getCommandManager().setVideoCodec(VideoCodec.MP4_360P_H264_360P);
 
                 drone.getVideoManager().reinitialize();
             }

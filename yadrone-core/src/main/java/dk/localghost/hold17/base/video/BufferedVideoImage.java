@@ -712,7 +712,7 @@ public class BufferedVideoImage {
 
     // The four Luma 8x8 matrices (quadrants Y0, Y1, Y2, Y3) form the basis of
     // the final 16x16 pixel matrix.
-    // The two Croma 8x8 matrices are used to calculate the actual RGB value of
+    // The two Chroma 8x8 matrices are used to calculate the actual RGB value of
     // the pixel (RGB565, each pixel is represented by two bytes)
 
     // Each processing loop processes from each Luma matrix two rows. In each
@@ -799,7 +799,7 @@ public class BufferedVideoImage {
         int chromaBlueValue = 0;
         int chromaRedValue = 0;
 
-        int[] cromaQuadrantOffsets = new int[]{0, 4, 32, 36};
+        int[] chromaQuadrantOffsets = new int[]{0, 4, 32, 36};
         int[] pixelDataQuadrantOffsets = new int[]{0, _BlockWidth,
                 Width * _BlockWidth, (Width * _BlockWidth) + _BlockWidth};
 
@@ -817,7 +817,7 @@ public class BufferedVideoImage {
                 for (int horizontalStep = 0; horizontalStep < _BlockWidth / 2; horizontalStep++) {
                     for (int quadrant = 0; quadrant < 4; quadrant++) {
                         int chromaIndex = chromaOffset
-                                + cromaQuadrantOffsets[quadrant]
+                                + chromaQuadrantOffsets[quadrant]
                                 + horizontalStep;
                         chromaBlueValue = macroBlock.DataBlocks[4][chromaIndex];
                         chromaRedValue = macroBlock.DataBlocks[5][chromaIndex];

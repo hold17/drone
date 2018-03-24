@@ -265,10 +265,14 @@ public class ARDrone implements IARDrone, IExceptionListener {
             commandManager.freeze();
     }
 
-    public void hover() {
-        if (commandManager != null)
-            commandManager.hover();
-    }
+	public void hover() {
+		if (commandManager != null)
+			commandManager.hover();
+	}
+	public void hoverSticky() {
+		if (commandManager != null)
+			commandManager.hoverSticky();
+	}
 
     @Override
     public void setMaxAltitude(int altitude) {
@@ -335,13 +339,13 @@ public class ARDrone implements IARDrone, IExceptionListener {
 
     private void informExceptionListener(ARDroneException exception) {
         for (int i = 0; i < excListenerList.size(); i++)
-            excListenerList.get(i).exeptionOccurred(exception);
+            excListenerList.get(i).exceptionOccurred(exception);
     }
 
     /**
      * Call upon an exception occurred in one of the managers
      */
-    public void exeptionOccurred(ARDroneException exc) {
+    public void exceptionOccurred(ARDroneException exc) {
         informExceptionListener(exc);
     }
 

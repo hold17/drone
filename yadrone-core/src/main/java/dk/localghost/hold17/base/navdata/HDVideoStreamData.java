@@ -1,7 +1,7 @@
 package dk.localghost.hold17.base.navdata;
 
 
-public class HDVideoStreamData extends NavData {
+public class HDVideoStreamData {
     private HDVideoState hdvideo_state;
     private int storage_fifo_nb_packets;
     private int storage_fifo_size;
