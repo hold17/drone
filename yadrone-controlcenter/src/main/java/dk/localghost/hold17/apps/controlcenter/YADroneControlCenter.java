@@ -1,6 +1,8 @@
 package dk.localghost.hold17.apps.controlcenter;
 
 import dk.localghost.hold17.base.ARDrone;
+import dk.localghost.hold17.base.video.HumbleDecoder;
+import dk.localghost.hold17.base.video.VideoDecoder;
 
 
 public class YADroneControlCenter {
@@ -12,7 +14,8 @@ public class YADroneControlCenter {
 
     private void initialize() {
         try {
-            ardrone = new ARDrone();
+            //ardrone = new ARDrone();
+            ardrone = new ARDrone("192.168.1.155", new HumbleDecoder());
             System.out.println("Connect drone controller");
             ardrone.start();
 
