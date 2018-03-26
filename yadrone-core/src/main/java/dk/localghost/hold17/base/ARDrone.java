@@ -36,7 +36,7 @@ public class ARDrone implements IARDrone, IExceptionListener {
     /**
      * default ip address
      */
-    private static final String IP_ADDRESS = "192.168.1.155";
+    private static final String IP_ADDRESS = "192.168.1.1";
 
     private String ipaddr = null;
     private InetAddress inetaddr = null;
@@ -380,9 +380,6 @@ public class ARDrone implements IARDrone, IExceptionListener {
         return inetaddr;
     }
 
-    /* (non-Javadoc)
-     * @see dk.localghost.hold17.base.IARDrone#restart()
-     */
     @Override
     public void restart() {
         commandManager.stop();
