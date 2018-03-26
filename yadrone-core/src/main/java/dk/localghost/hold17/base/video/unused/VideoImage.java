@@ -1,6 +1,4 @@
-package dk.localghost.hold17.base.video;
-
-import java.nio.ByteBuffer;
+package dk.localghost.hold17.base.video.unused;
 
 //#region Copyright Notice
 
@@ -45,7 +43,7 @@ import java.nio.ByteBuffer;
 
 ///#//#endregion
 
-public class BufferedVideoImage {
+public class VideoImage {
     // event EventHandler<ImageCompleteEventArgs> ImageComplete;
 
     // [DllImport("Kernel32.dll", EntryPoint = "RtlMoveMemory")]
@@ -164,7 +162,7 @@ public class BufferedVideoImage {
         return PixelRowSize;
     }
 
-    private ByteBuffer ImageStream;
+    private byte[] ImageStream;
 
     private ImageSlice ImageSlice;
     private uint[] PixelData;
@@ -188,14 +186,14 @@ public class BufferedVideoImage {
 
     // /#//#region ruction
 
-    public BufferedVideoImage() {
+    public VideoImage() {
     }
 
     // /#//#endregion
 
     // /#//#region Methods
 
-    public void AddImageStream(ByteBuffer stream) {
+    public void AddImageStream(byte[] stream) {
         ImageStream = stream;
         ProcessStream();
     }
@@ -224,7 +222,7 @@ public class BufferedVideoImage {
         // Stopwatch stopWatch = new Stopwatch();
         // stopWatch.Start();
 
-        while (!PictureComplete && StreamIndex < (ImageStream.capacity() >> 2)) {
+        while (!PictureComplete && StreamIndex < (ImageStream.length >> 2)) {
             ReadHeader();
 
             if (!PictureComplete) {
@@ -587,13 +585,13 @@ public class BufferedVideoImage {
         return data;
     }
 
-    private uint PeekStreamData(ByteBuffer stream, int count) {
+    private uint PeekStreamData(byte[] stream, int count) {
         uint data = new uint(0);
         uint streamField = StreamField;
         int streamFieldBitIndex = StreamFieldBitIndex;
 
         while (count > (32 - streamFieldBitIndex)
-                && StreamIndex < (ImageStream.capacity() >> 2)) {
+                && StreamIndex < (ImageStream.length >> 2)) {
             data = (data.shiftLeft(32 - streamFieldBitIndex)).or(streamField
                     .shiftRight(streamFieldBitIndex));
 

@@ -18,7 +18,7 @@
 //  specific prior written permission.
 
 //modified :Shigeo Yoshida, 2011-02-23
-package dk.localghost.hold17.base.video;
+package dk.localghost.hold17.base.video.unused;
 
 import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
