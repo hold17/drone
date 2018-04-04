@@ -4,6 +4,7 @@ package dk.localghost.hold17.apps.controlcenter.plugins.qrcode;
 import com.google.zxing.*;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
+import com.google.zxing.qrcode.QRCodeReader;
 import dk.localghost.hold17.apps.controlcenter.ICCPlugin;
 import dk.localghost.hold17.base.IARDrone;
 import dk.localghost.hold17.base.video.ImageListener;
@@ -54,7 +55,7 @@ public class QRCodeScannerPanel extends JPanel implements ICCPlugin {
         BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
 
         // decode the barcode (if only QR codes are used, the QRCodeReader might be a better choice)
-        MultiFormatReader reader = new MultiFormatReader();
+        QRCodeReader reader = new QRCodeReader();
 
         try {
             detectionResult = reader.decode(bitmap);
