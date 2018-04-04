@@ -150,6 +150,10 @@ public class HumbleDecoder implements VideoDecoder {
                         image = displayVideoAtCorrectTime(streamStartTime, picture,
                                 converter, image, systemStartTime, systemTimeBase,
                                 streamTimebase);
+
+                        // display it on the Java Swing window
+                        if (listener != null)
+                            listener.imageUpdated(image);
                     }
                     offset += bytesRead;
                 } while (offset < packet.getSize());
@@ -198,9 +202,6 @@ public class HumbleDecoder implements VideoDecoder {
         // finally, convert the image from Humble format into Java images.
         image = converter.toImage(image, picture);
 
-        // display it on the Java Swing window
-        if (listener != null)
-            listener.imageUpdated(image);
         return image;
     }
 
