@@ -10,7 +10,6 @@ import com.xuggle.xuggler.ICodec;
 import dk.localghost.hold17.apps.controlcenter.CCPropertyManager;
 import dk.localghost.hold17.apps.controlcenter.ICCPlugin;
 import dk.localghost.hold17.base.IARDrone;
-import dk.localghost.hold17.base.command.VideoBitRateMode;
 import dk.localghost.hold17.base.command.VideoCodec;
 import dk.localghost.hold17.base.video.ImageListener;
 
