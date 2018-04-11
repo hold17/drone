@@ -1,19 +1,19 @@
 package dk.localghost.hold17.base.command;
 
 public enum Location {
-	INDOOR("indoor_"), CURRENT(""), OUTDOOR("outdoor_");
+    INDOOR("indoor_"), CURRENT(""), OUTDOOR("outdoor_");
 
-	private String commandPrefix;
+    private String commandPrefix;
 
-	private Location(String commandPrefix) {
-		this.commandPrefix = commandPrefix;
-	}
+    private Location(String commandPrefix) {
+        this.commandPrefix = commandPrefix;
+    }
 
-	/**
-	 * @return the commandPrefix
-	 */
-	public String getCommandPrefix() {
-		return commandPrefix;
-	}
+    /**
+     * @return the commandPrefix
+     */
+    public String getCommandPrefix() {
+        return commandPrefix;
+    }
 
 }

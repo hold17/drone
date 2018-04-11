@@ -9,8 +9,8 @@ package dk.localghost.hold17.base.navdata;
 import java.util.EventListener;
 
 public interface StateListener extends EventListener {
-	public void stateChanged(DroneState state);
+    public void stateChanged(DroneState state);
 
-	public void controlStateChanged(ControlState state);
+    public void controlStateChanged(ControlState state);
 
 }

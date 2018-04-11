@@ -14,13 +14,13 @@ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PRO
  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package dk.localghost.hold17.base.video;
+package dk.localghost.hold17.base.video.unused;
 
-public class ImageDataException extends Exception{
-	
-	private static final long serialVersionUID = -3948568506319692544L;
+public class ImageDataException extends Exception {
 
-	public ImageDataException(String message){
-		super(message);
-	}
+    private static final long serialVersionUID = -3948568506319692544L;
+
+    public ImageDataException(String message) {
+        super(message);
+    }
 }

@@ -1,10 +1,8 @@
 package dk.localghost.hold17.base.exception;
 
-public class NavDataException extends ARDroneException
-{
+public class NavDataException extends ARDroneException {
 
-	public NavDataException(Throwable t)
-	{
-		super(t);
-	}
+    public NavDataException(Throwable t) {
+        super(t);
+    }
 }

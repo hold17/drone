@@ -5,26 +5,22 @@ package dk.localghost.hold17.base.command;
  * TODO what happened to this command? It's not described in the manual.
  * Seems to be replaced by Configuration command control:flight_anim
  */
-public class PlayAnimationCommand extends ATCommand
-{
-    protected int   animation_no;
-    protected int   duration;
+public class PlayAnimationCommand extends ATCommand {
+    protected int animation_no;
+    protected int duration;
 
-    public PlayAnimationCommand(int animation_no, int duration)
-    {
+    public PlayAnimationCommand(int animation_no, int duration) {
         this.animation_no = animation_no;
-        this.duration     = duration;
+        this.duration = duration;
     }
 
     @Override
-    protected String getID()
-    {
+    protected String getID() {
         return "ANIM";
     }
 
     @Override
-    protected Object[] getParameters()
-    {
-        return new Object[] { animation_no, duration };
+    protected Object[] getParameters() {
+        return new Object[]{animation_no, duration};
     }
 }

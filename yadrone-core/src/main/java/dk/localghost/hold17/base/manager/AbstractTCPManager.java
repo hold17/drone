@@ -26,75 +26,72 @@ import java.net.Socket;
 // TODO: I believe IOExceptions should be thrown all the way up,
 // but it means all apps should handle them
 // also need to think about effect if not connected (currently return null or ignore)
-public abstract class AbstractTCPManager implements Runnable {
+public abstract class AbstractTCPManager extends AbstractManager {
 
-	protected InetAddress inetaddr = null;
-	protected Socket socket = null;
-	protected boolean connected = false;
-	protected Thread thread;
+    protected Socket socket = null;
 
-	public AbstractTCPManager(InetAddress inetaddr) {
-		this.inetaddr = inetaddr;
-	}
+    public AbstractTCPManager(InetAddress inetaddr) {
+        super(inetaddr);
+    }
 
-	public boolean connect(int port) throws IOException 
-	{
-		try {
-			socket = new Socket(inetaddr, port);
-			socket.setSoTimeout(3000);
-		} catch (IOException e) {
-			e.printStackTrace();
-			connected = false;
-			throw e;
-		}
-		connected = true;
-		return true;
-	}
+    public boolean connect(int port) throws IOException {
+        try {
+            socket = new Socket(inetaddr, port);
+            socket.setSoTimeout(3000);
+        } catch (IOException e) {
+            e.printStackTrace();
+            connected = false;
+            throw e;
+        }
+        connected = true;
+        connectionStateEvent.stateConnected();
+        return true;
+    }
 
-	public boolean isConnected() {
-		return connected;
-	}
 
-	public void close() {
-		try {
-			connected = false;
-			if (socket != null) {
-				socket.close();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    public void close() {
+        try {
+            connected = false;
+            connectionStateEvent.stateDisconnected();
+            if (socket != null) {
+                socket.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	protected void ticklePort(int port) {
-		byte[] buf = { 0x01, 0x00, 0x00, 0x00 };
-		try {
-			if (socket != null) {
-				OutputStream os = socket.getOutputStream();
-				os.write(buf);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    protected void ticklePort(int port) {
+        byte[] buf = {0x01, 0x00, 0x00, 0x00};
+        try {
+            if (socket != null) {
+                OutputStream os = socket.getOutputStream();
+                os.write(buf);
+                connectionStateEvent.stateConnected();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            connectionStateEvent.stateDisconnected();
+        }
+    }
 
-	protected InputStream getInputStream() {
-		try {
-			if (socket != null) {
-				return socket.getInputStream();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
+    protected InputStream getInputStream() {
+        try {
+            if (socket != null) {
+                return socket.getInputStream();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-	public void start() {
-		if (thread == null || thread.getState() == Thread.State.TERMINATED) {
-			String name = getClass().getSimpleName();
-			thread = new Thread(this, name);
-			thread.start();
-		}
-	}
+    public void start() {
+        if (thread == null || thread.getState() == Thread.State.TERMINATED) {
+            String name = getClass().getSimpleName();
+            thread = new Thread(this, name);
+            thread.start();
+        }
+    }
 
 }
