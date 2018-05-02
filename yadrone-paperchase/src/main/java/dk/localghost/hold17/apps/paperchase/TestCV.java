@@ -13,15 +13,18 @@ import java.io.IOException;
 import java.nio.file.Paths;
 
 public class TestCV {
+    public Mat testMat;
+
     static {
-        nu.pattern.OpenCV.loadShared();
+        nu.pattern.OpenCV.loadShared(); // loading maven version of OpenCV
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
 
     public TestCV() {
         try {
-            Mat testMat = openFile("a4-papir.jpg");
+            testMat = openFile("a4-papir.jpg");
             System.out.println(testMat.toString());
+            saveFile("imageOutput.jpg", testMat);
         } catch (Exception e) {
             System.err.println("Something went wrong" + e.toString());
         }
@@ -31,13 +34,13 @@ public class TestCV {
         new TestCV();
     }
 
-    public Mat openFile(String fileName) throws Exception{
+    public Mat openFile(String fileName) throws Exception {
         final String path = Paths.get("").toAbsolutePath().toString();
         final String filePath = (path + "/TestImages/" + fileName).replace('/', '\\');
 
         Mat newImage = Imgcodecs.imread(filePath);
-        if(newImage.dataAddr()==0){
-            throw new Exception ("Couldn't open file "+filePath);
+        if (newImage.dataAddr() == 0) {
+            throw new Exception("Couldn't open file " + filePath);
         }
         return newImage;
     }
@@ -53,5 +56,12 @@ public class TestCV {
         MatOfByte mob = new MatOfByte();
         Imgcodecs.imencode(".jpg", mat, mob);
         return ImageIO.read(new ByteArrayInputStream(mob.toArray()));
+    }
+
+    public void saveFile(String fileName, Mat testMat) {
+        final String path = Paths.get("").toAbsolutePath().toString();
+        final String filePath = (path + "/TestImages/" + fileName).replace('/', '\\');
+        Imgcodecs.imwrite(filePath, testMat);
+        System.out.println("File saved to " + filePath);
     }
 }
