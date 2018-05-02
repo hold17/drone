@@ -12,8 +12,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 
+import static org.opencv.imgproc.Imgproc.COLOR_BGR2GRAY;
+import static org.opencv.imgproc.Imgproc.cvtColor;
+
 public class TestCV {
     public Mat testMat;
+    public Mat grayImage;
 
     static {
         nu.pattern.OpenCV.loadShared(); // loading maven version of OpenCV
@@ -24,9 +28,10 @@ public class TestCV {
         try {
             testMat = openFile("a4-papir.jpg");
             System.out.println(testMat.toString());
-            saveFile("imageOutput.jpg", testMat);
+            convertGreyscale(testMat);
+            saveFile("imageOutput.jpg", grayImage);
         } catch (Exception e) {
-            System.err.println("Something went wrong" + e.toString());
+            System.err.println("Something went wrong: " + e.toString());
         }
     }
 
@@ -63,5 +68,10 @@ public class TestCV {
         final String filePath = (path + "/TestImages/" + fileName).replace('/', '\\');
         Imgcodecs.imwrite(filePath, testMat);
         System.out.println("File saved to " + filePath);
+    }
+
+    public void convertGreyscale(Mat testMat) {
+        grayImage = new Mat();
+        cvtColor(testMat, this.grayImage, COLOR_BGR2GRAY);
     }
 }
