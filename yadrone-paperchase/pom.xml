@@ -39,6 +39,15 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/java/dk/localghost/hold17/apps/paperchase/GUI</directory>
+                <includes>
+                    <include>**/*.fxml</include>
+                </includes>
+                <targetPath>dk/localghost/hold17/apps/paperchase/GUI</targetPath>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
