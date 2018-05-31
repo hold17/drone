@@ -26,6 +26,7 @@
         <module>yadrone-controlcenter</module>
         <module>yadrone-paperchase</module>
         <module>yadrone-tutorial</module>
+        <module>autonomous-drone</module>
     </modules>
 
     <repositories>
