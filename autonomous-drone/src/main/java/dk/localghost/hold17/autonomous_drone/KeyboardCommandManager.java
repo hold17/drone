@@ -1,5 +1,4 @@
-package dk.localghost.hold17.apps.controlcenter.plugins.keyboard;
-
+package dk.localghost.hold17.autonomous_drone;
 
 import dk.localghost.hold17.base.IARDrone;
 
@@ -17,7 +16,7 @@ public class KeyboardCommandManager implements KeyListener {
     public void keyReleased(KeyEvent e) {
 //		System.out.println("Key released: " + e.getKeyChar());
 
-//        drone.hover();
+        drone.hover();
     }
 
     public void keyPressed(KeyEvent e) {
@@ -43,9 +42,6 @@ public class KeyboardCommandManager implements KeyListener {
         }
 
         switch (key) {
-            case KeyEvent.VK_P:
-                System.out.println("P was pressed!");
-                break;
             case KeyEvent.VK_ENTER:
                 drone.takeOff();
                 break;
@@ -133,3 +129,4 @@ public class KeyboardCommandManager implements KeyListener {
 
     }
 }
+
