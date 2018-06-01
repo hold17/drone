@@ -3,12 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>yadrone-paperchase</artifactId>
+    <artifactId>autonomous_drone</artifactId>
     <packaging>jar</packaging>
 
     <parent>
         <groupId>dk.localghost.hold17</groupId>
-        <artifactId>autonomous-drone</artifactId>
+        <artifactId>yadrone</artifactId>
         <version>0.0.1-ALPHA</version>
         <relativePath>../</relativePath>
     </parent>
@@ -46,5 +46,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
