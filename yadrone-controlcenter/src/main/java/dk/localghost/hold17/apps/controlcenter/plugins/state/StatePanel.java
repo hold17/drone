@@ -49,7 +49,7 @@ public class StatePanel extends JPanel implements ICCPlugin {
             sb.append("IsBatteryHigh: " + data.isBatteryTooHigh() + "\n");
             sb.append("IsTimerElapsed: " + data.isTimerElapsed() + "\n");
             sb.append("isNotEnoughPower: " + data.isNotEnoughPower() + "\n");
-            sb.append("isAngelsOutOufRange: " + data.isAngelsOutOufRange() + "\n");
+            sb.append("isAngelsOutOufRange: " + data.isAnglesOutOfRange() + "\n");
             sb.append("isTooMuchWind: " + data.isTooMuchWind() + "\n");
             sb.append("isUltrasonicSensorDeaf: " + data.isUltrasonicSensorDeaf() + "\n");
             sb.append("isCutoutSystemDetected: " + data.isCutoutSystemDetected() + "\n");

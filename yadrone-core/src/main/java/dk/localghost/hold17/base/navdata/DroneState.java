@@ -130,7 +130,7 @@ public class DroneState {
         return (state & (1 << 18)) != 0;
     }
 
-    public boolean isAngelsOutOufRange() {
+    public boolean isAnglesOutOfRange() {
         return (state & (1 << 19)) != 0;
     }
 
@@ -227,7 +227,7 @@ public class DroneState {
         sb.append("isMotorsDown: " + isMotorsDown() + "\n");
         sb.append("isBatteryLow: " + isBatteryTooLow() + "\n");
         sb.append("isTimerElapsed: " + isTimerElapsed() + "\n");
-        sb.append("isAngelsOutOufRange: " + isAngelsOutOufRange() + "\n");
+        sb.append("isAnglesOutOfRange: " + isAnglesOutOfRange() + "\n");
         sb.append("isTooMuchWind: " + isTooMuchWind() + "\n");
         sb.append("isUltrasonicSensorDeaf: " + isUltrasonicSensorDeaf() + "\n");
         sb.append("isCutoutSystemDetected: " + isCutoutSystemDetected() + "\n");

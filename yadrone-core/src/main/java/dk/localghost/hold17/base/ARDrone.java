@@ -36,7 +36,7 @@ public class ARDrone implements IARDrone, IExceptionListener {
     /**
      * default ip address
      */
-    private static final String IP_ADDRESS = "192.168.1.155";
+    private static final String IP_ADDRESS = "192.168.1.1";
 
     private String ipaddr = null;
     private InetAddress inetaddr = null;

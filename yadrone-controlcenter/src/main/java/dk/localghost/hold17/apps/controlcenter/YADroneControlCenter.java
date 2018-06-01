@@ -12,8 +12,8 @@ public class YADroneControlCenter {
 
     private void initialize() {
         try {
-            //ardrone = new ARDrone();
-            ardrone = new ARDrone("192.168.1.155");
+//            ardrone = new ARDrone();
+            ardrone = new ARDrone("10.0.1.2");
             System.out.println("Connect drone controller");
             ardrone.start();
 

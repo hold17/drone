@@ -185,8 +185,7 @@ public class CommandManager extends AbstractUDPManager {
         return move(-perc2float(speed), 0f, 0f, 0f);
     }
 
-    public CommandManager move(float lrtilt, float fbtilt, float vspeed, float aspeed, float magneto_psi,
-                               float magneto_psi_accuracy) {
+    public CommandManager move(float lrtilt, float fbtilt, float vspeed, float aspeed, float magneto_psi, float magneto_psi_accuracy) {
         lrtilt = limit(lrtilt, -1f, 1f);
         fbtilt = limit(fbtilt, -1f, 1f);
         vspeed = limit(vspeed, -1f, 1f);
