@@ -40,31 +40,28 @@ public class AutonomousUI extends Application {
 
             primaryStage.setAlwaysOnTop(true);
 
-            scene.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
-                @Override
-                public void handle(KeyEvent event) {
-                    switch(event.getCode()) {
-                        case T:
-                            drone.takeOff(); break;
-                        case G:
-                            drone.landing(); break;
-                        case W:
-                            drone.forward(); break;
-                        case S:
-                            drone.backward(); break;
-                        case A:
-                            drone.goLeft(); break;
-                        case D:
-                            drone.goRight(); break;
-                        case Q: case LEFT:
-                            drone.spinLeft(); break;
-                        case E: case RIGHT:
-                            drone.spinRight(); break;
-                        case X: case UP:
-                            drone.up(); break;
-                        case Z: case DOWN:
-                            drone.down(); break;
-                    }
+            scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+                switch(event.getCode()) {
+                    case T:
+                        drone.takeOff(); break;
+                    case G:
+                        drone.landing(); break;
+                    case W:
+                        drone.forward(); break;
+                    case S:
+                        drone.backward(); break;
+                    case A:
+                        drone.goLeft(); break;
+                    case D:
+                        drone.goRight(); break;
+                    case Q: case LEFT:
+                        drone.spinLeft(); break;
+                    case E: case RIGHT:
+                        drone.spinRight(); break;
+                    case X: case UP:
+                        drone.up(); break;
+                    case Z: case DOWN:
+                        drone.down(); break;
                 }
             });
 
