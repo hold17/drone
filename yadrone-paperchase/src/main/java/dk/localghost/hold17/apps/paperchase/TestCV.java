@@ -2,6 +2,7 @@ package dk.localghost.hold17.apps.paperchase;
 
 import org.opencv.core.*;
 import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 
 import javax.imageio.ImageIO;
@@ -13,14 +14,12 @@ import java.nio.file.Paths;
 import org.bytedeco.javacv.*;
 import org.bytedeco.javacpp.*;
 
-import static java.lang.System.exit;
 import static org.bytedeco.javacpp.opencv_core.*;
 import static org.bytedeco.javacpp.opencv_highgui.*;
 import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
-import static org.bytedeco.javacpp.opencv_videoio.*;
 import static org.bytedeco.javacpp.opencv_imgproc.*;
-//import static org.opencv.imgproc.Imgproc.*;
-//import static org.opencv.imgproc.Imgproc.COLOR_BGR2GRAY;
+import static org.opencv.imgproc.Imgproc.*;
+import static org.opencv.imgproc.Imgproc.COLOR_BGR2GRAY;
 
 public class TestCV {
     public Mat testMat;
@@ -37,7 +36,7 @@ public class TestCV {
             System.out.println(testMat.toString());
 //            convertGreyscale(testMat);
 //            saveFile("imageOutput.jpg", grayImage);
-            detectWhite();
+            detectWhiteMat();
         } catch (Exception e) {
             System.err.println("Something went wrong: " + e.toString());
         }
@@ -84,51 +83,43 @@ public class TestCV {
 //        cvtColor(testMat, this.grayImage, COLOR_BGR2GRAY);
 //    }
 
-    public void detectWhite() {
+    public void detectWhiteIplImage() {
 
         IplImage img1, imghsv, imgbin;
-        CvCapture cam;
-        if((cam = cvCaptureFromCAM(-1)) == null) {
-            System.out.println("Didn't find webcam. Exiting.");
-            exit(0);
-        }
 
-        imghsv = cvCreateImage(cvSize(1280,720), 8, 3);
-        imgbin = cvCreateImage(cvSize(1280,720), 8, 1);
-        cvQueryFrame(cam);
+        img1 = cvLoadImage("TestImages/a4-papir.jpg");
+        imghsv = cvCreateImage(cvGetSize(img1), 8, 3);
+        imgbin = cvCreateImage(cvGetSize(img1), 8, 1);
 
-        for(;;) {
-            img1 = cvQueryFrame(cam);
-            imghsv = cvCreateImage(cvGetSize(img1), 8, 3);
-            imgbin = cvCreateImage(cvGetSize(img1), 8, 1);
-            if(img1 == null) break;
-
-//            cvShowImage("webcam", img1);
         cvCvtColor(img1, imghsv, CV_BGR2HSV);
-            CvScalar minc = cvScalar(210, 210, 210, 0);
-            CvScalar maxc = cvScalar(255, 255, 255, 0);
-            cvInRangeS(img1, minc, maxc, imgbin);
+        CvScalar minc = cvScalar(200, 200, 200, 0);
+        CvScalar maxc = cvScalar(255, 255, 255, 0);
+        cvInRangeS(img1, minc, maxc, imgbin);
 
-            cvShowImage("default", img1);
-            cvShowImage("Binary", imgbin);
-            char c = (char) cvWaitKey(15);
-            if(c == 'q') break;
-        }
+        cvShowImage("default", img1);
+        cvShowImage("Binary", imgbin);
+        cvWaitKey();
 
         cvReleaseImage(imghsv);
         cvReleaseImage(imgbin);
-        cvReleaseCapture(cam);
+        cvReleaseImage(img1);
+
     }
 
-//    public void cameratest() {
-//        VideoCapture cap = new VideoCapture(CV_CAP_ANY);
-//
-//        if(!cap.isOpened()) {
-//            System.out.println("Camera not found. Exiting.");
-//        }
-//
-//        Mat frame = new Mat();
-//        cap.read(frame);
-//        cvShowImage()
-//    }
+    public Mat detectWhiteMat() {
+        Mat img1, imgbin /* imghsv til konvertering til HSV. Bliver ikke gjort nu */ ;
+
+        try {
+            img1 = openFile("realFilterTest.jpg");
+            imgbin = new Mat();
+            Core.inRange(img1, new Scalar(220, 220, 220, 0), new Scalar(255, 255, 255, 0), imgbin);
+            saveFile("realFilterTestOutput.jpg", imgbin);
+            return imgbin;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
 }
