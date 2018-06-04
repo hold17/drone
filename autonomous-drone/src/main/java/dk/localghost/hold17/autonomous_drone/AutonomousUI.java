@@ -24,9 +24,9 @@ public class AutonomousUI extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-//        drone = new ARDrone("10.0.1.2");
-//        drone.start();
-//        drone.getCommandManager().flatTrim();
+        drone = new ARDrone("10.0.1.2");
+        drone.start();
+        drone.getCommandManager().flatTrim();
 
         try {
             URL url = getClass().getResource("stuff.fxml");
