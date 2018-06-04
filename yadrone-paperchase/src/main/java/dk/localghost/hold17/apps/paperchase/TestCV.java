@@ -1,7 +1,9 @@
 package dk.localghost.hold17.apps.paperchase;
 
 import org.opencv.core.*;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 
@@ -11,8 +13,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bytedeco.javacv.*;
 import org.bytedeco.javacpp.*;
+import org.opencv.imgproc.Imgproc;
 
 import static org.bytedeco.javacpp.opencv_core.*;
 import static org.bytedeco.javacpp.opencv_highgui.*;
@@ -36,7 +42,8 @@ public class TestCV {
             System.out.println(testMat.toString());
 //            convertGreyscale(testMat);
 //            saveFile("imageOutput.jpg", grayImage);
-            detectWhiteMat();
+//            detectWhiteMat();
+            drawContours();
         } catch (Exception e) {
             System.err.println("Something went wrong: " + e.toString());
         }
@@ -112,8 +119,8 @@ public class TestCV {
         try {
             img1 = openFile("realFilterTest.jpg");
             imgbin = new Mat();
-            Core.inRange(img1, new Scalar(220, 220, 220, 0), new Scalar(255, 255, 255, 0), imgbin);
-            saveFile("realFilterTestOutput.jpg", imgbin);
+            Core.inRange(img1, new Scalar(230, 230, 230, 0), new Scalar(255, 255, 255, 0), imgbin);
+//            saveFile("realFilterTestOutput.jpg", imgbin);
             return imgbin;
         } catch (Exception e) {
             e.printStackTrace();
@@ -122,4 +129,65 @@ public class TestCV {
         return null;
     }
 
+    public Mat drawContours() {
+        Mat imgbin = detectWhiteMat();
+        Mat imgcol = new Mat();
+        Mat hierarchy = new Mat();
+        imgbin.convertTo(imgbin, CV_8UC3);
+        cvtColor(imgbin, imgcol, CV_GRAY2RGB);
+//        imgbin.convertTo(imgbin, CvType.CV_32SC1);
+        List<MatOfPoint> contours = new ArrayList<>();
+        Scalar color = new Scalar(20, 255, 57);
+        Imgproc.findContours(imgbin, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+//        Imgproc.drawContours(imgbin, contours, -1, new Scalar(255, 255, 0), 1);
+
+//        Mat contourImg = new Mat(imgbin.size(), imgbin.type());
+
+//        for (int i = 0; i < contours.size(); i++) {
+
+
+            Imgproc.drawContours(imgcol, filterContours(contours, 4, 0.5), -1, color, 2, 8, hierarchy, 2, new Point());
+//        }
+
+        saveFile("realFilterTestOutputContour.jpg", imgcol);
+
+        return imgcol;
+    }
+
+    public List<MatOfPoint> filterContours(List<MatOfPoint> contours, int vertices, double accuracy) {
+        MatOfPoint2f approx = new MatOfPoint2f();
+        MatOfPoint2f matOfPoint2f = new MatOfPoint2f();
+
+        List<MatOfPoint2f> contoursMat2 = new ArrayList<>();
+
+        for(int i = 0; i < contours.size(); i++) {
+            MatOfPoint contour = contours.get(i);
+            matOfPoint2f.fromList(contour.toList());
+            Imgproc.approxPolyDP(matOfPoint2f, approx,Imgproc.arcLength(matOfPoint2f, true) * accuracy, true);
+
+            long total = approx.total();
+
+            if(total != vertices) {
+                contours.remove(i);
+            }
+        }
+
+        return contours;
+
+//        for (int i = 0; i < contours.size(); i++) {
+//            // Skip small or non-convex objects
+//            if (Math.abs(Imgproc.contourArea(contours.get(i))) < 100)
+//                continue;
+//
+//            // Approximate contour with accuracy proportional to the contour perimeter
+//            contoursMat2.add(i, (new MatOfPoint2f(contours.get(i))));
+//
+//            Imgproc.approxPolyDP(contoursMat2.get(i), approx, Imgproc.arcLength(contoursMat2.get(i), true) * 0.02, true);
+//
+//        }
+//
+//        for (int i = 0; i < contoursMat2.size(); i++) {
+//            contours.add(new MatOfPoint(contoursMat2.get(i)));
+//        }
+    }
 }
