@@ -18,7 +18,7 @@ public class PaperChase {
     private QRCodeScanner scanner = null;
 
     public PaperChase() {
-        drone = new ARDrone();
+        drone = new ARDrone("10.0.1.2");
         drone.start();
         drone.getCommandManager().setVideoChannel(VideoChannel.HORI);
 
