@@ -7,7 +7,6 @@ import dk.localghost.hold17.base.navdata.Altitude;
 import dk.localghost.hold17.base.navdata.AltitudeListener;
 import dk.localghost.hold17.base.navdata.BatteryListener;
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -18,7 +17,7 @@ import java.net.URL;
 
 public class AutonomousUI extends Application {
     private IARDrone drone;
-    private String currentKey = "";
+    private static String ip;
 
     private int droneAltitude = 0;
     private int droneBattery = 0;
@@ -30,12 +29,19 @@ public class AutonomousUI extends Application {
     private final static int SPEED = 30;
 
     public static void main(String[] args) {
+        if (args.length < 1) {
+            System.err.println("You must assign an ip address as argument.");
+            System.exit(-1);
+        }
+
+        ip = args[0];
+
         launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) {
-        drone = new ARDrone("10.0.1.2");
+        drone = new ARDrone(ip);
         drone.start();
         drone.getCommandManager().flatTrim();
 
@@ -62,7 +68,7 @@ public class AutonomousUI extends Application {
             }
         });
 
-        drone.setMinAltitude(MIN_ALTITUDE);
+        drone.setMinAltitude(MIN_ALTITUDE); // TODO Doesn't work..
         drone.setMaxAltitude(MAX_ALTITUDE);
 
         drone.getCommandManager().setLedsAnimation(LEDAnimation.BLINK_GREEN, 10, 1);
@@ -116,8 +122,8 @@ public class AutonomousUI extends Application {
                         }
                         break;
                     case ENTER:
-//                        drone.getCommandManager().schedule(0, this::flyThroughRing);
-                        drone.getCommandManager().spinRight(SPEED).doFor(2000);
+                        drone.getCommandManager().schedule(0, this::flyThroughRing);
+//                        drone.getCommandManager().spinRight(SPEED).doFor(2000);
                         break;
                     case P:
                         System.out.println("DRONE Altitude: " + droneAltitude);
@@ -129,12 +135,7 @@ public class AutonomousUI extends Application {
                 }
             });
 
-            scene.addEventFilter(KeyEvent.KEY_RELEASED, new EventHandler<KeyEvent>() {
-                @Override
-                public void handle(KeyEvent event) {
-                    drone.hover();
-                }
-            });
+            scene.addEventFilter(KeyEvent.KEY_RELEASED, (event) -> drone.hover());
         } catch (Exception e) {
             System.err.println("Couldn't load file: ");
             e.printStackTrace();
@@ -144,7 +145,7 @@ public class AutonomousUI extends Application {
     private void flyThroughRing() {
         System.out.println("          FLYING UP");
         drone.getCommandManager().setLedsAnimation(LEDAnimation.BLINK_ORANGE, 10, 1);
-        while(droneAltitude < MAX_ALTITUDE - 200) {
+        while(droneAltitude < MAX_ALTITUDE) {
             drone.getCommandManager().up(100).doFor(500);
         }
 
