@@ -227,6 +227,7 @@ public class CommandManager extends AbstractUDPManager {
         q.add(new HoverCommand());
         return this;
     }
+
 	public CommandManager hoverSticky() {
 		q.add(new HoverCommand.StickyHover());
 		return this;
@@ -731,7 +732,7 @@ public class CommandManager extends AbstractUDPManager {
         long t0 = 0;
         while (!doStop) {
             try {
-                long dt; //dt seems to be: time elapsed since the last sticky command: i.e. a command which shall be send repeatedly.
+                long dt; //dt seems to be time elapsed since the last sticky command: i.e. a command which shall be send repeatedly.
                 if (cs == null) {
                     // we need to reset the watchdog within 50ms
                     dt = 40;
@@ -802,18 +803,26 @@ public class CommandManager extends AbstractUDPManager {
         setMaxEulerAngle(0.25f);
     }
 
-    private synchronized void sendCommand(ATCommand c) throws InterruptedException, IOException {
-        if (!(c instanceof KeepAliveCommand)) {
-            System.out.println("CommandManager: send " + c.getCommandString(seq));
-        }
-        String config = "AT*CONFIG_IDS=" + (seq++) + ",\"" + CommandManager.SESSION_ID + "\",\"" + CommandManager.PROFILE_ID + "\",\"" + CommandManager.APPLICATION_ID + "\"" + "\r"; // AT*CONFIG_IDS=5,"aabbccdd","bbccddee","ccddeeff"
-        byte[] configPrefix = config.getBytes("ASCII");
+    private synchronized void sendCommand(ATCommand c) throws IOException {
+//        if (!(c instanceof KeepAliveCommand)) {
+//            //System.out.println(c.toString());
+//            System.out.println("CommandManager: " + "[seq #"+seq+"] " + c.getCommandString(seq));
+//        }
+        System.out.println("CommandManager: " + "[seq #"+seq+"] " + c.getCommandString(seq));
 
         byte[] command = c.getPacket(seq++);
+        byte[] buffer;
 
-        byte[] buffer = new byte[configPrefix.length + command.length];
-        System.arraycopy(configPrefix, 0, buffer, 0, configPrefix.length);
-        System.arraycopy(command, 0, buffer, configPrefix.length, command.length);
+        // since MultiConfig is enabled by default, AT*CONFIG_IDS must be sent before AT*CONFIG
+        if (c instanceof ConfigureCommand) {
+            String config = "AT*CONFIG_IDS=" + (seq++) + ",\"" + CommandManager.SESSION_ID + "\",\"" + CommandManager.PROFILE_ID + "\",\"" + CommandManager.APPLICATION_ID + "\"" + "\r"; // AT*CONFIG_IDS=5,"aabbccdd","bbccddee","ccddeeff"
+            byte[] configPrefix = config.getBytes("ASCII");
+            buffer = new byte[configPrefix.length + command.length];
+            System.arraycopy(configPrefix, 0, buffer, 0, configPrefix.length);
+            System.arraycopy(command, 0, buffer, configPrefix.length, command.length);
+        } else {
+            buffer = command;
+        }
 
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length, inetaddr, ARDroneUtils.PORT);
         socket.send(packet);
