@@ -7,10 +7,6 @@ import dk.localghost.hold17.base.command.event.CommandSentListener;
 
 import java.io.PrintStream;
 
-/**
- * @author Formicarufa (Tomas Prochazka)
- * 12. 3. 2016
- */
 class CommandsRecorder implements CommandSentListener {
 
     PrintStream stream;

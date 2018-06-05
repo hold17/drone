@@ -6,9 +6,6 @@ import java.io.PrintStream;
 
 /**
  * Records navdata or commands to a given stream.
- *
- * @author Formicarufa (Tomas Prochazka)
- * 12. 3. 2016
  */
 public class Recorder {
     IARDrone drone;

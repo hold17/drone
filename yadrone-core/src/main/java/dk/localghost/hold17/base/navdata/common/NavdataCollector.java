@@ -2,10 +2,6 @@ package dk.localghost.hold17.base.navdata.common;
 
 import dk.localghost.hold17.base.navdata.*;
 
-/**
- * @author Formicarufa (Tomas Prochazka)
- * 12. 3. 2016
- */
 public class NavdataCollector implements TimeListener, PWMlistener, AcceleroListener, VelocityListener, AltitudeListener, AttitudeListener, WindListener, TemperatureListener, PressureListener, MagnetoListener, BatteryListener, StateListener {
 
     CommonNavdata result;

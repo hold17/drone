@@ -6,10 +6,6 @@ import dk.localghost.hold17.base.navdata.common.NavdataCollector;
 
 import java.io.PrintStream;
 
-/**
- * @author Formicarufa (Tomas Prochazka)
- * 12. 3. 2016
- */
 class NavdataRecorder implements CommonNavdataListener {
 
     PrintStream stream;
