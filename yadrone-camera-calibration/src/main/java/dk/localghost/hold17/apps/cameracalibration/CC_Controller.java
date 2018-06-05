@@ -3,6 +3,7 @@ package dk.localghost.hold17.apps.cameracalibration;
 import dk.localghost.hold17.base.ARDrone;
 import dk.localghost.hold17.base.IARDrone;
 import dk.localghost.hold17.base.command.VideoChannel;
+import dk.localghost.hold17.base.command.VideoCodec;
 import dk.localghost.hold17.base.video.ImageListener;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -47,8 +48,6 @@ public class CC_Controller {
     private TextField numHorCorners;
     @FXML
     private TextField numVerCorners;
-    @FXML
-    private TextField numSuccesfulBoards;
     // a timer for acquiring the video stream
     private Timer timer;
     // a flag to change the button behavior
@@ -87,6 +86,7 @@ public class CC_Controller {
         this.distCoeffs = new Mat();
         this.successes = 0;
         this.isCalibrated = false;
+        this.snapshotButton.setText("Take snapshot (" + (this.successes+1) + " of " + this.numBoards.getText() + ")");
 
         ardrone = new ARDrone("10.0.1.2");
         ardrone.start();
@@ -115,6 +115,8 @@ public class CC_Controller {
         if (!this.cameraActive) {
             this.cameraActive = true;
             ardrone.getCommandManager().setVideoChannel(VideoChannel.HORI);
+            ardrone.getCommandManager().setVideoCodec(VideoCodec.H264_720P);
+            ardrone.getVideoManager().reinitialize();
 
             ardrone.getVideoManager().addImageListener(new ImageListener() {
                 @Override
@@ -292,7 +294,9 @@ public class CC_Controller {
             // if the frame is not empty, process it
             if (!frame.empty()) {
                 // show the chessboard pattern
-                 this.findAndDrawPoints(frame);
+                // perform this operation only before starting the calibration process
+                 if (this.successes < this.boardsNumber)
+                     this.findAndDrawPoints(frame);
 
                  if (this.isCalibrated) {
                      // prepare the undistorted image
@@ -324,6 +328,7 @@ public class CC_Controller {
             imageCorners = new MatOfPoint2f();
             this.objectPoints.add(obj);
             this.successes++;
+            this.snapshotButton.setText("Take snapshot (" + (this.successes + 1) + " of " + this.numBoards.getText() + ")");
         }
 
         // reach the correct number of images needed for the calibration
@@ -336,37 +341,31 @@ public class CC_Controller {
      * Find and draws the points needed for the calibration on the chessboard
      *
      * @param frame the current frame
-     * @return the current number of successfully identified chessboards as an int
      */
     private void findAndDrawPoints(Mat frame) {
         // init
         Mat grayImage = new Mat();
+        // convert the frame in gray scale
+        Imgproc.cvtColor(frame, grayImage, Imgproc.COLOR_BGR2GRAY);
+        // the size of the chessboard
+        Size boardSize = new Size(this.numCornersHor, this.numCornersVer);
+        // look for the inner chessboard corners
+        boolean found = Calib3d.findChessboardCorners(grayImage, boardSize, imageCorners,
+                Calib3d.CALIB_CB_ADAPTIVE_THRESH + Calib3d.CALIB_CB_NORMALIZE_IMAGE + Calib3d.CALIB_CB_FAST_CHECK);
+        // all the required corners have been found...
+        if (found) {
+            // optimization
+            TermCriteria term = new TermCriteria(TermCriteria.EPS | TermCriteria.MAX_ITER, 30, 0.1);
+            Imgproc.cornerSubPix(grayImage, imageCorners, new Size(11, 11), new Size(-1, -1), term);
+            // save the current frame for further elaborations
+            grayImage.copyTo(this.savedImage);
+            // show the chessboard inner corners on screen
+            Calib3d.drawChessboardCorners(frame, boardSize, imageCorners, found);
 
-        // I would perform this operation only before starting the calibration
-        // process
-        if (this.successes < this.boardsNumber) {
-            // convert the frame in gray scale
-            Imgproc.cvtColor(frame, grayImage, Imgproc.COLOR_BGR2GRAY);
-            // the size of the chessboard
-            Size boardSize = new Size(this.numCornersHor, this.numCornersVer);
-            // look for the inner chessboard corners
-            boolean found = Calib3d.findChessboardCorners(grayImage, boardSize, imageCorners,
-                    Calib3d.CALIB_CB_ADAPTIVE_THRESH + Calib3d.CALIB_CB_NORMALIZE_IMAGE + Calib3d.CALIB_CB_FAST_CHECK);
-            // all the required corners have been found...
-            if (found) {
-                // optimization
-                TermCriteria term = new TermCriteria(TermCriteria.EPS | TermCriteria.MAX_ITER, 30, 0.1);
-                Imgproc.cornerSubPix(grayImage, imageCorners, new Size(11, 11), new Size(-1, -1), term);
-                // save the current frame for further elaborations
-                grayImage.copyTo(this.savedImage);
-                // show the chessboard inner corners on screen
-                Calib3d.drawChessboardCorners(frame, boardSize, imageCorners, found);
-
-                // enable the option for taking a snapshot
-                this.snapshotButton.setDisable(false);
-            } else {
-                this.snapshotButton.setDisable(true);
-            }
+            // enable the option for taking a snapshot
+            this.snapshotButton.setDisable(false);
+        } else {
+            this.snapshotButton.setDisable(true);
         }
     }
 
