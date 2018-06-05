@@ -17,11 +17,10 @@ import java.nio.ByteBuffer;
 //Publishing date   : 2010-01-06 
 //based on work by  : Wilke Jansoone
 
-//Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions
-//are met:
+//Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 //- Redistributions of source code must retain the above copyright notice, this list of conditions, the disclaimer and the original author of the source code.
-//- Neither the name of the PixVillage Team, nor the names of its contributors may be used to endorse or promote products derived from this software without 
-//specific prior written permission.
+//- Neither the name of the PixVillage Team, nor the names of its contributors may be used to endorse or promote products derived from this software without
+// specific prior written permission.
 
 ////#endregion
 
@@ -212,9 +211,7 @@ public class BufferedVideoImage {
         boolean blockCbHasAcComponents = false;
         boolean blockCrHasAcComponents = false;
 
-        // Set StreamFieldBitIndex to 32 to make sure that the first call to
-        // ReadStreamData
-        // actually consumes data from the stream
+        // Set StreamFieldBitIndex to 32 to make sure that the first call to ReadStreamData actually consumes data from the stream
         StreamFieldBitIndex = 32;
         StreamField = new uint(0);
         StreamIndex = 0;
@@ -361,15 +358,13 @@ public class BufferedVideoImage {
                     if (ImageSlice == null) {
                         ImageSlice = new ImageSlice(BlockCount);
                         PixelData = new uint[Width * Height];
-                        // ImageSource = new WriteableBitmap(Width, Height, 96,
-                        // 96, PixelFormats.Bgr565, null);
+                        // ImageSource = new WriteableBitmap(Width, Height, 96, 96, PixelFormats.Bgr565, null);
                         // Rectangle = new Int32Rect(0, 0, Width, Height);
                     } else {
                         if (ImageSlice.MacroBlocks.length != BlockCount) {
                             ImageSlice = new ImageSlice(BlockCount);
                             PixelData = new uint[Width * Height];
-                            // ImageSource = new WriteableBitmap(Width, Height,
-                            // 96, 96, PixelFormats.Bgr565, null);
+                            // ImageSource = new WriteableBitmap(Width, Height, 96, 96, PixelFormats.Bgr565, null);
                             // Rectangle = new Int32Rect(0, 0, Width, Height);
                         }
                     }
@@ -425,65 +420,43 @@ public class BufferedVideoImage {
         int temp = 0;
         int sign = 0;
 
-        // Use the RLE and Huffman dictionaries to understand this code
-        // fragment. You can find
-        // them in the developers guide on page 34.
+        // Use the RLE and Huffman dictionaries to understand this code fragment.
+        // You can find them in the developers guide on page 34.
         // The bits in the data are actually composed of two kinds of fields:
-        // - run fields - this field contains information on the number of
-        // consecutive zeros.
-        // - level fields - this field contains the actual non zero value which
-        // can be negative or positive.
+        // - run fields - this field contains information on the number of consecutive zeros.
+        // - level fields - this field contains the actual non zero value which can be negative or positive.
         // First we extract the run field info and then the level field info.
 
         streamCode = PeekStreamData(ImageStream, 32);
 
-        // /#//#region Determine number of consecutive zeros in zig zag. (a.k.a
-        // 'run' field info)
+        // /#//#region Determine number of consecutive zeros in zig zag. (a.k.a 'run' field info)
 
-        // Suppose we have following bit sequence:
-        // 00001111.....
-        // 1 - Count the number of leading zeros -> 4
-        // Coarse value lookup is thus 00001
-        // 2 - Lookup the additional value, for coarse value 00001 this is 3
-        // addtional bits
+        // Suppose we have following bit sequence: 00001111.....
+        // 1 - Count the number of leading zeros -> 4 Coarse value lookup is thus 00001
+        // 2 - Lookup the additional value, for coarse value 00001 this is 3 addtional bits
         // 3 - Calculate value of run, for coarse value 00001 this is (111) + 8
 
-        zeroCount = CountLeadingZeros(streamCode); // - (1)
-        streamCode.shiftLeftEquals(zeroCount + 1); // - (2) -> shift left to get
-        // rid of the coarse value
-        streamLength += zeroCount + 1; // - position bit pointer to keep track
-        // off how many bits to consume later on
-        // the stream.
+        // - (1)
+        zeroCount = CountLeadingZeros(streamCode);
+
+        // - (2) -> shift left to get rid of the coarse value
+        streamCode.shiftLeftEquals(zeroCount + 1);
+
+        // - position bit pointer to keep track off how many bits to consume later on the stream.
+        streamLength += zeroCount + 1;
 
         if (zeroCount > 1) {
-            temp = (streamCode.shiftRight(32 - (zeroCount - 1))).intValue(); // -
-            // (2)
-            // ->
-            // shift
-            // right
-            // to
-            // determine
-            // the
-            // addtional
-            // bits
-            // (number
-            // of
-            // additional
-            // bits
-            // is
-            // zerocount
-            // - 1)
-            streamCode.shiftLeftEquals(zeroCount - 1); // - shift all of the run
-            // bits out of the way
-            // so the first bit is
-            // points to the first
-            // bit of the level
-            // field.
-            streamLength += zeroCount - 1;// - position bit pointer to keep
-            // track off how many bits to
-            // consume later on the stream.
-            run[0] = temp + (1 << (zeroCount - 1)); // - (3) -> calculate run
-            // value
+            // - (2) -> shift right to determine the addtional bits (number of additional bits is zerocount - 1)
+            temp = (streamCode.shiftRight(32 - (zeroCount - 1))).intValue();
+
+            // - shift all of the run bits out of the way so the first bit is points to the first bit of the level field.
+            streamCode.shiftLeftEquals(zeroCount - 1);
+
+            // - position bit pointer to keep track off how many bits to consume later on the stream.
+            streamLength += zeroCount - 1;
+
+            // - (3) -> calculate run value
+            run[0] = temp + (1 << (zeroCount - 1));
         } else {
             run[0] = zeroCount;
         }
@@ -492,25 +465,21 @@ public class BufferedVideoImage {
 
         // /#//#region Determine non zero value. (a.k.a 'level' field info)
 
-        // Suppose we have following bit sequence:
-        // 000011111.....
-        // 1 - Count the number of leading zeros -> 4
-        // Coarse value lookup is thus 00001
-        // 2 - Lookup the additional value, for coarse value 00001 this is 4
-        // addtional bits (last bit is sign bit)
-        // 3 - Calculate value of run, for coarse value 00001 this is (xxx) + 8,
-        // multiply by sign
+        // Suppose we have following bit sequence: 000011111.....
+        // 1 - Count the number of leading zeros -> 4 Coarse value lookup is thus 00001
+        // 2 - Lookup the additional value, for coarse value 00001 this is 4 addtional bits (last bit is sign bit)
+        // 3 - Calculate value of run, for coarse value 00001 this is (xxx) + 8, multiply by sign
 
         zeroCount = CountLeadingZeros(streamCode);
-        streamCode.shiftLeftEquals(zeroCount + 1); // - (1)
-        streamLength += zeroCount + 1; // - position bit pointer to keep track
-        // off how many bits to consume later on
-        // the stream.
+
+        // - (1)
+        streamCode.shiftLeftEquals(zeroCount + 1);
+
+        // - position bit pointer to keep track off how many bits to consume later on the stream.
+        streamLength += zeroCount + 1;
 
         if (zeroCount == 1) {
-            // If coarse value is 01 according to the Huffman dictionary this
-            // means EOB, so there is
-            // no run and level and we indicate this by setting last to true;
+            // If coarse value is 01 according to the Huffman dictionary this means EOB, so there is no run and level and we indicate this by setting last to true;
             run[0] = 0;
             last[0] = true;
         } else {
@@ -519,35 +488,31 @@ public class BufferedVideoImage {
                 temp = 1;
             }
 
-            streamLength += zeroCount;// - position bit pointer to keep track
-            // off how many bits to consume later on
-            // the stream.
-            streamCode.shiftRightEquals(32 - zeroCount);// - (2) -> shift right
-            // to determine the
-            // addtional bits
-            // (number of additional
-            // bits is zerocount)
-            // sign = (sbyte)(streamCode & 1); // determine sign, last bit is
-            // sign
-            sign = (int) (streamCode.and(1).intValue()); // determine sign, last
-            // bit is sign
+            // - position bit pointer to keep track off how many bits to consume later on the stream.
+            streamLength += zeroCount;
+
+            // - (2) -> shift right to determine the addtional bits (number of additional bits is zerocount)
+            streamCode.shiftRightEquals(32 - zeroCount);
+
+            // sign = (sbyte)(streamCode & 1); // determine sign, last bit is sign
+
+            // determine sign, last bit is sign
+            sign = (int) (streamCode.and(1).intValue());
 
             if (zeroCount != 0) {
-                // temp = (sbyte)(streamCode >> 1); // take into account that
-                // last bit is sign, so shift it out of the way
-                // temp += (sbyte)(1 << (zeroCount - 1)); // - (3) -> calculate
-                // run value without sign
-                temp = (streamCode.shiftRight(1)).intValue(); // take into
-                // account
-                // that last bit is
-                // sign, so shift it
-                // out of the way
-                temp += (int) (1 << (zeroCount - 1)); // - (3) -> calculate run
-                // value without sign
+                // temp = (sbyte)(streamCode >> 1);
+                // take into account that last bit is sign, so shift it out of the way
+                // temp += (sbyte)(1 << (zeroCount - 1)); // - (3) -> calculate run value without sign
+
+                // take into account that last bit is sign, so shift it out of the way
+                temp = (streamCode.shiftRight(1)).intValue();
+
+                // - (3) -> calculate run value without sign
+                temp += (int) (1 << (zeroCount - 1));
             }
 
-            level[0] = (sign == 1) ? -temp : temp; // - (3) -> calculate run
-            // value with sign
+            // - (3) -> calculate run value with sign
+            level[0] = (sign == 1) ? -temp : temp;
             last[0] = false;
         }
 
@@ -581,8 +546,7 @@ public class BufferedVideoImage {
         }
 
         numCalls++;
-        // System.out.println("ReadStreamData " + data + " " + numCalls + " " +
-        // count);
+        // System.out.println("ReadStreamData " + data + " " + numCalls + " " + count);
 
         return data;
     }

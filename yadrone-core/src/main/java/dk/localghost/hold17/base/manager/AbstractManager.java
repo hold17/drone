@@ -22,12 +22,6 @@ import dk.localghost.hold17.base.connection.ConnectionStateListener;
 
 import java.net.InetAddress;
 
-/**
- * Common ancestor for both UDPManager and TCPManager.
- *
- * @author Formicarufa (Tomas Prochazka)
- * 19. 3. 2016
- */
 public abstract class AbstractManager implements Runnable {
 
     protected InetAddress inetaddr = null;
