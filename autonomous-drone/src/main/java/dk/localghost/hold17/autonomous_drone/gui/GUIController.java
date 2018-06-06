@@ -16,15 +16,13 @@ import java.util.TimerTask;
 
 public class GUIController {
     private IARDrone ardrone;
-
     private Timer timer;
     private BufferedImage bufferedImage;
 
     @FXML
     private ImageView cameraView;
 
-
-    protected void init(IARDrone drone) {
+    void init(IARDrone drone) {
         ardrone = drone;
         ardrone.start();
         startRecording();
@@ -40,15 +38,8 @@ public class GUIController {
             @Override
             public void imageUpdated(BufferedImage newImage) {
                 bufferedImage = newImage;
-                //System.out.println("this ran!");
             }
         });
-
-        try {
-            Thread.sleep(15000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
 
         TimerTask frameGrabber = new TimerTask() {
             @Override
@@ -70,11 +61,9 @@ public class GUIController {
                     System.out.println("bufferedImage was null");
                 }
             }
-
         };
         this.timer = new Timer();
         this.timer.schedule(frameGrabber, 0, 33);
     }
-
 
 }

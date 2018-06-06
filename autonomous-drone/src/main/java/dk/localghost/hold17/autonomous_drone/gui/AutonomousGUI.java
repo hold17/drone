@@ -4,6 +4,7 @@ import dk.localghost.hold17.autonomous_drone.controller.DroneController;
 import dk.localghost.hold17.autonomous_drone.controller.KeyboardCommandManager;
 import dk.localghost.hold17.base.ARDrone;
 import dk.localghost.hold17.base.IARDrone;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -13,8 +14,6 @@ import javafx.stage.Stage;
 
 public class AutonomousGUI extends Application {
     private static IARDrone drone;
-    private static String ip;
-
     private final static int SPEED = 20;
 
     private DroneController droneController;
@@ -25,11 +24,8 @@ public class AutonomousGUI extends Application {
             System.err.println("You must assign an ip address as argument.");
             System.exit(-1);
         }
-
-        ip = args[0];
-
         AutonomousGUI autonomousGUI = new AutonomousGUI();
-        autonomousGUI.initDrone();
+        autonomousGUI.initDrone(args[0]);
         launch(args);
     }
 
@@ -39,7 +35,7 @@ public class AutonomousGUI extends Application {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("AutonomousGUI.fxml"));
             BorderPane rootElement = loader.load();
 
-            rootElement.setStyle("-fx-background-color: whitesmoke;");
+//            rootElement.setStyle("-fx-background-color: whitesmoke;");
             Scene scene = new Scene(rootElement, 1280, 720);
 //            scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 
@@ -66,7 +62,7 @@ public class AutonomousGUI extends Application {
         }
     }
 
-    private void initDrone() {
+    private void initDrone(String ip) {
         drone = new ARDrone(ip);
         droneController = new DroneController(drone, SPEED);
         keyboardManager = new KeyboardCommandManager(droneController);
