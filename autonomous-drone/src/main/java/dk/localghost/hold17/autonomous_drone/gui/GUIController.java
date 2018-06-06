@@ -40,7 +40,7 @@ public class GUIController {
             public void run() {
                 if (bufferedImage != null) {
                     Image image = SwingFXUtils.toFXImage(bufferedImage, null);
-                    // show the original frames
+                    // show the image
                     Platform.runLater(() -> {
                         cameraView.setImage(image);
                         // set fixed width
@@ -54,6 +54,7 @@ public class GUIController {
             }
         };
         this.timer = new Timer();
+        // update imageView with new image every 33ms (30 fps)
         this.timer.schedule(frameGrabber, 0, 33);
     }
 
