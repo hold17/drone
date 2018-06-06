@@ -1,6 +1,5 @@
 package dk.localghost.hold17.apps.cameracalibration;
 
-import dk.localghost.hold17.base.ARDrone;
 import dk.localghost.hold17.base.IARDrone;
 import dk.localghost.hold17.base.command.VideoChannel;
 import dk.localghost.hold17.base.command.VideoCodec;
@@ -74,7 +73,7 @@ public class CC_Controller {
     /**
      * Init all the (global) variables needed in the controller
      */
-    protected void init() {
+    protected void init(IARDrone drone) {
         this.cameraActive = false;
         this.obj = new MatOfPoint3f();
         this.imageCorners = new MatOfPoint2f();
@@ -88,7 +87,7 @@ public class CC_Controller {
         this.isCalibrated = false;
         this.snapshotButton.setText("Take snapshot (" + (this.successes+1) + " of " + this.numBoards.getText() + ")");
 
-        ardrone = new ARDrone("10.0.1.2");
+        ardrone = drone;
         ardrone.start();
     }
 
@@ -186,67 +185,6 @@ public class CC_Controller {
         }
 
     }
-//    protected void startCamera() {
-//        image = null;
-//        if (!this.cameraActive) {
-//            // start the video capture
-//            this.capture.open(0);
-//
-//            // is the video stream available?
-//            if (this.capture.isOpened()) {
-//                this.cameraActive = true;
-//
-//                // grab a frame every 33 ms (30 frames/sec)
-//                TimerTask frameGrabber = new TimerTask() {
-//                    @Override
-//                    public void run() {
-//                        CamStream = grabFrame();
-//                        // show the original frames
-//                        Platform.runLater(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                originalFrame.setImage(CamStream);
-//                                // set fixed width
-//                                originalFrame.setFitWidth(380);
-//                                // preserve image ratio
-//                                originalFrame.setPreserveRatio(true);
-//                                // show the original frames
-//                                calibratedFrame.setImage(undistortedImage);
-//                                // set fixed width
-//                                calibratedFrame.setFitWidth(380);
-//                                // preserve image ratio
-//                                calibratedFrame.setPreserveRatio(true);
-//                            }
-//                        });
-//
-//                    }
-//                };
-//                this.timer = new Timer();
-//                this.timer.schedule(frameGrabber, 0, 33);
-//
-//                // update the button content
-//                this.cameraButton.setText("Stop Camera");
-//            } else {
-//                // log the error
-//                System.err.println("Impossible to open the camera connection...");
-//            }
-//        } else {
-//            // the camera is not active at this point
-//            this.cameraActive = false;
-//            // update again the button content
-//            this.cameraButton.setText("Start Camera");
-//            // stop the timer
-//            if (this.timer != null) {
-//                this.timer.cancel();
-//                this.timer = null;
-//            }
-//            // release the camera
-//            this.capture.release();
-//            // clean the image areas
-//            originalFrame.setImage(null);
-//            calibratedFrame.setImage(null);
-//        }
-//    }
 
     /**
      * Get a frame from the opened video stream (if any)
@@ -257,36 +195,6 @@ public class CC_Controller {
         // init everything
         Image imageToShow = null;
         Mat frame;
-
-        // check if the capture is open
-//        if (this.capture.isOpened()) {
-//            try {
-//                // read the current frame
-//                this.capture.read(frame);
-//
-//                // if the frame is not empty, process it
-//                if (!frame.empty()) {
-//                    // show the chessboard pattern
-//                    this.findAndDrawPoints(frame);
-//
-//                    if (this.isCalibrated) {
-//                        // prepare the undistored image
-//                        Mat undistored = new Mat();
-//                        Imgproc.undistort(frame, undistored, intrinsic, distCoeffs);
-//                        undistortedImage = mat2Image(undistored);
-//                    }
-//
-//                    // convert the Mat object (OpenCV) to Image (JavaFX)
-//                    imageToShow = mat2Image(frame);
-//                }
-//
-//            } catch (Exception e) {
-//                // log the (full) error
-//                System.err.print("ERROR");
-//                e.printStackTrace();
-//            }
-//        }
-
         try {
             // read the current frame
             frame = bufferedImageToMat(image);
@@ -350,10 +258,13 @@ public class CC_Controller {
         // the size of the chessboard
         Size boardSize = new Size(this.numCornersHor, this.numCornersVer);
         // look for the inner chessboard corners
+        //imageCorners = new MatOfPoint2f();
+//        System.out.println("1." + imageCorners.toString());
         boolean found = Calib3d.findChessboardCorners(grayImage, boardSize, imageCorners,
                 Calib3d.CALIB_CB_ADAPTIVE_THRESH + Calib3d.CALIB_CB_NORMALIZE_IMAGE + Calib3d.CALIB_CB_FAST_CHECK);
+//        System.out.println("2." + imageCorners.toString() + " || " + found);
         // all the required corners have been found...
-        if (found) {
+        if (found && imageCorners.isContinuous()) {
             // optimization
             TermCriteria term = new TermCriteria(TermCriteria.EPS | TermCriteria.MAX_ITER, 30, 0.1);
             Imgproc.cornerSubPix(grayImage, imageCorners, new Size(11, 11), new Size(-1, -1), term);

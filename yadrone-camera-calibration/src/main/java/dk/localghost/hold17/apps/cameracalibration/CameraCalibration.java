@@ -1,5 +1,7 @@
 package dk.localghost.hold17.apps.cameracalibration;
 
+import dk.localghost.hold17.base.ARDrone;
+import dk.localghost.hold17.base.IARDrone;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
@@ -17,7 +19,14 @@ public class CameraCalibration extends Application {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
 
+    private static IARDrone ardrone = null;
+
     public static void main(String[] args) {
+        if (args[0] == null) {
+            System.out.println("Drone IP not specified. Please launch with drone IP as first argument.");
+            System.exit(-1);
+        }
+        ardrone = new ARDrone(args[0]);
         launch(args);
     }
 
@@ -39,7 +48,7 @@ public class CameraCalibration extends Application {
             primaryStage.setScene(scene);
             // init the controller variables
             CC_Controller controller = loader.getController();
-            controller.init();
+            controller.init(ardrone);
             // show the GUI
             primaryStage.show();
 
