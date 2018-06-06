@@ -38,7 +38,6 @@ public class AutonomousGUI extends Application {
 //            rootElement.setStyle("-fx-background-color: whitesmoke;");
             Scene scene = new Scene(rootElement, 1280, 720);
 //            scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-
             primaryStage.setTitle("Autonomous GUI for Hold 17");
             primaryStage.setScene(scene);
 
@@ -51,6 +50,8 @@ public class AutonomousGUI extends Application {
             primaryStage.setOnCloseRequest(event -> {
                 drone.stop();
                 drone.disconnect();
+                System.out.println("User closed the window");
+                System.exit(0);
             });
 
             // Add key listeners for the drone
