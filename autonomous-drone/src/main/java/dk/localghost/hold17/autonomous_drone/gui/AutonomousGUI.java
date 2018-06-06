@@ -50,6 +50,10 @@ public class AutonomousGUI extends Application {
             primaryStage.show();
 
             primaryStage.setAlwaysOnTop(true);
+            primaryStage.setOnCloseRequest(event -> {
+                drone.stop();
+                drone.disconnect();
+            });
 
             // Add key listeners for the drone
             scene.addEventFilter(KeyEvent.KEY_PRESSED, keyboardManager);
