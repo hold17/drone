@@ -11,8 +11,8 @@ public class DroneController {
     private IARDrone drone;
     private CommandManager cmd;
 
-    private final static int MAX_ALTITUDE = 2000;
-    private final static int MIN_ALTITUDE = 1000;
+    private final static int MAX_ALTITUDE = 1400;
+    private final static int MIN_ALTITUDE = 900;
 
     private int droneAltitude = 0;
     private int droneBattery = 0;
@@ -35,6 +35,12 @@ public class DroneController {
         drone.setMinAltitude(MIN_ALTITUDE); // TODO Doesn't work..
         drone.setMaxAltitude(MAX_ALTITUDE);
         initializeListeners();
+
+        System.out.println("CURRENT BATTERY: " + droneBattery + "%");
+
+        if (droneBattery < 20) {
+            System.out.println("WARNING: Battery percentage low (" + droneBattery + "%)!");
+        }
 
         LEDSuccess();
     }
@@ -113,35 +119,58 @@ public class DroneController {
      * Autonomous flight: up, forward, down
      */
     public void flyThroughRing() {
+        cmd.hover().doFor(250);
+        goToMinimumAltitude();
+        cmd.hover().doFor(250);
         // Change this value to change the distance to fly when flying through rings
-        final int FORWARD_TIME = 1000;
+        final int FORWARD_TIME = 1500;
 
         // UP
         System.out.println("          FLYING UP");
-        drone.getCommandManager().setLedsAnimation(LEDAnimation.BLINK_ORANGE, 10, 1);
-        while(droneAltitude < MAX_ALTITUDE) {
-            drone.getCommandManager().up(100).doFor(500);
-        }
+        cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 10, 1);
+        goToMaxmimumAltitude();
 
         // WAIT
-        drone.getCommandManager().hover().doFor(250);
+        cmd.hover().doFor(100);
 
         // FORWARD
         System.out.println("          FLYING FORWARD");
-        drone.getCommandManager().setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 1);
-        drone.getCommandManager().forward(speed).doFor(FORWARD_TIME);
+        cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 1);
+        cmd.forward(speed).doFor(FORWARD_TIME);
 
         // WAIT
-        drone.getCommandManager().hover().doFor(250);
+        cmd.hover().doFor(250);
 
         // DOWN
         System.out.println("          FLYING DOWN");
-        while(droneAltitude > MIN_ALTITUDE) {
-            drone.getCommandManager().down(speed).doFor(500);
-        }
+        goToMinimumAltitude();
 
         // WAIT
-        drone.getCommandManager().hover().doFor(250);
+        cmd.hover().doFor(250);
+    }
+
+    public void goToMinimumAltitude() {
+        if (droneAltitude > MIN_ALTITUDE) {
+            while(droneAltitude > MIN_ALTITUDE) {
+                cmd.down(speed).doFor(250);
+            }
+        } else {
+            while(droneAltitude < MIN_ALTITUDE) {
+                cmd.up(speed).doFor(250);
+            }
+        }
+    }
+
+    public void goToMaxmimumAltitude() {
+        if (droneAltitude < MAX_ALTITUDE) {
+            while(droneAltitude < MAX_ALTITUDE) {
+                cmd.up(speed).doFor(250);
+            }
+        } else {
+            while(droneAltitude > MAX_ALTITUDE) {
+                cmd.down(speed).doFor(250);
+            }
+        }
     }
 
     public void LEDSuccess() {

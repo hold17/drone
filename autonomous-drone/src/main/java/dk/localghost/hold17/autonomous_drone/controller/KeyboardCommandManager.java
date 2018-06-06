@@ -50,6 +50,8 @@ public class KeyboardCommandManager implements EventHandler<KeyEvent> {
                 System.out.println("DRONE Altitude: " + controller.getDroneAltitude());
                 System.out.println("DRONE Battery: " + controller.getDroneBattery());
                 break;
+            case M:
+                drone.restart(); break;
             case BACK_SPACE:
                 controller.stop();
                 System.exit(0);

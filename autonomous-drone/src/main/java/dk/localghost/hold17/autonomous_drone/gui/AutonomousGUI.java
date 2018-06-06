@@ -17,7 +17,7 @@ public class AutonomousGUI extends Application {
     private IARDrone drone;
     private static String ip;
 
-    private final static int SPEED = 30;
+    private final static int SPEED = 20;
 
     private DroneController droneController;
     private KeyboardCommandManager keyboardManager;
