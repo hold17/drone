@@ -6,15 +6,13 @@ import dk.localghost.hold17.base.ARDrone;
 import dk.localghost.hold17.base.IARDrone;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
-import java.net.URL;
-
 public class AutonomousGUI extends Application {
-    private IARDrone drone;
+    private static IARDrone drone;
     private static String ip;
 
     private final static int SPEED = 20;
@@ -30,26 +28,30 @@ public class AutonomousGUI extends Application {
 
         ip = args[0];
 
+        AutonomousGUI autonomousGUI = new AutonomousGUI();
+        autonomousGUI.initDrone();
         launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) {
-        drone = new ARDrone(ip);
-        droneController = new DroneController(drone, SPEED);
-        keyboardManager = new KeyboardCommandManager(droneController);
-
         try {
-            URL url = getClass().getResource("AutonomousGUI.fxml");
-            System.out.println("URL: " + url.toString());
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("AutonomousGUI.fxml"));
+            BorderPane rootElement = loader.load();
 
-            Parent root = FXMLLoader.load(url);
+            rootElement.setStyle("-fx-background-color: whitesmoke;");
+            Scene scene = new Scene(rootElement, 1280, 720);
+//            scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+
             primaryStage.setTitle("Autonomous GUI for Hold 17");
-            Scene scene = new Scene(root, 300, 200);
             primaryStage.setScene(scene);
-            primaryStage.show();
 
-            primaryStage.setAlwaysOnTop(true);
+            GUIController controller = loader.getController();
+            controller.init(drone);
+
+            primaryStage.show();
+//            primaryStage.setAlwaysOnTop(true);
+
             primaryStage.setOnCloseRequest(event -> {
                 drone.stop();
                 drone.disconnect();
@@ -63,4 +65,11 @@ public class AutonomousGUI extends Application {
             e.printStackTrace();
         }
     }
+
+    private void initDrone() {
+        drone = new ARDrone(ip);
+        droneController = new DroneController(drone, SPEED);
+        keyboardManager = new KeyboardCommandManager(droneController);
+    }
+
 }
