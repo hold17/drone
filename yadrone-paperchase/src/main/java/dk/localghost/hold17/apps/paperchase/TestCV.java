@@ -47,7 +47,14 @@ public class TestCV {
     public TestCV() {
         try {
             /* filterImage() runs detectWhiteMat(), then finds contours and runs drawRectangles() */
-            filterImage();
+            long startTime = System.currentTimeMillis();
+            int count = 0;
+            while(10000 >  System.currentTimeMillis() - startTime) {
+                filterImage();
+                count++;
+            }
+            System.out.println("Program ran " + count + " times.");
+            saveFile("filtered.jpg", filterImage());
         } catch (Exception e) {
             System.err.println("Something went wrong: " + e.toString());
             e.printStackTrace();
@@ -142,14 +149,14 @@ public class TestCV {
         //Detect and draw rectangles on RGB image
         imgcol = drawRectangles(imgcol,contours, externalContours, hierarchy1,0.06);
         determinePaperOrientation(imgcol);
-        saveFile("filtered.jpg", imgcol);
+//        saveFile("filtered.jpg", imgcol);
 
         return imgcol;
     }
 
     /*** Use contours to detect vertices,
-     *   Check for all contours with approximately 4 vertices (square),
-     *   Surround squares with a boundingrect,
+     *   Check for all contours with approximately 4 vertices (rectangle),
+     *   Surround rectangle with a boundingrect,
      *   Check for boundingrect size,
      *   Draw desired boundingrects
      * @param imgcol Mat
@@ -165,12 +172,12 @@ public class TestCV {
         for(MatOfPoint externalContour : externalContours) {
             matOfPoint2f.fromList(externalContour.toList());
 
-            /* Check if current contour has approximately approx.total() vertices. We check for 4 = square. */
+            /* Check if current contour has approximately approx.total() vertices. We check for 4 = rectangle. */
             Imgproc.approxPolyDP(matOfPoint2f, approx,Imgproc.arcLength(matOfPoint2f, true) * accuracy, true);
 
             long total = approx.total();
 
-            /* If 4 vertices are found, the contour is approximately a square */
+            /* If 4 vertices are found, the contour is approximately a rectangle */
             if(total == 4) {
                 Rect rect = Imgproc.boundingRect(externalContour);
 
@@ -180,9 +187,9 @@ public class TestCV {
                 double rectArea = rect.width * rect.height;
 
                 if (rectArea > 2000 /* && aspectRatio > 0.2 /* && rect.width > 50 && rect.height > 100 */) {
-                    System.out.print("External rectangle detected. ");
+                 /***   System.out.print("External rectangle detected. ");
                     System.out.print("Coordinates: " + "(" + centerX + ", " + centerY + ") ");
-                    System.out.println("Width: " + rect.width + ", Height: " + rect.height);
+                    System.out.println("Width: " + rect.width + ", Height: " + rect.height); ***/
                     Imgproc.rectangle(imgcol, rect.br(), rect.tl(), NEON_GREEN, 4, 8, 0);
 
                     //Create rotated rectangle by defining the minimum area in which the contour will fit
@@ -201,12 +208,12 @@ public class TestCV {
         for(MatOfPoint contour : contours) {
             matOfPoint2f.fromList(contour.toList());
 
-            /* Check if current contour has approximately approx.total() vertices. We check for 4 = square. */
+            /* Check if current contour has approximately approx.total() vertices. We check for 4 = rectangle. */
             Imgproc.approxPolyDP(matOfPoint2f, approx,Imgproc.arcLength(matOfPoint2f, true) * accuracy, true);
 
             long total = approx.total();
 
-            /* If 4 vertices are found, the contour is approximately a square */
+            /* If 4 vertices are found, the contour is approximately a rectangle */
             if(total == 4) {
 
                 /* Create a boundingRect from the current contour. A boundingRect is the smallest
@@ -234,9 +241,9 @@ public class TestCV {
                 /* If the rect area is over 3000 we want to draw it
                  * Might need to add more requirements */
                 if(rectArea > 3000 /* && aspectRatio > 0.2 /* && rect.width > 50 && rect.height > 100 */) {
-                    System.out.print("Rectangle detected. ");
+                    /*** System.out.print("Rectangle detected. ");
                     System.out.print("Coordinates: " + "(" +centerX + ", " + centerY + ") ");
-                    System.out.print("Width: " + rect.width + ", Height: " + rect.height);
+                    System.out.print("Width: " + rect.width + ", Height: " + rect.height); ***/
 
                     /* Small QR rects. TODO: Need to detect these from within the larger rect area instead */
                     for(int j = 0; j < externalRects.size(); j++) {
@@ -247,11 +254,11 @@ public class TestCV {
                         }
 
                         if(rect.x > erect.x && rect.width < erect.width && rect.y > erect.y && rect.height < erect.height) {
-                            System.out.println(" | INTERNAL");
+                           /*** System.out.println(" | INTERNAL"); ***/
                             externalCustomRectangles.get(j).addChild(1);
                             Imgproc.rectangle(imgcol, rect.br(), rect.tl(), RED, 3, 8, 0);
                         } else {
-                            System.out.println(" | NOT INTERNAL ");
+                           /***  System.out.println(" | NOT INTERNAL "); **/
                         }
                    }
                 }
@@ -278,7 +285,7 @@ public class TestCV {
         for(ExternalRectangle e : externalCustomRectangles) {
             if(e.getChildren() >= 3) {
                 QRCodes.add(e);
-                System.out.println("QR code found!");
+               /*** System.out.println("QR code found!"); ***/
             }
         }
 
@@ -295,10 +302,9 @@ public class TestCV {
         /* Find the biggest QR-code by height */
         for(ExternalRectangle e : QRCodes) {
             if (maxHeight == e.getRect().height) {
-//                Imgproc.circle(imgcol, new Point(e.getRect().x, e.getRect().y), 10, YELLOW, FILLED);
                 biggestQRCode = e.getRect();
                 Imgproc.rectangle(imgcol, e.getRect().br(), e.getRect().tl(), NEON_GREEN, 5, 8, 0);
-                System.out.println("Biggest QR code is at: " + "(" + e.getRect().x + ", " + e.getRect().y + ")");
+               /*** System.out.println("Biggest QR code is at: " + "(" + e.getRect().x + ", " + e.getRect().y + ")"); ***/
             }
         }
     }
@@ -357,16 +363,43 @@ public class TestCV {
              * the drone is to the right of the paper. Then the opposite.
              */
             if(lower1.x > lower2.x) {
-                System.out.println("Lowest point is in the right side of rotated rect at point " + lower1);
-                System.out.println("Drone is looking at the QR code from the RIGHT");
+               /*** System.out.println("Lowest point is in the right side of rotated rect at point " + lower1);
+                System.out.println("Drone is looking at the QR code from the RIGHT"); ***/
                 Imgproc.circle(imgcol, lower1, 15, CYAN, FILLED);
             }
             else if(lower1.x < lower2.x) {
-                System.out.println("Lowest point is in the right side of rotated rect at point " + lower1);
-                System.out.println("Drone is looking at the QR code from the LEFT");
+                /*** System.out.println("Lowest point is in the right side of rotated rect at point " + lower1);
+                System.out.println("Drone is looking at the QR code from the LEFT"); ***/
                 Imgproc.circle(imgcol, lower1, 15, CYAN, FILLED);
             }
         }
+    }
+
+    // Tjekker forholdet for den fundne rektangel
+    void TjekForA4Papir(Rect rect){
+        // Er det et A4 papir frontalt foran kameraet skal det være ~ 1:1.5 højde/bredde ratio.
+        double ratio = (double) rect.height / (double) rect.width;
+        if ( ratio < 1.5 && ratio > 1.3){
+            System.out.println("Fandt A4 papir med Width: " + rect.width + ", Heigth: " + rect.height);
+        }
+    }
+
+
+
+    // TODO: Skift værdierne der tjekkes for, så de passer til dronens kameraopløsning
+    String FindPaperPosition(Rect rect){
+        if (rect.x > 0 && rect.x < 1533){
+            return "Til venstre\n";
+        }
+
+        if (rect.x > 1533 && rect.x < 3066){
+            return "I centrum\n";
+        }
+
+        if (rect.x > 3066 && rect.x < 4640){
+            return "Til højre\n";
+        }
+        return "Papirets position blev ikke fundet\n";
     }
 
     /***
