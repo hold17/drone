@@ -17,9 +17,6 @@ public class AutonomousGUI extends Application {
     private static IARDrone drone;
     private final static int SPEED = 20;
     private DroneController droneController;
-    private KeyboardCommandManager keyboardManager;
-    @FXML
-    private ImageView imageView;
 
     public static void main(String[] args) {
         if (args.length < 1) {
@@ -36,20 +33,17 @@ public class AutonomousGUI extends Application {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("AutonomousGUI.fxml"));
             BorderPane rootElement = loader.load();
-
-//            rootElement.setStyle("-fx-background-color: whitesmoke;");
             Scene scene = new Scene(rootElement, 1280, 720);
-//            scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
             primaryStage.setTitle("Autonomous GUI for Hold 17");
             primaryStage.setScene(scene);
+
             droneController = new DroneController(drone, SPEED);
-            keyboardManager = new KeyboardCommandManager(droneController);
+            KeyboardCommandManager keyboardManager = new KeyboardCommandManager(droneController);
 
             GUIController controller = loader.getController();
             controller.init(drone);
 
             primaryStage.show();
-//            primaryStage.setAlwaysOnTop(true);
 
             primaryStage.setOnCloseRequest(event -> {
                 drone.stop();
@@ -59,9 +53,6 @@ public class AutonomousGUI extends Application {
             });
 
             // Add key listeners for the drone
-            // primaryStage.setAlwaysOnTop(true);
-//            scene.addEventHandler(KeyEvent.KEY_RELEASED, event -> droneController.hover());
-//            scene.addEventHandler(KeyEvent.KEY_PRESSED, keyboardManager);
             scene.addEventFilter(KeyEvent.KEY_RELEASED, event -> droneController.hover());
             scene.addEventFilter(KeyEvent.KEY_PRESSED, keyboardManager);
         } catch (Exception e) {
