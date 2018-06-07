@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
 
 import org.opencv.imgproc.Imgproc;
 
@@ -39,6 +40,12 @@ public class ImageProcessor {
     private ExternalRectangle externalCustomRectangle;
     private Rect biggestQRCode;
 
+    private String fileName = "4.jpg";
+    private String outputName = "4filtered.jpg";
+    private String imgNumber = "4";
+
+    private int count;
+
     static {
         nu.pattern.OpenCV.loadShared(); // loading maven version of OpenCV
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -47,14 +54,21 @@ public class ImageProcessor {
     public ImageProcessor() {
         try {
             /* filterImage() runs detectWhiteMat(), then finds contours and runs drawRectangles() */
+            int counter = 0;
             long startTime = System.currentTimeMillis();
-            int count = 0;
+            Mat img = openFile(fileName);
             while(10000 >  System.currentTimeMillis() - startTime) {
-                filterImage();
-                count++;
+                externalCustomRectangles.clear();
+                externalRects.clear();
+                QRCodes.clear();
+                filterImage(img);
+                counter++;
             }
-            System.out.println("Program ran " + count + " times.");
-            saveFile("filtered.jpg", filterImage());
+//            saveFile(outputName, filterImage());
+            long stopTime = System.currentTimeMillis();
+            System.out.println("Total time: " + (double)(stopTime-startTime)/1000 + " seconds.");
+            System.out.println("Program ran " + counter + " times.");
+            System.out.println("Ran rectangle() " + count + " times.");
         } catch (Exception e) {
             System.err.println("Something went wrong: " + e.toString());
             e.printStackTrace();
@@ -62,6 +76,11 @@ public class ImageProcessor {
     }
 
     public static void main(String[] args) {
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         new ImageProcessor();
     }
 
@@ -69,48 +88,44 @@ public class ImageProcessor {
      * Open file as matrix
      * @param fileName file
      * @return Mat
-     * @throws Exception new
      */
-    public Mat openFile(String fileName) throws Exception {
-        final String path = Paths.get("").toAbsolutePath().toString();
-        final String filePath = (path + "/TestImages/" + fileName).replace('/', '\\');
-
-        Mat newImage = Imgcodecs.imread(filePath);
-        if (newImage.dataAddr() == 0) {
-            throw new Exception("Couldn't open file " + filePath);
-        }
-
-        return newImage;
-    }
-
-    /*** Save matrix to file ***/
-    public void saveFile(String fileName, Mat testMat) {
-        final String path = Paths.get("").toAbsolutePath().toString();
-        final String filePath = (path + "/TestImages/" + fileName).replace('/', '\\');
-        Imgcodecs.imwrite(filePath, testMat);
-        System.out.println("File saved to " + filePath);
-    }
-
-    /***
-     * Convert image to a binary matrix and remove everything that is not the desired shade of white
-     * @return Mat
-     */
-    public Mat detectWhiteMat() {
-        Mat img, imgbin;
-
+    public Mat openFile(String fileName) {
         try {
-            img = openFile("unfiltered.jpg");
-            imgbin = new Mat();
+            final String path = Paths.get("").toAbsolutePath().toString();
+            final String filePath = (path + "/DroneImages/" + fileName).replace('/', '\\');
 
-            /* Write 1 if in range of the two scalars, 0 if not. Binary image result written to imgbin */
-            Core.inRange(img, new Scalar(225, 225, 225, 0), new Scalar(255, 255, 255, 0), imgbin);
+            Mat newImage = Imgcodecs.imread(filePath);
+            if (newImage.dataAddr() == 0) {
+                throw new Exception("Couldn't open file " + filePath);
+            }
 
-            return imgbin;
+            return newImage;
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         return null;
+    }
+
+    /*** Save matrix to file ***/
+    public void saveFile(String fileName, Mat testMat) {
+        final String path = Paths.get("").toAbsolutePath().toString();
+            final String filePath = (path + "/DroneImagesFiltered/" + fileName).replace('/', '\\');
+        Imgcodecs.imwrite(filePath, testMat);
+        System.out.println("File saved to " + filePath);
+    }
+
+    /***
+     * Convert image to a binary matrix and remove everything that is not the desired shades of white/grey
+     * @return Mat
+     */
+    public Mat detectWhiteMat(Mat img) {
+        Mat imgbin = new Mat();
+        /* Write 1 if in range of the two scalars, 0 if not. Binary image result written to imgbin */
+        Core.inRange(img, new Scalar(180, 180, 180, 0), new Scalar(255, 255, 255, 0), imgbin);
+//            saveFile(imgNumber +"whiteImage.jpg", imgbin);
+
+        return imgbin;
     }
 
     /*** Denoise binary image,
@@ -120,15 +135,15 @@ public class ImageProcessor {
      *   Run determinePaperOrientation;
      * @return Mat
      */
-    public Mat filterImage() {
-        Mat imgbin = detectWhiteMat();
+    public Mat filterImage(Mat img) {
+        Mat imgbin = detectWhiteMat(img);
         Mat imgcol = new Mat();
         Mat hierarchy1 = new Mat();
         Mat hierarchy2 = new Mat();
 
         //Denoise binary image using medianBlur and OPEN
         Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
-        Imgproc.medianBlur(imgbin, imgbin, 5);
+        //Imgproc.medianBlur(imgbin, imgbin, 5);
         Imgproc.morphologyEx(imgbin, imgbin, Imgproc.MORPH_OPEN, kernel);
 
         //Contours are matrices of points. We store all of them in this list.
@@ -145,6 +160,7 @@ public class ImageProcessor {
          * is not currently used. Use RETR_EXTERNAL if you only want to find parent contours. */
         Imgproc.findContours(imgbin, contours, hierarchy1, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
         Imgproc.findContours(imgbin, externalContours, hierarchy2, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+//        Imgproc.drawContours(imgcol, externalContours, -1, CYAN, 3);
 
         //Detect and draw rectangles on RGB image
         imgcol = drawRectangles(imgcol,contours, externalContours, hierarchy1,0.06);
@@ -190,14 +206,14 @@ public class ImageProcessor {
                  /***   System.out.print("External rectangle detected. ");
                     System.out.print("Coordinates: " + "(" + centerX + ", " + centerY + ") ");
                     System.out.println("Width: " + rect.width + ", Height: " + rect.height); ***/
-                    Imgproc.rectangle(imgcol, rect.br(), rect.tl(), NEON_GREEN, 4, 8, 0);
-
+//                    Imgproc.rectangle(imgcol, rect.br(), rect.tl(), NEON_GREEN, 4, 8, 0);
+//                    saveFile(imgNumber + "ExternalRect.jpg", imgcol);
                     //Create rotated rectangle by defining the minimum area in which the contour will fit
-                    RotatedRect rRect = Imgproc.minAreaRect(matOfPoint2f);
+//                    MatOfPoint2f rectContour = null;
+//                    rectContour.fromList(externalContour.toList());
+//                    RotatedRect rRect = Imgproc.minAreaRect(approx);
                     externalRects.add(rect);
                     externalCustomRectangle = new ExternalRectangle(rect);
-                    externalCustomRectangle.setrRect(rRect);
-                    externalCustomRectangle.setApprox(approx);
                     externalCustomRectangle.setContour(externalContour);
                     externalCustomRectangles.add(externalCustomRectangle);
                 }
@@ -256,7 +272,7 @@ public class ImageProcessor {
                         if(rect.x > erect.x && rect.width < erect.width && rect.y > erect.y && rect.height < erect.height) {
                            /*** System.out.println(" | INTERNAL"); ***/
                             externalCustomRectangles.get(j).addChild(1);
-                            Imgproc.rectangle(imgcol, rect.br(), rect.tl(), RED, 3, 8, 0);
+//                            Imgproc.rectangle(imgcol, rect.br(), rect.tl(), RED, 3, 8, 0);
                         } else {
                            /***  System.out.println(" | NOT INTERNAL "); **/
                         }
@@ -283,7 +299,7 @@ public class ImageProcessor {
 
         /* Define and find QRCodes as rectangles with 3 or more children */
         for(ExternalRectangle e : externalCustomRectangles) {
-            if(e.getChildren() >= 3) {
+            if(e.getChildren() >= 2) {
                 QRCodes.add(e);
                /*** System.out.println("QR code found!"); ***/
             }
@@ -303,14 +319,18 @@ public class ImageProcessor {
         for(ExternalRectangle e : QRCodes) {
             if (maxHeight == e.getRect().height) {
                 biggestQRCode = e.getRect();
+
+//                long time = System.currentTimeMillis();
                 Imgproc.rectangle(imgcol, e.getRect().br(), e.getRect().tl(), NEON_GREEN, 5, 8, 0);
-               /*** System.out.println("Biggest QR code is at: " + "(" + e.getRect().x + ", " + e.getRect().y + ")"); ***/
+//                System.out.println("Imgproc.rectangle() ran for " + (double) (time-System.currentTimeMillis())/1000 + " seconds");
+                count++;
+                /*** System.out.println("Biggest QR code is at: " + "(" + e.getRect().x + ", " + e.getRect().y + ")"); ***/
             }
         }
     }
 
     /***
-     * Draw a rotated rectangle rRect around the biggest QRCode,
+     * Draw a rotated rectangle rRect around the biggest QRCode,f
      * Find endpoints of rRect,
      * Compare the bottom left and bottom right points:
      * If left is lower, drone is to the left of paper
@@ -336,43 +356,44 @@ public class ImageProcessor {
         /* Take the vertices of rRect and store in vertices[], then make a rotatedBox
          * from by drawing the contour. Use approxPolyDP() to approximate the endpoints,
          * and store them in a list. */
-        Point[] vertices = new Point[4];
-        rRect.points(vertices);
-        rotatedBox.add(new MatOfPoint(vertices));
-        boxMop2f.fromList(rotatedBox.get(0).toList());
-        drawContours(imgcol, rotatedBox, 0, YELLOW, 3);
-
-        Imgproc.approxPolyDP(boxMop2f, approx, Imgproc.arcLength(boxMop2f, true) * 0.1, true);
-        List<Point> approxList = approx.toList();
-
-        /* Make sure that approxPolyDP found 4 points */
-        if (approxList.size() == 4) {
-
-            /* Sort the coordinates in ascending y-coords
-             * Index 0 is the lowest point of the rotated rectangle */
-            Collections.sort(approxList, PointComparator.Y_COORD);
-            Point lower1 = approxList.get(0);
-            Point lower2 = approxList.get(1);
-
-            /* Draw all points as filled circles in red */
-            for (Point p : approxList) {
-                Imgproc.circle(imgcol, new Point(p.x, p.y), 10, RED, FILLED);
-            }
-
-            /* If the lowest point is to the right of the second lowest point,
-             * the drone is to the right of the paper. Then the opposite.
-             */
-            if(lower1.x > lower2.x) {
-               /*** System.out.println("Lowest point is in the right side of rotated rect at point " + lower1);
-                System.out.println("Drone is looking at the QR code from the RIGHT"); ***/
-                Imgproc.circle(imgcol, lower1, 15, CYAN, FILLED);
-            }
-            else if(lower1.x < lower2.x) {
-                /*** System.out.println("Lowest point is in the right side of rotated rect at point " + lower1);
-                System.out.println("Drone is looking at the QR code from the LEFT"); ***/
-                Imgproc.circle(imgcol, lower1, 15, CYAN, FILLED);
-            }
-        }
+        // TODO: UNCOMMENT CODE
+//        Point[] vertices = new Point[4];
+//        rRect.points(vertices);
+//        rotatedBox.add(new MatOfPoint(vertices));
+//        boxMop2f.fromList(rotatedBox.get(0).toList());
+//        drawContours(imgcol, rotatedBox, 0, YELLOW, 3);
+//
+//        Imgproc.approxPolyDP(boxMop2f, approx, Imgproc.arcLength(boxMop2f, true) * 0.1, true);
+//        List<Point> approxList = approx.toList();
+//
+//        /* Make sure that approxPolyDP found 4 points */
+//        if (approxList.size() == 4) {
+//
+//            /* Sort the coordinates in ascending y-coords
+//             * Index 0 is the lowest point of the rotated rectangle */
+//            Collections.sort(approxList, PointComparator.Y_COORD);
+//            Point lower1 = approxList.get(0);
+//            Point lower2 = approxList.get(1);
+//
+//          /***  Draw all points as filled circles in red
+//            for (Point p : approxList) {
+//                Imgproc.circle(imgcol, new Point(p.x, p.y), 10, RED, FILLED);
+//            } ***/
+//
+//            /* If the lowest point is to the right of the second lowest point,
+//             * the drone is to the right of the paper. Then the opposite.
+//             */
+//            if(lower1.x > lower2.x) {
+//                System.out.println("Lowest point is in the right side of rotated rect at point " + lower1);
+//                System.out.println("Drone is looking at the QR code from the RIGHT");
+//                Imgproc.circle(imgcol, lower1, 15, CYAN, FILLED);
+//            }
+//            else if(lower1.x < lower2.x) {
+//                System.out.println("Lowest point is in the right side of rotated rect at point " + lower1);
+//                System.out.println("Drone is looking at the QR code from the LEFT");
+//                Imgproc.circle(imgcol, lower1, 15, CYAN, FILLED);
+//            }
+//        }
     }
 
     // Tjekker forholdet for den fundne rektangel
@@ -383,8 +404,6 @@ public class ImageProcessor {
             System.out.println("Fandt A4 papir med Width: " + rect.width + ", Heigth: " + rect.height);
         }
     }
-
-
 
     // TODO: Skift værdierne der tjekkes for, så de passer til dronens kameraopløsning
     String FindPaperPosition(Rect rect){
@@ -429,16 +448,16 @@ public class ImageProcessor {
 
 
     /***TEST METHOD ## Detect edges using a threshold ***/
-    public Mat detectEdgesThreshold() {
-        Mat imgbin = detectWhiteMat();
-        threshold(imgbin, imgbin, 127, 255, Imgproc.THRESH_BINARY);
-        return imgbin;
-    }
+//    public Mat detectEdgesThreshold() {
+//        Mat imgbin = detectWhiteMat();
+//        threshold(imgbin, imgbin, 127, 255, Imgproc.THRESH_BINARY);
+//        return imgbin;
+//    }
 
     /***TEST METHOD ## Detect edges using canny ***/
-    public Mat detectEdgesCanny() {
-        Mat imgbin = detectWhiteMat();
-        Imgproc.Canny(imgbin, imgbin, 100, 200);
-        return imgbin;
-    }
+//    public Mat detectEdgesCanny() {
+//        Mat imgbin = detectWhiteMat();
+//        Imgproc.Canny(imgbin, imgbin, 100, 200);
+//        return imgbin;
+//    }
 }
