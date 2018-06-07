@@ -1,4 +1,4 @@
-package dk.localghost.hold17.apps.paperchase;
+package dk.localghost.hold17.autonomous_drone.opencv_processing;
 
 import org.opencv.core.*;
 import org.opencv.core.Mat;
@@ -25,7 +25,7 @@ import static org.bytedeco.javacpp.opencv_core.*;
 import static org.bytedeco.javacpp.opencv_imgproc.*;
 import static org.opencv.imgproc.Imgproc.*;
 
-public class TestCV {
+public class ImageProcessor {
 
     private final Scalar NEON_GREEN = new Scalar(20, 255, 57);
     private final Scalar RED = new Scalar (0, 0, 255);
@@ -44,7 +44,7 @@ public class TestCV {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
 
-    public TestCV() {
+    public ImageProcessor() {
         try {
             /* filterImage() runs detectWhiteMat(), then finds contours and runs drawRectangles() */
             long startTime = System.currentTimeMillis();
@@ -62,7 +62,7 @@ public class TestCV {
     }
 
     public static void main(String[] args) {
-        new TestCV();
+        new ImageProcessor();
     }
 
     /***

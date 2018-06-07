@@ -1,4 +1,4 @@
-package dk.localghost.hold17.apps.paperchase;
+package dk.localghost.hold17.autonomous_drone.opencv_processing;
 
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
