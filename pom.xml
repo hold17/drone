@@ -32,62 +32,126 @@
     <repositories>
         <repository>
             <id>xuggle repo</id>
-            <url>https://files.liferay.com/mirrors/xuggle.googlecode.com/svn/trunk/repo/share/java/</url>
+            <url>https://mvnrepository.com/artifact/xuggle/xuggle-xuggler</url>
         </repository>
     </repositories>
 
     <dependencyManagement>
         <dependencies>
+            <!--telnet and ftp-->
             <dependency>
                 <groupId>commons-net</groupId>
                 <artifactId>commons-net</artifactId>
-                <version>3.2</version>
+                <version>3.6</version>
             </dependency>
+            <!--video decoder-->
             <dependency>
                 <groupId>xuggle</groupId>
                 <artifactId>xuggle-xuggler</artifactId>
                 <version>5.4</version>
             </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-jdk14</artifactId>
-                <version>1.7.25</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>1.7.25</version>
-            </dependency>
+            <!--charts-->
             <dependency>
                 <groupId>org.jfree</groupId>
                 <artifactId>jfreechart</artifactId>
-                <version>1.0.17</version>
+                <version>1.5.0</version>
             </dependency>
+            <!--QR codes-->
             <dependency>
                 <groupId>com.google.zxing</groupId>
                 <artifactId>core</artifactId>
-                <version>2.2</version>
+                <version>3.3.2</version>
             </dependency>
+            <!--QR codes-->
             <dependency>
                 <groupId>com.google.zxing</groupId>
                 <artifactId>javase</artifactId>
-                <version>2.2</version>
+                <version>3.3.2</version>
             </dependency>
+            <!--find classes implementing specific interface-->
             <dependency>
                 <groupId>org.reflections</groupId>
                 <artifactId>reflections</artifactId>
-                <version>0.9.9-RC1</version>
+                <version>0.9.11</version>
             </dependency>
+            <!--openCV-->
             <dependency>
                 <groupId>org.openpnp</groupId>
                 <artifactId>opencv</artifactId>
                 <version>3.2.0-1</version>
             </dependency>
-            <dependency>
-                <groupId>org.bytedeco</groupId>
-                <artifactId>javacv-platform</artifactId>
-                <version>1.4.1</version>
-            </dependency>
+            <!--different openCV (exclusions are stuff we don't need)-->
+            <!--<dependency>-->
+                <!--<groupId>org.bytedeco</groupId>-->
+                <!--<artifactId>javacv-platform</artifactId>-->
+                <!--<version>1.4.1</version>-->
+                <!--<exclusions>-->
+                    <!--<exclusion>-->
+                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
+                        <!--<artifactId>flycapture-platform</artifactId>-->
+                    <!--</exclusion>-->
+                    <!--<exclusion>-->
+                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
+                        <!--<artifactId>libdc1394-platform</artifactId>-->
+                    <!--</exclusion>-->
+                    <!--<exclusion>-->
+                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
+                        <!--<artifactId>libfreenect-platform</artifactId>-->
+                    <!--</exclusion>-->
+                    <!--<exclusion>-->
+                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
+                        <!--<artifactId>libfreenect2-platform</artifactId>-->
+                    <!--</exclusion>-->
+                    <!--<exclusion>-->
+                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
+                        <!--<artifactId>librealsense-platform</artifactId>-->
+                    <!--</exclusion>-->
+                    <!--<exclusion>-->
+                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
+                        <!--<artifactId>artoolkitplus-platform</artifactId>-->
+                    <!--</exclusion>-->
+                    <!--<exclusion>-->
+                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
+                        <!--<artifactId>flandmark-platform</artifactId>-->
+                    <!--</exclusion>-->
+                    <!--<exclusion>-->
+                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
+                        <!--<artifactId>videoinput-platform</artifactId>-->
+                    <!--</exclusion>-->
+                    <!--<exclusion>-->
+                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
+                        <!--<artifactId>flycapture</artifactId>-->
+                    <!--</exclusion>-->
+                    <!--<exclusion>-->
+                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
+                        <!--<artifactId>libdc1394</artifactId>-->
+                    <!--</exclusion>-->
+                    <!--<exclusion>-->
+                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
+                        <!--<artifactId>libfreenect</artifactId>-->
+                    <!--</exclusion>-->
+                    <!--<exclusion>-->
+                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
+                        <!--<artifactId>libfreenect2</artifactId>-->
+                    <!--</exclusion>-->
+                    <!--<exclusion>-->
+                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
+                        <!--<artifactId>librealsense</artifactId>-->
+                    <!--</exclusion>-->
+                    <!--<exclusion>-->
+                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
+                        <!--<artifactId>artoolkitplus</artifactId>-->
+                    <!--</exclusion>-->
+                    <!--<exclusion>-->
+                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
+                        <!--<artifactId>flandmark</artifactId>-->
+                    <!--</exclusion>-->
+                    <!--<exclusion>-->
+                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
+                        <!--<artifactId>videoinput</artifactId>-->
+                    <!--</exclusion>-->
+                <!--</exclusions>-->
+            <!--</dependency>-->
 
         </dependencies>
     </dependencyManagement>
