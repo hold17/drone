@@ -16,7 +16,6 @@ public class KeyboardCommandManager implements KeyListener {
 
     public void keyReleased(KeyEvent e) {
 //		System.out.println("Key released: " + e.getKeyChar());
-
         drone.hover();
     }
 
@@ -43,6 +42,12 @@ public class KeyboardCommandManager implements KeyListener {
         }
 
         switch (key) {
+            case KeyEvent.VK_9:
+
+                break;
+            case KeyEvent.VK_P:
+                System.out.println("P was pressed!");
+                break;
             case KeyEvent.VK_ENTER:
                 drone.takeOff();
                 break;
