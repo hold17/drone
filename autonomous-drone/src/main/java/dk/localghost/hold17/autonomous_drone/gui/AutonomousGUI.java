@@ -4,10 +4,11 @@ import dk.localghost.hold17.autonomous_drone.controller.DroneController;
 import dk.localghost.hold17.autonomous_drone.controller.KeyboardCommandManager;
 import dk.localghost.hold17.base.ARDrone;
 import dk.localghost.hold17.base.IARDrone;
-
 import javafx.application.Application;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
@@ -15,17 +16,18 @@ import javafx.stage.Stage;
 public class AutonomousGUI extends Application {
     private static IARDrone drone;
     private final static int SPEED = 20;
-
     private DroneController droneController;
     private KeyboardCommandManager keyboardManager;
+    @FXML
+    private ImageView imageView;
 
     public static void main(String[] args) {
         if (args.length < 1) {
             System.err.println("You must assign an ip address as argument.");
             System.exit(-1);
         }
-        AutonomousGUI autonomousGUI = new AutonomousGUI();
-        autonomousGUI.initDrone(args[0]);
+        drone = new ARDrone(args[0]);
+        drone.start();
         launch(args);
     }
 
@@ -40,6 +42,8 @@ public class AutonomousGUI extends Application {
 //            scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
             primaryStage.setTitle("Autonomous GUI for Hold 17");
             primaryStage.setScene(scene);
+            droneController = new DroneController(drone, SPEED);
+            keyboardManager = new KeyboardCommandManager(droneController);
 
             GUIController controller = loader.getController();
             controller.init(drone);
@@ -55,18 +59,15 @@ public class AutonomousGUI extends Application {
             });
 
             // Add key listeners for the drone
-            scene.addEventFilter(KeyEvent.KEY_PRESSED, keyboardManager);
+            // primaryStage.setAlwaysOnTop(true);
+//            scene.addEventHandler(KeyEvent.KEY_RELEASED, event -> droneController.hover());
+//            scene.addEventHandler(KeyEvent.KEY_PRESSED, keyboardManager);
             scene.addEventFilter(KeyEvent.KEY_RELEASED, event -> droneController.hover());
+            scene.addEventFilter(KeyEvent.KEY_PRESSED, keyboardManager);
         } catch (Exception e) {
             System.err.println("Couldn't load file: ");
             e.printStackTrace();
         }
-    }
-
-    private void initDrone(String ip) {
-        drone = new ARDrone(ip);
-        droneController = new DroneController(drone, SPEED);
-        keyboardManager = new KeyboardCommandManager(droneController);
     }
 
 }
