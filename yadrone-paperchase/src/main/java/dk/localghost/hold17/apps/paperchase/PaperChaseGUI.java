@@ -23,7 +23,7 @@ public class PaperChaseGUI extends JFrame implements ImageListener, TagListener 
     private Result result;
     private String orientation;
 
-    private String[] shredsToFind = new String[]{"Shred 1", "Shred 2"};
+    private String[] shredsToFind = new String[]{"P.02"};
     private boolean[] shredsFound = new boolean[]{false, false};
 
     private JPanel videoPanel;

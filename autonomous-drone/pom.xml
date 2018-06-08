@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>yadrone-core</artifactId>
+    <artifactId>autonomous-drone</artifactId>
     <packaging>jar</packaging>
 
     <parent>
@@ -15,24 +15,38 @@
 
     <dependencies>
         <dependency>
-            <groupId>commons-net</groupId>
-            <artifactId>commons-net</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>yadrone-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
         </dependency>
         <dependency>
-            <groupId>xuggle</groupId>
-            <artifactId>xuggle-xuggler</artifactId>
+            <groupId>org.openpnp</groupId>
+            <artifactId>opencv</artifactId>
         </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.bytedeco</groupId>-->
+            <!--<artifactId>javacv-platform</artifactId>-->
+        <!--</dependency>-->
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/java/dk/localghost/hold17/autonomous_drone</directory>
+                <includes>
+                    <include>**/*.fxml</include>
+                </includes>
+                <targetPath>dk/localghost/hold17/autonomous_drone</targetPath>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -44,5 +58,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

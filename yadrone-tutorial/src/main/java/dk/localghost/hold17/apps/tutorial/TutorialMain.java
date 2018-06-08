@@ -12,7 +12,7 @@ public class TutorialMain {
         IARDrone drone = null;
         try {
             // Tutorial Section 1
-            drone = new ARDrone();
+            drone = new ARDrone("10.0.1.2");
             drone.addExceptionListener(new IExceptionListener() {
                 public void exceptionOccurred(ARDroneException exc) {
                     exc.printStackTrace();
@@ -28,8 +28,8 @@ public class TutorialMain {
 			new TutorialVideoListener(drone);
 
             // Tutorial Section 4
-//			TutorialCommander commander = new TutorialCommander(drone);
-//			commander.animateLEDs();
+			TutorialCommander commander = new TutorialCommander(drone);
+			commander.animateLEDs();
 //			commander.takeOffAndLand();
 //			commander.leftRightForwardBackward();
         } catch (Exception exc) {

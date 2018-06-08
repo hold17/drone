@@ -42,7 +42,7 @@ public class CommandManager extends AbstractUDPManager {
     public final static String SESSION_ID = "ccddeeff";
 
     private IExceptionListener excListener;
-    private CommandQueue q;
+    private CommandQueue cQueue;
     private Timer timer;
 
     private static int seq = 1;
@@ -50,17 +50,17 @@ public class CommandManager extends AbstractUDPManager {
 
     public CommandManager(InetAddress inetaddr, IExceptionListener excListener) {
         super(inetaddr);
-        this.q = new CommandQueue(100);
+        this.cQueue = new CommandQueue(100);
         this.timer = new Timer("YADrone CommandManager Timer");
         this.excListener = excListener;
     }
 
     public void resetCommunicationWatchDog() {
-        q.add(new KeepAliveCommand());
+        cQueue.add(new KeepAliveCommand());
     }
 
     public void setVideoChannel(VideoChannel c) {
-        q.add(new VideoChannelCommand(c));
+        cQueue.add(new VideoChannelCommand(c));
     }
 
     /**
@@ -125,23 +125,23 @@ public class CommandManager extends AbstractUDPManager {
     }
 
     public CommandManager landing() {
-        q.add(new LandCommand());
+        cQueue.add(new LandCommand());
         return this;
     }
 
     public CommandManager flatTrim() {
-        q.add(new FlatTrimCommand());
+        cQueue.add(new FlatTrimCommand());
         return this;
     }
 
     public CommandManager manualTrim(float pitch, float roll, float yaw) {
-        q.add(new ManualTrimCommand(pitch, roll, yaw));
+        cQueue.add(new ManualTrimCommand(pitch, roll, yaw));
         return this;
     }
 
     public CommandManager takeOff() {
         flatTrim();
-        q.add(new TakeOffCommand());
+        cQueue.add(new TakeOffCommand());
         return this;
     }
 
@@ -149,7 +149,7 @@ public class CommandManager extends AbstractUDPManager {
      * See Developer Guide 6.5:
      */
     public CommandManager emergency() {
-        q.add(new EmergencyCommand());
+        cQueue.add(new EmergencyCommand());
         return this;
     }
 
@@ -193,7 +193,7 @@ public class CommandManager extends AbstractUDPManager {
         aspeed = limit(aspeed, -1f, 1f);
         magneto_psi = limit(magneto_psi, -1f, 1f);
         magneto_psi_accuracy = limit(magneto_psi_accuracy, -1f, 1f);
-        q.add(new PCMDMagCommand(false, false, true, lrtilt, fbtilt, vspeed, aspeed, magneto_psi, magneto_psi_accuracy));
+        cQueue.add(new PCMDMagCommand(false, false, true, lrtilt, fbtilt, vspeed, aspeed, magneto_psi, magneto_psi_accuracy));
         return this;
     }
 
@@ -204,7 +204,7 @@ public class CommandManager extends AbstractUDPManager {
         vspeed = limit(vspeed, -1f, 1f);
         aspeed = limit(aspeed, -1f, 1f);
 //		System.out.println("CommandManager: Move lrTilt=" + lrtilt + " fbtilt=" + fbtilt + " vspeed=" + vspeed + " aspeed=" + aspeed);
-        q.add(new MoveCommand(false, lrtilt, fbtilt, vspeed, aspeed));
+        cQueue.add(new MoveCommand(false, lrtilt, fbtilt, vspeed, aspeed));
         return this;
     }
 
@@ -219,17 +219,17 @@ public class CommandManager extends AbstractUDPManager {
     }
 
     public CommandManager freeze() {
-        q.add(new FreezeCommand());
+        cQueue.add(new FreezeCommand());
         return this;
     }
 
     public CommandManager hover() {
-        q.add(new HoverCommand());
+        cQueue.add(new HoverCommand());
         return this;
     }
 
 	public CommandManager hoverSticky() {
-		q.add(new HoverCommand.StickyHover());
+		cQueue.add(new HoverCommand.StickyHover());
 		return this;
 	}
 
@@ -238,14 +238,14 @@ public class CommandManager extends AbstractUDPManager {
     }
 
     private CommandManager setMulticonfiguration() {
-        q.add(new ConfigureCommand("custom:session_id", SESSION_ID));
-        q.add(new ConfigureCommand("custom:profile_id", PROFILE_ID));
-        q.add(new ConfigureCommand("custom:application_id", APPLICATION_ID));
+        cQueue.add(new ConfigureCommand("custom:session_id", SESSION_ID));
+        cQueue.add(new ConfigureCommand("custom:profile_id", PROFILE_ID));
+        cQueue.add(new ConfigureCommand("custom:application_id", APPLICATION_ID));
         return this;
     }
 
     public CommandManager setConfigurationIds() {
-        q.add(new ConfigureIdsCommand(SESSION_ID, PROFILE_ID, APPLICATION_ID));
+        cQueue.add(new ConfigureIdsCommand(SESSION_ID, PROFILE_ID, APPLICATION_ID));
         return this;
     }
 
@@ -255,7 +255,7 @@ public class CommandManager extends AbstractUDPManager {
      */
     public CommandManager setVideoCodecFps(int fps) {
         fps = limit(fps, H264.MIN_FPS, H264.MAX_FPS);
-        q.add(new ConfigureCommand("video:codec_fps", fps));
+        cQueue.add(new ConfigureCommand("video:codec_fps", fps));
         return this;
     }
 
@@ -267,7 +267,7 @@ public class CommandManager extends AbstractUDPManager {
      *             VideoBitRateMode.MANUAL  Video stream bitrate is fixed by the video:bitrate key
      */
     public CommandManager setVideoBitrateControl(VideoBitRateMode mode) {
-        q.add(new ConfigureCommand("video:bitrate_control_mode", mode.ordinal()));
+        cQueue.add(new ConfigureCommand("video:bitrate_control_mode", mode.ordinal()));
         return this;
     }
 
@@ -277,7 +277,7 @@ public class CommandManager extends AbstractUDPManager {
      */
     public CommandManager setVideoBitrate(int rate) {
         rate = limit(rate, H264.MIN_BITRATE, H264.MAX_BITRATE);
-        q.add(new ConfigureCommand("video:bitrate", rate));
+        cQueue.add(new ConfigureCommand("video:bitrate", rate));
         return this;
     }
 
@@ -287,7 +287,7 @@ public class CommandManager extends AbstractUDPManager {
      */
     public CommandManager setMaxVideoBitrate(int rate) {
         rate = limit(rate, H264.MIN_BITRATE, H264.MAX_BITRATE);
-        q.add(new ConfigureCommand("video:max_bitrate", rate));
+        cQueue.add(new ConfigureCommand("video:max_bitrate", rate));
         return this;
     }
 
@@ -302,7 +302,7 @@ public class CommandManager extends AbstractUDPManager {
      * @param c The video codec to use.
      */
     public CommandManager setVideoCodec(VideoCodec c) {
-        q.add(new ConfigureCommand("video:video_codec", c.getValue()));
+        cQueue.add(new ConfigureCommand("video:video_codec", c.getValue()));
         return this;
     }
 
@@ -312,13 +312,13 @@ public class CommandManager extends AbstractUDPManager {
      * @param b If TRUE, video stream will be recorded
      */
     public CommandManager setVideoOnUsb(boolean b) {
-        q.add(new ConfigureCommand("video:video_on_usb", b ? "TRUE" : "FALSE"));
+        cQueue.add(new ConfigureCommand("video:video_on_usb", b ? "TRUE" : "FALSE"));
         return this;
     }
 
 //	Reserved for future use, The default value is TRUE.
 //	public void setVideoData(boolean b) {
-//		q.add(new ConfigureCommand("general:video_enable", b));
+//		cQueue.add(new ConfigureCommand("general:video_enable", b));
 //	}
 
     /**
@@ -327,7 +327,7 @@ public class CommandManager extends AbstractUDPManager {
      * @param b If set to TRUE, a reduced set is sent. If set to FALSE, all the available data are sent.
      */
     public CommandManager setNavDataDemo(boolean b) {
-        q.add(new ConfigureCommand("general:navdata_demo", b));
+        cQueue.add(new ConfigureCommand("general:navdata_demo", b));
         return this;
     }
 
@@ -336,7 +336,7 @@ public class CommandManager extends AbstractUDPManager {
      * @param mask I honestly do not know, where values for this mask are defined. Have a look at the User Guide (page 74 in v2.0.1)
      */
     public CommandManager setNavDataOptions(int mask) {
-        q.add(new ConfigureCommand("general:navdata_options", mask));
+        cQueue.add(new ConfigureCommand("general:navdata_options", mask));
         return this;
     }
 
@@ -347,7 +347,7 @@ public class CommandManager extends AbstractUDPManager {
      * @param duration The duration in seconds
      */
     public CommandManager setLedsAnimation(LEDAnimation anim, float freq, int duration) {
-        q.add(new LEDAnimationCommand(anim, freq, duration));
+        cQueue.add(new LEDAnimationCommand(anim, freq, duration));
         return this;
     }
 
@@ -356,13 +356,13 @@ public class CommandManager extends AbstractUDPManager {
      * @param b TRUE for outdoor, FALSE for indoor hulls
      */
     public CommandManager setDetectEnemyWithoutShell(boolean b) {
-        q.add(new ConfigureCommand("detect:enemy_without_shell", (b ? "1" : "0")));
+        cQueue.add(new ConfigureCommand("detect:enemy_without_shell", (b ? "1" : "0")));
         return this;
     }
 
 //	Only for ARDrone 1.0 with legacy groundstripe detection.
 //	public void setGroundStripeColors(GroundStripeColor c) {
-//		q.add(new ConfigureCommand("detect:groundstripe_colors", c.getValue()));
+//		cQueue.add(new ConfigureCommand("detect:groundstripe_colors", c.getValue()));
 //	}
 
     /**
@@ -370,7 +370,7 @@ public class CommandManager extends AbstractUDPManager {
      * @param c Possible values are green (1), yellow (2) and blue (3)
      */
     public CommandManager setEnemyColors(EnemyColor c) {
-        q.add(new ConfigureCommand("detect:enemy_colors", c.getValue()));
+        cQueue.add(new ConfigureCommand("detect:enemy_colors", c.getValue()));
         return this;
     }
 
@@ -384,7 +384,7 @@ public class CommandManager extends AbstractUDPManager {
     public CommandManager setDetectionType(CadType type) {
         // TODO: push VisionCadType into special ConfigureCommand
         int t = type.ordinal();
-        q.add(new ConfigureCommand("detect:detect_type", t));
+        cQueue.add(new ConfigureCommand("detect:detect_type", t));
         return this;
     }
 
@@ -397,34 +397,34 @@ public class CommandManager extends AbstractUDPManager {
      */
     public CommandManager setDetectionType(DetectionType dt, VisionTagType[] tagtypes) {
         int mask = VisionTagType.getMask(tagtypes);
-        q.add(new ConfigureCommand("detect:" + dt.getCmdSuffix(), mask));
+        cQueue.add(new ConfigureCommand("detect:" + dt.getCmdSuffix(), mask));
         return this;
     }
 
     public CommandManager setVisionParameters(int coarse_scale, int nb_pair, int loss_per, int nb_tracker_width,
                                               int nb_tracker_height, int scale, int trans_max, int max_pair_dist, int noise) {
-        q.add(new VisionParametersCommand(coarse_scale, nb_pair, loss_per, nb_tracker_width, nb_tracker_height, scale,
+        cQueue.add(new VisionParametersCommand(coarse_scale, nb_pair, loss_per, nb_tracker_width, nb_tracker_height, scale,
                 trans_max, max_pair_dist, noise));
         return this;
     }
 
     // TODO find out if still supported in Drone 2.0 and what are the options
     public CommandManager setVisionOption(int option) {
-        q.add(new VisionOptionCommand(option));
+        cQueue.add(new VisionOptionCommand(option));
         return this;
     }
 
     // TODO find out if still supported in Drone 2.0
     public CommandManager setGains(int pq_kp, int r_kp, int r_ki, int ea_kp, int ea_ki, int alt_kp, int alt_ki, int vz_kp,
                                    int vz_ki, int hovering_kp, int hovering_ki, int hovering_b_kp, int hovering_b_ki) {
-        q.add(new GainsCommand(pq_kp, r_kp, r_ki, ea_kp, ea_ki, alt_kp, alt_ki, vz_kp, vz_ki, hovering_kp, hovering_ki,
+        cQueue.add(new GainsCommand(pq_kp, r_kp, r_ki, ea_kp, ea_ki, alt_kp, alt_ki, vz_kp, vz_ki, hovering_kp, hovering_ki,
                 hovering_b_kp, hovering_b_ki));
         return this;
     }
 
     // TODO find out if still supported in Drone 2.0
     public CommandManager setRawCapture(boolean picture, boolean video) {
-        q.add(new RawCaptureCommand(picture, video));
+        cQueue.add(new RawCaptureCommand(picture, video));
         return this;
     }
 
@@ -439,7 +439,7 @@ public class CommandManager extends AbstractUDPManager {
         if (b) {
             level |= (1 << 2);
         }
-        q.add(new ConfigureCommand("control:control_level", level));
+        cQueue.add(new ConfigureCommand("control:control_level", level));
         return this;
     }
 
@@ -452,7 +452,7 @@ public class CommandManager extends AbstractUDPManager {
      * @param mode
      */
     public CommandManager setFlyingMode(FlyingMode mode) {
-        q.add(new ConfigureCommand("control:flying_mode", mode.ordinal()));
+        cQueue.add(new ConfigureCommand("control:flying_mode", mode.ordinal()));
         return this;
     }
 
@@ -462,7 +462,7 @@ public class CommandManager extends AbstractUDPManager {
      * @param range maximum distance (in millimeters)
      */
     public CommandManager setHoveringRange(int range) {
-        q.add(new ConfigureCommand("control:hovering_range", range));
+        cQueue.add(new ConfigureCommand("control:hovering_range", range));
         return this;
     }
 
@@ -486,7 +486,7 @@ public class CommandManager extends AbstractUDPManager {
         angle = limit(angle, 0f, 0.52f);
         System.out.println("CommandManager: setMaxEulerAngle (bendingAngle): " + angle + " rad");
         String command = "control:" + l.getCommandPrefix() + "euler_angle_max";
-        q.add(new ConfigureCommand(command, String.valueOf(angle)));
+        cQueue.add(new ConfigureCommand(command, String.valueOf(angle)));
         return this;
     }
 
@@ -508,7 +508,7 @@ public class CommandManager extends AbstractUDPManager {
         altitude = limit(altitude, 0, 100000);
         System.out.println("CommandManager: setMaxAltitude: " + altitude + " mm");
         String command = "control:" + l.getCommandPrefix() + "altitude_max";
-        q.add(new ConfigureCommand(command, altitude));
+        cQueue.add(new ConfigureCommand(command, altitude));
         return this;
     }
 
@@ -529,7 +529,7 @@ public class CommandManager extends AbstractUDPManager {
     public CommandManager setMinAltitude(Location l, int altitude) {
         altitude = limit(altitude, 0, 100000);
         String command = "control:" + l.getCommandPrefix() + "altitude_min";
-        q.add(new ConfigureCommand(command, altitude));
+        cQueue.add(new ConfigureCommand(command, altitude));
         return this;
     }
 
@@ -553,7 +553,7 @@ public class CommandManager extends AbstractUDPManager {
         speed = limit(speed, 0, 2000);
         System.out.println("CommandManager: setMaxVz (verticalSpeed): " + speed + " mm");
         String command = "control:" + l.getCommandPrefix() + "control_vz_max";
-        q.add(new ConfigureCommand(command, speed));
+        cQueue.add(new ConfigureCommand(command, speed));
         return this;
     }
 
@@ -576,12 +576,12 @@ public class CommandManager extends AbstractUDPManager {
     public CommandManager setMaxYaw(Location l, float speed) {
         speed = limit(speed, 0.7f, 6.11f);
         String command = "control:" + l.getCommandPrefix() + "control_yaw";
-        q.add(new ConfigureCommand(command, speed));
+        cQueue.add(new ConfigureCommand(command, speed));
         return this;
     }
 
     public CommandManager setCommand(ATCommand command) {
-        q.add(command);
+        cQueue.add(command);
         return this;
     }
 
@@ -592,35 +592,35 @@ public class CommandManager extends AbstractUDPManager {
      */
     public CommandManager setOutdoor(boolean flying_outdoor, boolean outdoor_hull) {
         System.out.println("CommandManager: setOutdoor(flyingOutdoor,usingOutdoorHull) = " + flying_outdoor + "," + outdoor_hull);
-        q.add(new ConfigureCommand("control:outdoor", flying_outdoor));
-        q.add(new ConfigureCommand("control:flight_without_shell", outdoor_hull));
+        cQueue.add(new ConfigureCommand("control:outdoor", flying_outdoor));
+        cQueue.add(new ConfigureCommand("control:flight_without_shell", outdoor_hull));
         return this;
     }
 
 //	@Deprecated
 //	public void setAutonomousFlight(boolean b) {
-//		q.add(new ConfigureCommand("control:autonomous_flight", b));
+//		cQueue.add(new ConfigureCommand("control:autonomous_flight", b));
 //	}
 
 //	Should not be used with commercial AR.Drones
 //	public void setManualTrim(boolean b) {
-//		q.add(new ConfigureCommand("control:manual_trim", b));
+//		cQueue.add(new ConfigureCommand("control:manual_trim", b));
 //	}
 
 //	Why should we offer this in Java ?
 //	public void setPhoneTilt(float tilt) {
-//		q.add(new ConfigureCommand("control:control_iphone_tilt", String.valueOf(tilt)));
+//		cQueue.add(new ConfigureCommand("control:control_iphone_tilt", String.valueOf(tilt)));
 //	}
 
     public CommandManager animate(FlightAnimation a) {
-        q.add(new FlightAnimationCommand(a));
+        cQueue.add(new FlightAnimationCommand(a));
         return this;
     }
 
     public CommandManager setPosition(double latitude, double longitude, double altitude) {
-        q.add(new ConfigureCommand("gps:latitude", latitude));
-        q.add(new ConfigureCommand("gps:longitude", longitude));
-        q.add(new ConfigureCommand("gps:altitude", altitude));
+        cQueue.add(new ConfigureCommand("gps:latitude", latitude));
+        cQueue.add(new ConfigureCommand("gps:longitude", longitude));
+        cQueue.add(new ConfigureCommand("gps:altitude", altitude));
         return this;
     }
 
@@ -630,7 +630,7 @@ public class CommandManager extends AbstractUDPManager {
      * @param f Only two frequencies are availaible : 22:22 and 25 Hz.
      */
     public CommandManager setUltrasoundFrequency(UltrasoundFrequency f) {
-        q.add(new ConfigureCommand("pic:ultrasound_freq", f.getValue()));
+        cQueue.add(new ConfigureCommand("pic:ultrasound_freq", f.getValue()));
         return this;
     }
 
@@ -639,7 +639,7 @@ public class CommandManager extends AbstractUDPManager {
      * @param ssid The new SSID, e.g. "myArdroneNetwork"
      */
     public CommandManager setSSIDSinglePlayer(String ssid) {
-        q.add(new ConfigureCommand("network:ssid_single_player", ssid));
+        cQueue.add(new ConfigureCommand("network:ssid_single_player", ssid));
         return this;
     }
 
@@ -648,7 +648,7 @@ public class CommandManager extends AbstractUDPManager {
      * @param ssid The new SSID, e.g. "myArdroneNetwork"
      */
     public CommandManager setSSIDMultiPlayer(String ssid) {
-        q.add(new ConfigureCommand("network:ssid_multi_player", ssid));
+        cQueue.add(new ConfigureCommand("network:ssid_multi_player", ssid));
         return this;
     }
 
@@ -662,7 +662,7 @@ public class CommandManager extends AbstractUDPManager {
      * @param mode
      */
     public CommandManager setWifiMode(WifiMode mode) {
-        q.add(new ConfigureCommand("network:wifi_mode", mode.ordinal()));
+        cQueue.add(new ConfigureCommand("network:wifi_mode", mode.ordinal()));
         return this;
     }
 
@@ -671,22 +671,22 @@ public class CommandManager extends AbstractUDPManager {
      * @param mac The new MAC address.
      */
     public CommandManager setOwnerMac(String mac) {
-        q.add(new ConfigureCommand("network:owner_mac", mac));
+        cQueue.add(new ConfigureCommand("network:owner_mac", mac));
         return this;
     }
 
     public CommandManager startRecordingNavData(String dirname) {
-        q.add(new ConfigureCommand("userbox:userbox_cmd", String.valueOf(UserBox.START.ordinal()) + "," + dirname));
+        cQueue.add(new ConfigureCommand("userbox:userbox_cmd", String.valueOf(UserBox.START.ordinal()) + "," + dirname));
         return this;
     }
 
     public CommandManager cancelRecordingNavData() {
-        q.add(new ConfigureCommand("userbox:userbox_cmd", UserBox.CANCEL.ordinal()));
+        cQueue.add(new ConfigureCommand("userbox:userbox_cmd", UserBox.CANCEL.ordinal()));
         return this;
     }
 
     public CommandManager stopRecordingNavData() {
-        q.add(new ConfigureCommand("userbox:userbox_cmd", UserBox.STOP.ordinal()));
+        cQueue.add(new ConfigureCommand("userbox:userbox_cmd", UserBox.STOP.ordinal()));
         return this;
     }
 
@@ -695,7 +695,7 @@ public class CommandManager extends AbstractUDPManager {
     public CommandManager startRecordingPictures(int delay, int nshots) {
         Date d = new Date();
         final String label = USERBOXFORMAT.format(d);
-        q.add(new ConfigureCommand("userbox:userbox_cmd", String.valueOf(UserBox.SCREENSHOT.ordinal()) + ","
+        cQueue.add(new ConfigureCommand("userbox:userbox_cmd", String.valueOf(UserBox.SCREENSHOT.ordinal()) + ","
                 + String.valueOf(delay) + "," + String.valueOf(nshots) + "," + label));
         return this;
     }
@@ -703,13 +703,13 @@ public class CommandManager extends AbstractUDPManager {
     // AT*MISC undocumented, but needed to initialize
     // see https://github.com/bklang/ARbDrone/wiki/UndocumentedCommands
     private void sendMisc(int p1, int p2, int p3, int p4) {
-        q.add(new MiscCommand(p1, p2, p3, p4));
+        cQueue.add(new MiscCommand(p1, p2, p3, p4));
     }
 
     // AT*PMODE undocumented, but needed to initialize
     // see https://github.com/bklang/ARbDrone/wiki/UndocumentedCommands
     private void sendPMode(int mode) {
-        q.add(new PMODECommand(mode));
+        cQueue.add(new PMODECommand(mode));
     }
 
     /**
@@ -744,7 +744,7 @@ public class CommandManager extends AbstractUDPManager {
                     //AT-commands every 30 ms for smooth drone movements.
                     dt = Math.max(0, 30 - dt);
                 }
-                c = q.poll(dt, TimeUnit.MILLISECONDS);
+                c = cQueue.poll(dt, TimeUnit.MILLISECONDS);
                 // System.out.println(c);
                 if (c == null) {
                     if (cs == null) {
@@ -785,7 +785,7 @@ public class CommandManager extends AbstractUDPManager {
         }
         close();
         timer.cancel();
-        q.clear();
+        cQueue.clear();
         seq = 1;
         System.out.println("doStop() called ? " + doStop + " ... Stopped " + getClass().getSimpleName());
     }
