@@ -424,15 +424,15 @@ public class ImageProcessor {
 
     // TODO: Skift værdierne der tjekkes for, så de passer til dronens kameraopløsning
     public Direction findPaperPosition(Rect rect){
-        if (rect.x > 0 && rect.x < 426){
+        if (rect.x > 0 && rect.x < 512){
             return Direction.LEFT;
         }
 
-        if (rect.x > 426 && rect.x < 854){
+        if (rect.x > 512 && rect.x < 768){
             return Direction.CENTER;
         }
 
-        if (rect.x > 854 && rect.x < 1280){
+        if (rect.x > 768 && rect.x < 1280){
             return Direction.RIGHT;
         }
         return Direction.UNKNOWN;
@@ -557,9 +557,9 @@ public class ImageProcessor {
     }
     public Direction findDirectionFromCircle(Point circleCoordinate){
         double x = circleCoordinate.x;
-        if(x > 0 && x < 426) return Direction.LEFT;
-        else if(x > 426 && x < 853) return Direction.CENTER;
-        else if(x > 853 && x < 1280) return Direction.RIGHT;
+        if(x > 0 && x < 512) return Direction.LEFT;
+        else if(x > 512 && x < 768) return Direction.CENTER; // 256px (1/5 af billedeopløsningen på 1280)
+        else if(x > 768 && x < 1280) return Direction.RIGHT;
         else {
             return Direction.UNKNOWN;
         }
