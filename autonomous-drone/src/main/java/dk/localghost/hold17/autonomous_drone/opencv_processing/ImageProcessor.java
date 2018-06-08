@@ -43,6 +43,10 @@ public class ImageProcessor {
 
     private int count;
 
+
+    // Global variabel for centrum af største cirkel.
+    private Point biggestCircle = new Point();
+
     static {
         nu.pattern.OpenCV.loadShared(); // loading maven version of OpenCV
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -59,8 +63,8 @@ public class ImageProcessor {
 
             Mat img_circle = new Mat();
             img_circle = openFile("3.jpg");
-            Point p = findCircleAndDraw(img_circle, 1, 150);
-            Direction direction = findDirectionFromCircle(p);
+            findCircleAndDraw(img_circle, 1, 150);
+            Direction direction = findDirectionFromCircle(biggestCircle);
             System.out.println(direction);
             saveFile(outputName, img_circle);
 
@@ -476,7 +480,7 @@ public class ImageProcessor {
      * PROBLEM: Finder mange cirkler, også hvor der ikke giver mening.
      */
 
-    private Point findCircleAndDraw(Mat image, int dp, int minDist) {
+    private Mat findCircleAndDraw(Mat image, int dp, int minDist) {
         Mat circlePosition = new Mat();
         Mat hsv_image = new Mat();
         //Parameter tjek
@@ -512,7 +516,6 @@ public class ImageProcessor {
             Scalar color = new Scalar(farve);
 
             int maxRadius = 0;
-            maxCenter = new Point(0, 0);
             for (int i = 0; i < circlePosition.cols(); i++) // antallet af kolonner angiver antallet af cirkler fundet
             {
                 double[] testArr = circlePosition.get(0, i);
@@ -528,27 +531,33 @@ public class ImageProcessor {
                 // Vi ønsker kun at tegne den største cirkel
                 if (maxRadius < radius) {
                     maxRadius = radius;
-                    maxCenter.x = center.x;
-                    maxCenter.y = center.y;
+                    biggestCircle.x = center.x;
+                    biggestCircle.y = center.y;
                 }
             }
             // tegner cirklen
-            Imgproc.circle(image, maxCenter, maxRadius, color);
+            Imgproc.circle(image, biggestCircle, maxRadius, color);
         } else {
             System.out.println("Der blev ikke fundet nogle cirkler i billedet");
             return null;
         }
-
-        return maxCenter;
+        return image;
     }
 
+
     public Direction findDirectionFromCircle(Point circleCoordinate) {
-        double x = circleCoordinate.x;
-        if (x > 0 && x < 512) return Direction.LEFT;
-        else if (x > 512 && x < 768) return Direction.CENTER; // 256px (1/5 af billedeopløsningen på 1280)
-        else if (x > 768 && x < 1280) return Direction.RIGHT;
-        else {
+        if (circleCoordinate == null)
+        {
+            System.out.println("Point er ikke initialiseret");
             return Direction.UNKNOWN;
+        } else {
+            double x = circleCoordinate.x;
+            if (x > 0 && x < 512) return Direction.LEFT;
+            else if (x > 512 && x < 768) return Direction.CENTER; // 256px (1/5 af billedeopløsningen på 1280)
+            else if (x > 768 && x < 1280) return Direction.RIGHT;
+            else {
+                return Direction.UNKNOWN;
+            }
         }
     }
 
@@ -562,7 +571,7 @@ public class ImageProcessor {
         while (10000 > System.currentTimeMillis() - startTime)
         {
             if (s == Shape.CIRCLE) {
-                Point p = findCircleAndDraw(img, 1, 150);
+                findCircleAndDraw(img, 1, 150);
             } else if (s == Shape.RECTANGLE){
                 try {
                     filterImage(matToBufferedImage(img));
