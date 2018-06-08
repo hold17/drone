@@ -50,6 +50,7 @@ public class ImageProcessor {
 
     public ImageProcessor() {
         try {
+            Mat img = openFile(fileName);
             /* filterImage() runs detectWhiteMat(), then finds contours and runs drawRectangles() */
             int counter = 0;
             long startTime = System.currentTimeMillis();
