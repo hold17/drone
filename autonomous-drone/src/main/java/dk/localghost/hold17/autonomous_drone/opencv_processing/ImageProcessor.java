@@ -112,11 +112,11 @@ public class ImageProcessor {
      * Convert image to a binary matrix and remove everything that is not the desired shades of white/grey
      * @return Mat
      */
-    public Mat detectWhiteMat(Mat img) {
+    public Mat detectWhiteMat(Mat image) {
         Mat imgbin = new Mat();
+
         /* Write 1 if in range of the two scalars, 0 if not. Binary image result written to imgbin */
-        Core.inRange(img, new Scalar(180, 180, 180, 0), new Scalar(255, 255, 255, 0), imgbin);
-//            saveFile(imgNumber +"whiteImage.jpg", imgbin);
+        Core.inRange(image, new Scalar(180, 180, 180, 0), new Scalar(255, 255, 255, 0), imgbin);
 
         return imgbin;
     }
@@ -128,15 +128,28 @@ public class ImageProcessor {
      *   Run determinePaperOrientation;
      * @return Mat
      */
-    public Mat filterImage(Mat img) {
-        Mat imgbin = detectWhiteMat(img);
+    public Mat filterImage(BufferedImage bufferedImage) {
+        QRCodes.clear();
+        externalRects.clear();
+
+        Mat originalImage = null;
+
+        try {
+            originalImage = bufferedImageToMat(bufferedImage);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        saveFile("originialImage.jpg", originalImage);
+
+        Mat imgbin = detectWhiteMat(originalImage);
         Mat imgcol = new Mat();
         Mat hierarchy1 = new Mat();
         Mat hierarchy2 = new Mat();
 
         //Denoise binary image using medianBlur and OPEN
         Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
-        //Imgproc.medianBlur(imgbin, imgbin, 5);
+        Imgproc.medianBlur(imgbin, imgbin, 5);
         Imgproc.morphologyEx(imgbin, imgbin, Imgproc.MORPH_OPEN, kernel);
 
         //Contours are matrices of points. We store all of them in this list.
@@ -390,7 +403,7 @@ public class ImageProcessor {
     }
 
     // Tjekker forholdet for den fundne rektangel
-    void TjekForA4Papir(Rect rect){
+    void checkForA4Papir(Rect rect){
         // Er det et A4 papir frontalt foran kameraet skal det være ~ 1:1.5 højde/bredde ratio.
         double ratio = (double) rect.height / (double) rect.width;
         if ( ratio < 1.5 && ratio > 1.3){
@@ -399,19 +412,19 @@ public class ImageProcessor {
     }
 
     // TODO: Skift værdierne der tjekkes for, så de passer til dronens kameraopløsning
-    String FindPaperPosition(Rect rect){
-        if (rect.x > 0 && rect.x < 1533){
-            return "Til venstre\n";
+    public Direction findPaperPosition(Rect rect){
+        if (rect.x > 0 && rect.x < 426){
+            return Direction.LEFT;
         }
 
-        if (rect.x > 1533 && rect.x < 3066){
-            return "I centrum\n";
+        if (rect.x > 426 && rect.x < 854){
+            return Direction.CENTER;
         }
 
-        if (rect.x > 3066 && rect.x < 4640){
-            return "Til højre\n";
+        if (rect.x > 854 && rect.x < 1280){
+            return Direction.RIGHT;
         }
-        return "Papirets position blev ikke fundet\n";
+        return Direction.UNKNOWN;
     }
 
     /***
@@ -453,4 +466,7 @@ public class ImageProcessor {
 //        Imgproc.Canny(imgbin, imgbin, 100, 200);
 //        return imgbin;
 //    }
+    public Rect getBiggestQRCode() {
+        return biggestQRCode;
+    }
 }
