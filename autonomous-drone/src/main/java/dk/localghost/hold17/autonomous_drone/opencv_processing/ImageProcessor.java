@@ -22,7 +22,7 @@ import org.opencv.imgproc.Imgproc;
 
 import static org.opencv.imgproc.Imgproc.*;
 // TODO: Clean up unused code
-public class RingRecognition {
+public class ImageProcessor {
 
     private final Scalar NEON_GREEN = new Scalar(20, 255, 57);
     private final Scalar RED = new Scalar (0, 0, 255);
@@ -47,7 +47,7 @@ public class RingRecognition {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
 
-    public RingRecognition() {
+    public ImageProcessor() {
         try {
             BufferedImage img = matToBufferedImage(openFile(fileName));
             /* filterImage() runs detectWhiteMat(), then finds contours and runs drawRectangles() */
@@ -73,7 +73,7 @@ public class RingRecognition {
     }
 
     public static void main(String[] args) {
-        new RingRecognition();
+        new ImageProcessor();
     }
 
     /***
@@ -529,7 +529,7 @@ public class RingRecognition {
         // finder objekter der ligner cirkler og gemmer deres position i circlePosition
 
         // fortsæt kun, hvis der er fundet én eller flere cirkler
-        if (!circlePosition.empty())
+        if (circlePosition.empty() == false)
         {
             System.out.println("Fandt: " + circlePosition.cols() + " cirkler");
 
