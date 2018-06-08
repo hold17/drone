@@ -1,13 +1,5 @@
 package dk.localghost.hold17.autonomous_drone.opencv_processing;
 
-import org.opencv.core.*;
-import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -17,8 +9,14 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opencv.core.*;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
-
 import static org.opencv.imgproc.Imgproc.*;
 
 // TODO: Clean up unused code
@@ -49,15 +47,15 @@ public class ImageProcessor {
     }
 
     public ImageProcessor() {
-//            BufferedImage img = matToBufferedImage(openFile(fileName));
-//            benchmark(Shape.CIRCLE);
-//            benchmark(Shape.RECTANGLE);
+//        BufferedImage img = matToBufferedImage(openFile(fileName));
+//        benchmark(Shape.CIRCLE);
+//        benchmark(Shape.RECTANGLE);
 
-        Mat img_circle = openFile("3.jpg");
-        findCircleAndDraw(img_circle, 1, 150);
-        Direction direction = findDirectionFromCircle(biggestCircle);
-        System.out.println(direction);
-        saveFile(outputName, img_circle);
+//        Mat img_circle = openFile("3.jpg");
+//        findCircleAndDraw(img_circle, 1, 150);
+//        Direction direction = findDirectionFromCircle(biggestCircle);
+//        System.out.println(direction);
+//        saveFile(outputName, img_circle);
     }
 
 //    public static void main(String[] args) {
