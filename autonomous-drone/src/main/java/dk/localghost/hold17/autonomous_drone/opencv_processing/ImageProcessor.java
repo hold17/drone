@@ -2,9 +2,7 @@ package dk.localghost.hold17.autonomous_drone.opencv_processing;
 
 import org.opencv.core.*;
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -16,7 +14,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.opencv.imgproc.Imgproc;
@@ -49,33 +46,33 @@ public class ImageProcessor {
     }
 
     public ImageProcessor() {
-        try {
-            BufferedImage img = matToBufferedImage(openFile(fileName));
-            /* filterImage() runs detectWhiteMat(), then finds contours and runs drawRectangles() */
-            int counter = 0;
-            long startTime = System.currentTimeMillis();
-            int count = 0;
-            while(10000 >  System.currentTimeMillis() - startTime) {
-                externalCustomRectangles.clear();
-                externalRects.clear();
-                QRCodes.clear();
-                filterImage(img);
-                counter++;
-            }
-//            saveFile(outputName, filterImage());
-            long stopTime = System.currentTimeMillis();
-            System.out.println("Total time: " + (double)(stopTime-startTime)/1000 + " seconds.");
-            System.out.println("Program ran " + counter + " times.");
-            System.out.println("Ran rectangle() " + count + " times.");
-        } catch (Exception e) {
-            System.err.println("Something went wrong: " + e.toString());
-            e.printStackTrace();
-        }
+//        try {
+//            BufferedImage img = matToBufferedImage(openFile(fileName));
+//            /* filterImage() runs detectWhiteMat(), then finds contours and runs drawRectangles() */
+//            int counter = 0;
+//            long startTime = System.currentTimeMillis();
+//            int count = 0;
+//            while(10000 >  System.currentTimeMillis() - startTime) {
+//                externalCustomRectangles.clear();
+//                externalRects.clear();
+//                QRCodes.clear();
+//                filterImage(img);
+//                counter++;
+//            }
+////            saveFile(outputName, filterImage());
+//            long stopTime = System.currentTimeMillis();
+//            System.out.println("Total time: " + (double)(stopTime-startTime)/1000 + " seconds.");
+//            System.out.println("Program ran " + counter + " times.");
+//            System.out.println("Ran rectangle() " + count + " times.");
+//        } catch (Exception e) {
+//            System.err.println("Something went wrong: " + e.toString());
+//            e.printStackTrace();
+//        }
     }
 
-    public static void main(String[] args) {
-        new ImageProcessor();
-    }
+//    public static void main(String[] args) {
+//        new ImageProcessor();
+//    }
 
     /***
      * Open file as matrix
@@ -116,7 +113,7 @@ public class ImageProcessor {
         Mat imgbin = new Mat();
 
         /* Write 1 if in range of the two scalars, 0 if not. Binary image result written to imgbin */
-        Core.inRange(image, new Scalar(180, 180, 180, 0), new Scalar(255, 255, 255, 0), imgbin);
+        Core.inRange(image, new Scalar(0, 0, 0), new Scalar(100, 100, 100), imgbin);
 
         return imgbin;
     }
@@ -129,8 +126,9 @@ public class ImageProcessor {
      * @return Mat
      */
     public Mat filterImage(BufferedImage bufferedImage) {
-        QRCodes.clear();
+        externalCustomRectangles.clear();
         externalRects.clear();
+        QRCodes.clear();
 
         Mat originalImage = null;
 
@@ -140,7 +138,7 @@ public class ImageProcessor {
             e.printStackTrace();
         }
 
-        saveFile("originialImage.jpg", originalImage);
+        //saveFile("originialImage.jpg", originalImage);
 
         Mat imgbin = detectWhiteMat(originalImage);
         Mat imgcol = new Mat();
@@ -148,9 +146,9 @@ public class ImageProcessor {
         Mat hierarchy2 = new Mat();
 
         //Denoise binary image using medianBlur and OPEN
-        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
-        Imgproc.medianBlur(imgbin, imgbin, 5);
-        Imgproc.morphologyEx(imgbin, imgbin, Imgproc.MORPH_OPEN, kernel);
+//        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
+//        Imgproc.medianBlur(imgbin, imgbin, 5);
+//        Imgproc.morphologyEx(imgbin, imgbin, Imgproc.MORPH_OPEN, kernel);
 
         //Contours are matrices of points. We store all of them in this list.
         List<MatOfPoint> contours = new ArrayList<>();
@@ -170,7 +168,7 @@ public class ImageProcessor {
 
         //Detect and draw rectangles on RGB image
         imgcol = drawRectangles(imgcol,contours, externalContours, hierarchy1,0.06);
-        determinePaperOrientation(imgcol);
+//        determinePaperOrientation(imgcol);
 //        saveFile("filtered.jpg", imgcol);
 
         return imgcol;
@@ -278,7 +276,7 @@ public class ImageProcessor {
                         if(rect.x > erect.x && rect.width < erect.width && rect.y > erect.y && rect.height < erect.height) {
                            /*** System.out.println(" | INTERNAL"); ***/
                             externalCustomRectangles.get(j).addChild(1);
-//                            Imgproc.rectangle(imgcol, rect.br(), rect.tl(), RED, 3, 8, 0);
+                            Imgproc.rectangle(imgcol, rect.br(), rect.tl(), RED, 3, 8, 0);
                         } else {
                            /***  System.out.println(" | NOT INTERNAL "); **/
                         }
@@ -300,7 +298,7 @@ public class ImageProcessor {
      * @param imgcol Mat
      */
     public void findBiggestQRCode(Mat imgcol) {
-        int maxHeight = 0;
+        Rect biggestQRCode = null;
         boolean first = true;
 
         /* Define and find QRCodes as rectangles with 3 or more children */
@@ -314,55 +312,52 @@ public class ImageProcessor {
         /* Determine the largest height */
         for(ExternalRectangle e : QRCodes) {
             if(first) {
-                maxHeight = e.getRect().height;
+                biggestQRCode = e.getRect();
                 first = false;
-            } else if (e.getRect().height > maxHeight) {
-                maxHeight = e.getRect().height;
+            } else if (e.getRect().height > biggestQRCode.height) {
+                biggestQRCode = e.getRect();
             }
         }
 
-        /* Find the biggest QR-code by height */
-        for(ExternalRectangle e : QRCodes) {
-            if (maxHeight == e.getRect().height) {
-                biggestQRCode = e.getRect();
-
-//                long time = System.currentTimeMillis();
-                Imgproc.rectangle(imgcol, e.getRect().br(), e.getRect().tl(), NEON_GREEN, 5, 8, 0);
-//                System.out.println("Imgproc.rectangle() ran for " + (double) (time-System.currentTimeMillis())/1000 + " seconds");
-                count++;
-                /*** System.out.println("Biggest QR code is at: " + "(" + e.getRect().x + ", " + e.getRect().y + ")"); ***/
-            }
+        if(biggestQRCode != null) {
+            // set field
+            this.biggestQRCode = biggestQRCode;
+//            long time = System.currentTimeMillis();
+            Imgproc.rectangle(imgcol, biggestQRCode.br(), biggestQRCode.tl(), NEON_GREEN, 3, 8, 0);
+//            System.out.println("Imgproc.rectangle() ran for " + (double) (time-System.currentTimeMillis())/1000 + " seconds");
+            count++;
+            /*** System.out.println("Biggest QR code is at: " + "(" + e.getRect().x + ", " + e.getRect().y + ")"); ***/
         }
     }
 
-    /***
-     * Draw a rotated rectangle rRect around the biggest QRCode,f
-     * Find endpoints of rRect,
-     * Compare the bottom left and bottom right points:
-     * If left is lower, drone is to the left of paper
-     * If right is lower, drone is to the right of paper
-     * @param imgcol Mat
-     */
-    public void determinePaperOrientation(Mat imgcol) {
-        MatOfPoint2f approx = new MatOfPoint2f();
-        MatOfPoint2f matOfPoint2f = new MatOfPoint2f();
-        MatOfPoint2f boxMop2f = new MatOfPoint2f();
-        List<MatOfPoint> rotatedBox = new ArrayList<>();
-        RotatedRect rRect = null;
-
-        /* Find the object with the biggest QRCode,
-         * then define its rotated rect */
-        for(ExternalRectangle e : QRCodes) {
-            if(e.getRect() == biggestQRCode) {
-                matOfPoint2f.fromList(e.getContour().toList());
-                rRect = Imgproc.minAreaRect(matOfPoint2f);
-            }
-        }
-
-        /* Take the vertices of rRect and store in vertices[], then make a rotatedBox
-         * from by drawing the contour. Use approxPolyDP() to approximate the endpoints,
-         * and store them in a list. */
-        // TODO: UNCOMMENT CODE
+//    /***
+//     * Draw a rotated rectangle rRect around the biggest QRCode,f
+//     * Find endpoints of rRect,
+//     * Compare the bottom left and bottom right points:
+//     * If left is lower, drone is to the left of paper
+//     * If right is lower, drone is to the right of paper
+//     * @param imgcol Mat
+//     */
+//    public void determinePaperOrientation(Mat imgcol) {
+//        MatOfPoint2f approx = new MatOfPoint2f();
+//        MatOfPoint2f matOfPoint2f = new MatOfPoint2f();
+//        MatOfPoint2f boxMop2f = new MatOfPoint2f();
+//        List<MatOfPoint> rotatedBox = new ArrayList<>();
+//        RotatedRect rRect = null;
+//
+//        /* Find the object with the biggest QRCode,
+//         * then define its rotated rect */
+//        for(ExternalRectangle e : QRCodes) {
+//            if(e.getRect() == biggestQRCode) {
+//                matOfPoint2f.fromList(e.getContour().toList());
+//                rRect = Imgproc.minAreaRect(matOfPoint2f);
+//            }
+//        }
+//
+//        /* Take the vertices of rRect and store in vertices[], then make a rotatedBox
+//         * from by drawing the contour. Use approxPolyDP() to approximate the endpoints,
+//         * and store them in a list. */
+//         TODO: UNCOMMENT CODE
 //        Point[] vertices = new Point[4];
 //        rRect.points(vertices);
 //        rotatedBox.add(new MatOfPoint(vertices));
@@ -400,7 +395,7 @@ public class ImageProcessor {
 //                Imgproc.circle(imgcol, lower1, 15, CYAN, Core.FILLED);
 //            }
 //        }
-    }
+//    }
 
     // Tjekker forholdet for den fundne rektangel
     void checkForA4Papir(Rect rect){
@@ -444,12 +439,17 @@ public class ImageProcessor {
      * Needed for drone video feed
      * @param mat Mat
      * @return BufferedImage
-     * @throws IOException
      */
-    public BufferedImage matToBufferedImage(Mat mat) throws IOException {
-        MatOfByte mob = new MatOfByte();
-        Imgcodecs.imencode(".jpg", mat, mob);
-        return ImageIO.read(new ByteArrayInputStream(mob.toArray()));
+    public BufferedImage matToBufferedImage(Mat mat){
+        try {
+            MatOfByte mob = new MatOfByte();
+            Imgcodecs.imencode(".jpg", mat, mob);
+            return ImageIO.read(new ByteArrayInputStream(mob.toArray()));
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
 
