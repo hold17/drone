@@ -1,5 +1,6 @@
 package dk.localghost.hold17.autonomous_drone.gui;
 
+import dk.localghost.hold17.autonomous_drone.controller.DroneController;
 import dk.localghost.hold17.base.IARDrone;
 import dk.localghost.hold17.base.command.VideoChannel;
 import dk.localghost.hold17.base.command.VideoCodec;
@@ -47,6 +48,9 @@ public class GUIController {
                         // preserve bufferedImage ratio
                         cameraView.setPreserveRatio(true);
                     });
+
+                    DroneController.cameraHeight = bufferedImage.getHeight();
+                    DroneController.cameraWidth  = bufferedImage.getWidth();
                 } else {
                    // System.out.println("bufferedImage was null"); // SILENCED UNTIL NEEDED
                 }
