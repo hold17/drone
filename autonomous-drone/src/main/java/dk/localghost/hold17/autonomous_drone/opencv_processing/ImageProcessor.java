@@ -18,12 +18,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Scanner;
 
 import org.opencv.imgproc.Imgproc;
 
-import static org.bytedeco.javacpp.opencv_core.*;
-import static org.bytedeco.javacpp.opencv_imgproc.*;
 import static org.opencv.imgproc.Imgproc.*;
 
 public class ImageProcessor {
@@ -56,7 +53,7 @@ public class ImageProcessor {
             /* filterImage() runs detectWhiteMat(), then finds contours and runs drawRectangles() */
             int counter = 0;
             long startTime = System.currentTimeMillis();
-            Mat img = openFile(fileName);
+            int count = 0;
             while(10000 >  System.currentTimeMillis() - startTime) {
                 externalCustomRectangles.clear();
                 externalRects.clear();
@@ -76,11 +73,6 @@ public class ImageProcessor {
     }
 
     public static void main(String[] args) {
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         new ImageProcessor();
     }
 
@@ -152,8 +144,8 @@ public class ImageProcessor {
 
         /* Convert the binary image to an 8-bit image,
          * then convert to an RGB image so rectangles can be outlined in color */
-        imgbin.convertTo(imgbin, CV_8UC3);
-        cvtColor(imgbin, imgcol, CV_GRAY2RGB);
+        imgbin.convertTo(imgbin, CvType.CV_8UC3);
+        cvtColor(imgbin, imgcol, COLOR_GRAY2RGB);
 
         /* Find contours in the binary image. RETR_TREE creates a perfect hierarchy of contours,
          * including children, grandchildren, parents and grandparents. Might be useful later, but
@@ -377,7 +369,7 @@ public class ImageProcessor {
 //
 //          /***  Draw all points as filled circles in red
 //            for (Point p : approxList) {
-//                Imgproc.circle(imgcol, new Point(p.x, p.y), 10, RED, FILLED);
+//                Imgproc.circle(imgcol, new Point(p.x, p.y), 10, RED, Core.FILLED);
 //            } ***/
 //
 //            /* If the lowest point is to the right of the second lowest point,
@@ -386,12 +378,12 @@ public class ImageProcessor {
 //            if(lower1.x > lower2.x) {
 //                System.out.println("Lowest point is in the right side of rotated rect at point " + lower1);
 //                System.out.println("Drone is looking at the QR code from the RIGHT");
-//                Imgproc.circle(imgcol, lower1, 15, CYAN, FILLED);
+//                Imgproc.circle(imgcol, lower1, 15, CYAN, Core.FILLED);
 //            }
 //            else if(lower1.x < lower2.x) {
 //                System.out.println("Lowest point is in the right side of rotated rect at point " + lower1);
 //                System.out.println("Drone is looking at the QR code from the LEFT");
-//                Imgproc.circle(imgcol, lower1, 15, CYAN, FILLED);
+//                Imgproc.circle(imgcol, lower1, 15, CYAN, Core.FILLED);
 //            }
 //        }
     }

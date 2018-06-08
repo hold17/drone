@@ -23,7 +23,6 @@ public class GUIController {
 
     void init(IARDrone drone) {
         ardrone = drone;
-        ardrone.start();
         startRecording();
     }
 
@@ -49,7 +48,7 @@ public class GUIController {
                         cameraView.setPreserveRatio(true);
                     });
                 } else {
-                    System.out.println("bufferedImage was null");
+                   // System.out.println("bufferedImage was null"); // SILENCED UNTIL NEEDED
                 }
             }
         };
