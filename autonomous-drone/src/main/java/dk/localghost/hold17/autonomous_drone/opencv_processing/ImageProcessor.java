@@ -54,18 +54,28 @@ public class ImageProcessor {
             int counter = 0;
             long startTime = System.currentTimeMillis();
             int count = 0;
-            while(10000 >  System.currentTimeMillis() - startTime) {
-                externalCustomRectangles.clear();
-                externalRects.clear();
-                QRCodes.clear();
-                filterImage(img);
-                counter++;
-            }
-//            saveFile(outputName, filterImage());
+            //while(10000 >  System.currentTimeMillis() - startTime) {
+             //   externalCustomRectangles.clear();
+              //  externalRects.clear();
+              //  QRCodes.clear();
+               // filterImage(img);
+                //counter++;
+           // }
+
+
+            Mat img_circle = new Mat();
+            img_circle = openFile("3.jpg");
+            Point p = findCircleAndDraw(img_circle, 1, 150);
+            Direction direction = findDirectionFromCircle(p);
+            System.out.println(direction);
+            saveFile(outputName, img_circle);
+
+
+
             long stopTime = System.currentTimeMillis();
-            System.out.println("Total time: " + (double)(stopTime-startTime)/1000 + " seconds.");
-            System.out.println("Program ran " + counter + " times.");
-            System.out.println("Ran rectangle() " + count + " times.");
+            //System.out.println("Total time: " + (double)(stopTime-startTime)/1000 + " seconds.");
+            //System.out.println("Program ran " + counter + " times.");
+            //System.out.println("Ran rectangle() " + count + " times.");
         } catch (Exception e) {
             System.err.println("Something went wrong: " + e.toString());
             e.printStackTrace();
@@ -95,7 +105,6 @@ public class ImageProcessor {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
@@ -145,28 +154,6 @@ public class ImageProcessor {
         Mat imgcol = new Mat();
         Mat hierarchy1 = new Mat();
         Mat hierarchy2 = new Mat();
-
-
-        // Forsøger at finde cirkler
-        Mat mask = new Mat();
-        Mat img = null;
-        try {
-            img = openFile("3.jpg");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // returnerer threshhold billedet
-        //img = FindCircle_v2(img);
-
-        // Tegner fundne cirkler ind i billedet. Virker ikke optimalt
-        //cvtColor(img, img, CV_RGB2GRAY);
-        findCircleAndDraw(img,1,100);
-
-
-
-        imgcol = img;
-
 
 
 
@@ -502,7 +489,7 @@ public class ImageProcessor {
      * PROBLEM: Finder mange cirkler, også hvor der ikke giver mening.
      */
 
-    private void findCircleAndDraw(Mat image, int dp, int minDist){
+    private Point findCircleAndDraw(Mat image, int dp, int minDist){
         Mat circlePosition = new Mat();
         Mat hsv_image = new Mat();
         //Parameter tjek
@@ -529,6 +516,7 @@ public class ImageProcessor {
         // finder objekter der ligner cirkler og gemmer deres position i circlePosition
 
         // fortsæt kun, hvis der er fundet én eller flere cirkler
+        Point maxCenter;
         if (circlePosition.empty() == false)
         {
             System.out.println("Fandt: " + circlePosition.cols() + " cirkler");
@@ -538,7 +526,7 @@ public class ImageProcessor {
             Scalar color = new Scalar(farve);
 
             int maxRadius = 0;
-            Point maxCenter = new Point(0,0);
+            maxCenter = new Point(0,0);
             for (int i = 0; i < circlePosition.cols(); i++) // antallet af kolonner angiver antallet af cirkler fundet
             {
                 double[] testArr = circlePosition.get(0,i);
@@ -551,19 +539,29 @@ public class ImageProcessor {
                 // parser radius til int for at efterleve parametre krav i circle()
                 double radiusDouble = testArr[2];
                 int radius = (int) radiusDouble;
-
                 // Vi ønsker kun at tegne den største cirkel
                 if (maxRadius < radius) {
                     maxRadius = radius;
                     maxCenter.x = center.x;
                     maxCenter.y = center.y;
                 }
-
             }
             // tegner cirklen
             Imgproc.circle(image, maxCenter, maxRadius, color);
         } else{
             System.out.println("Der blev ikke fundet nogle cirkler i billedet");
+            return null;
+        }
+
+        return maxCenter;
+    }
+    public Direction findDirectionFromCircle(Point circleCoordinate){
+        double x = circleCoordinate.x;
+        if(x > 0 && x < 426) return Direction.LEFT;
+        else if(x > 426 && x < 853) return Direction.CENTER;
+        else if(x > 853 && x < 1280) return Direction.RIGHT;
+        else {
+            return Direction.UNKNOWN;
         }
     }
 
