@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
@@ -10,14 +9,8 @@
       <VBox prefHeight="720.0" prefWidth="640.0">
          <children>
             <ImageView fx:id="live" fitHeight="360.0" fitWidth="660.0" pickOnBounds="true" preserveRatio="true">
-               <image>
-                  <Image url="@../../../../../../../../../DroneImages/1.JPG" />
-               </image>
             </ImageView>
             <ImageView fx:id="filtered" fitHeight="360.0" fitWidth="660.0" pickOnBounds="true" preserveRatio="true">
-               <image>
-                  <Image url="@../../../../../../../../../DroneImagesFiltered/1filtered.jpg" />
-               </image>
             </ImageView>
          </children>
       </VBox>

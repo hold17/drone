@@ -113,7 +113,7 @@ public class ImageProcessor {
         Mat imgbin = new Mat();
 
         /* Write 1 if in range of the two scalars, 0 if not. Binary image result written to imgbin */
-        Core.inRange(image, new Scalar(0, 0, 0), new Scalar(100, 100, 100), imgbin);
+        Core.inRange(image, new Scalar(200, 200, 200), new Scalar(100, 100, 100), imgbin);
 
         return imgbin;
     }
