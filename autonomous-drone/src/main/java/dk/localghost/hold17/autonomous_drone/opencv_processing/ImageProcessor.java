@@ -47,13 +47,12 @@ public class ImageProcessor {
     public ImageProcessor() {
         try {
             /* filterImage() runs detectWhiteMat(), then finds contours and runs drawRectangles() */
-            long startTime = System.currentTimeMillis();
-            int count = 0;
-            while(10000 >  System.currentTimeMillis() - startTime) {
-                filterImage();
-                count++;
-            }
-            System.out.println("Program ran " + count + " times.");
+            //long startTime = System.currentTimeMillis();
+            //int count = 0;
+            //while(10000 >  System.currentTimeMillis() - startTime) {
+                //filterImage();
+              //  count++;
+            //System.out.println("Program ran " + count + " times.");
             saveFile("filtered.jpg", filterImage());
         } catch (Exception e) {
             System.err.println("Something went wrong: " + e.toString());
@@ -99,7 +98,7 @@ public class ImageProcessor {
         Mat img, imgbin;
 
         try {
-            img = openFile("unfiltered.jpg");
+            img = openFile("4.jpg");
             imgbin = new Mat();
 
             /* Write 1 if in range of the two scalars, 0 if not. Binary image result written to imgbin */
@@ -126,30 +125,50 @@ public class ImageProcessor {
         Mat hierarchy1 = new Mat();
         Mat hierarchy2 = new Mat();
 
+
+        // Forsøger at finde cirkler
+        Mat mask = new Mat();
+        Mat img = null;
+        try {
+            img = openFile("4.jpg");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        img = FindCircle_v2(img);
+
+        // Tegner fundne cirkler ind i billedet. Virker ikke optimalt
+        //cvtColor(img, img, CV_RGB2GRAY);
+        //FindCircleAndDraw(img,5,100);
+        imgcol = img;
+
+
+
         //Denoise binary image using medianBlur and OPEN
-        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
-        Imgproc.medianBlur(imgbin, imgbin, 5);
-        Imgproc.morphologyEx(imgbin, imgbin, Imgproc.MORPH_OPEN, kernel);
+     //   Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
+   //     Imgproc.medianBlur(imgbin, imgbin, 5);
+      //  Imgproc.morphologyEx(imgbin, imgbin, Imgproc.MORPH_OPEN, kernel);
 
         //Contours are matrices of points. We store all of them in this list.
-        List<MatOfPoint> contours = new ArrayList<>();
-        List<MatOfPoint> externalContours = new ArrayList<>();
+        //List<MatOfPoint> contours = new ArrayList<>();
+        //List<MatOfPoint> externalContours = new ArrayList<>();
 
         /* Convert the binary image to an 8-bit image,
          * then convert to an RGB image so rectangles can be outlined in color */
-        imgbin.convertTo(imgbin, CV_8UC3);
-        cvtColor(imgbin, imgcol, CV_GRAY2RGB);
+        //imgbin.convertTo(imgbin, CV_8UC3);
+        //cvtColor(imgbin, imgcol, CV_GRAY2RGB);
 
         /* Find contours in the binary image. RETR_TREE creates a perfect hierarchy of contours,
          * including children, grandchildren, parents and grandparents. Might be useful later, but
          * is not currently used. Use RETR_EXTERNAL if you only want to find parent contours. */
-        Imgproc.findContours(imgbin, contours, hierarchy1, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-        Imgproc.findContours(imgbin, externalContours, hierarchy2, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+        //Imgproc.findContours(imgbin, contours, hierarchy1, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+        //Imgproc.findContours(imgbin, externalContours, hierarchy2, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
         //Detect and draw rectangles on RGB image
-        imgcol = drawRectangles(imgcol,contours, externalContours, hierarchy1,0.06);
-        determinePaperOrientation(imgcol);
-//        saveFile("filtered.jpg", imgcol);
+        //imgcol = drawRectangles(imgcol,contours, externalContours, hierarchy1,0.06);
+        //determinePaperOrientation(imgcol);
+        //saveFile("filtered.jpg", imgcol);
+
 
         return imgcol;
     }
@@ -305,6 +324,8 @@ public class ImageProcessor {
                 biggestQRCode = e.getRect();
                 Imgproc.rectangle(imgcol, e.getRect().br(), e.getRect().tl(), NEON_GREEN, 5, 8, 0);
                /*** System.out.println("Biggest QR code is at: " + "(" + e.getRect().x + ", " + e.getRect().y + ")"); ***/
+
+                Imgproc.putText(imgcol, "QR code", new Point(e.getRect().x + 50, e.getRect().y - 100), 4,5, NEON_GREEN);
             }
         }
     }
@@ -428,17 +449,96 @@ public class ImageProcessor {
     }
 
 
+    // 150 - 255 virker til at sortere et nogenlunde tydeligt billede af de røde cirkler
     /***TEST METHOD ## Detect edges using a threshold ***/
-    public Mat detectEdgesThreshold() {
-        Mat imgbin = detectWhiteMat();
-        threshold(imgbin, imgbin, 127, 255, Imgproc.THRESH_BINARY);
-        return imgbin;
+    public Mat detectEdgesThreshold(Mat img) {
+        threshold(img, img, 150, 255, Imgproc.THRESH_BINARY);
+        return img;
     }
 
     /***TEST METHOD ## Detect edges using canny ***/
-    public Mat detectEdgesCanny() {
-        Mat imgbin = detectWhiteMat();
-        Imgproc.Canny(imgbin, imgbin, 100, 200);
-        return imgbin;
+    public Mat detectEdgesCanny(Mat img, int t1, int t2) {
+        Mat detected_edges = new Mat();
+        blur(img, detected_edges, new Size(3,3) );
+
+        //Imgproc.Canny(detected_edges, detected_edges, t1, t2);
+        return detected_edges;
+    }
+
+
+    /*
+     * Funktion der finder cirkler samt tegner dem
+     * dp = pixelreduktionsgrad
+     * minDist = minimum radius i pixelantal
+     * TODO: Udvid funktion således at det returneres om cirklen er til henholdsvis venstre/højre/centrum af billedet. Kig på Point koordinater.
+     *
+     * PROBLEM: Finder mange cirkler, også hvor der ikke giver mening.
+     */
+
+    void FindCircleAndDraw(Mat image, int dp, int minDist){
+        // finder circler med Hough Transform
+
+        //Parameter tjek
+        if (dp <= 0)  dp = 1;
+        if (minDist <= 0) minDist = 1;
+
+
+        Mat circlePosition = new Mat();
+        // finder objekter der ligner cirkler og gemmer deres position i circlePosition
+        Imgproc.HoughCircles(image, circlePosition, Imgproc.CV_HOUGH_GRADIENT, dp, minDist );
+
+        // fortsæt kun, hvis der er fundet én eller flere cirkler
+        if (circlePosition.empty() == false)
+        {
+            System.out.println("Fandt: " + circlePosition.cols() + " cirkel(er)");
+
+            // sætter cirklens farve
+            double farve = 100;
+            Scalar color = new Scalar(farve);
+
+            for (int i = 0; i < circlePosition.cols(); i++) // antallet af kolonner angiver antallet af cirkler fundet
+            {
+                double[] testArr = circlePosition.get(0,i);
+                System.out.println("\nCirkel nr. " + i + " fundet på:\nx-koord: " + testArr[0] + "\ny-koord: " + testArr[1] + "\nradius: " + testArr[2]);
+
+
+                // sætter cirklens centrum
+                Point center = new Point(testArr[0], testArr[1]);
+
+                // parser radius til int for at efterleve parametre krav i circle()
+                double radiusDouble = testArr[2];
+                int radius = (int) radiusDouble;
+                // tegner cirklen
+                Imgproc.circle(image, center, radius, color);
+            }
+        } else{
+            System.out.println("Der blev ikke fundet nogle cirkler i billedet");
+        }
+
+    }
+
+
+    /*
+    * Ikke færdig.
+    *
+    * Skal finde cirkel, lige nu forsøges med diverse metoder for at se hvad virker bedst
+     */
+    Mat FindCircle_v2(Mat img){
+        //Sorterer vise farver fra, så vi ender med tydeligere cirkler
+        img = detectEdgesThreshold(img);
+
+        // Fjerner farver, så vi kun har røde farver tilbage
+        Scalar lower_red = new Scalar(50,50,110);
+        Scalar upper_red = new Scalar(255,255,130);
+        //Core.inRange(img, lower_red, upper_red, img);
+
+
+        // Find kanter med canny()
+        int threshold1 = 100;
+        int threshhold2 = 200;
+        //img = detectEdgesCanny(img, threshold1, threshhold2); // denne funk virker kun halvt
+
+        return img;
+
     }
 }
