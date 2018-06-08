@@ -28,10 +28,6 @@ public class AutonomousGUI extends Application {
         drone = new ARDrone(args[0]);
         drone.start();
 
-        QRCodeScanner qrScanner = new QRCodeScanner();
-        drone.getVideoManager().addImageListener(qrScanner::imageUpdated);
-        qrScanner.addListener(new QRScannerController());
-
         launch(args);
     }
 

@@ -51,6 +51,10 @@ public class DroneController {
         drone.getVideoManager().addImageListener(camera -> this.droneCamera = camera);
 
         LEDSuccess();
+
+        QRCodeScanner qrScanner = new QRCodeScanner();
+        drone.getVideoManager().addImageListener(qrScanner::imageUpdated);
+        qrScanner.addListener(new QRScannerController());
     }
 
     private void initializeListeners() {
