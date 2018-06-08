@@ -32,9 +32,9 @@ public class KeyboardCommandManager implements EventHandler<KeyEvent> {
             case D:
                 drone.goRight(); break;
             case Q: case LEFT:
-                drone.getCommandManager().spinLeft(DroneController.getSpeed()); break;
+                drone.getCommandManager().spinLeft(100); break;
             case E: case RIGHT:
-                drone.getCommandManager().spinRight(DroneController.getSpeed()); break;
+                drone.getCommandManager().spinRight(100); break;
             case UP:
                 drone.up(); break;
             case DOWN:
