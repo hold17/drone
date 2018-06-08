@@ -1,5 +1,6 @@
 package dk.localghost.hold17.autonomous_drone.gui;
 
+import dk.localghost.hold17.autonomous_drone.opencv_processing.ImageProcessor;
 import dk.localghost.hold17.base.IARDrone;
 import dk.localghost.hold17.base.command.VideoChannel;
 import dk.localghost.hold17.base.command.VideoCodec;
@@ -19,7 +20,11 @@ public class GUIController {
     private BufferedImage bufferedImage;
 
     @FXML
-    private ImageView cameraView;
+    private ImageView live;
+    @FXML
+    private ImageView filtered;
+
+    private static ImageProcessor imgProc = new ImageProcessor();
 
     void init(IARDrone drone) {
         ardrone = drone;
@@ -39,13 +44,18 @@ public class GUIController {
             public void run() {
                 if (bufferedImage != null) {
                     Image image = SwingFXUtils.toFXImage(bufferedImage, null);
+                    Image imageFiltered = SwingFXUtils.toFXImage(imgProc.matToBufferedImage(imgProc.filterImage(bufferedImage)), null);
                     // show the image
                     Platform.runLater(() -> {
-                        cameraView.setImage(image);
+                        live.setImage(image);
                         // set fixed width
-                        cameraView.setFitWidth(1280);
+                        live.setFitWidth(640);
                         // preserve bufferedImage ratio
-                        cameraView.setPreserveRatio(true);
+                        live.setPreserveRatio(true);
+
+                        filtered.setImage(imageFiltered);
+                        filtered.setFitWidth(640);
+                        filtered.setPreserveRatio(true);
                     });
                 } else {
                    // System.out.println("bufferedImage was null"); // SILENCED UNTIL NEEDED
