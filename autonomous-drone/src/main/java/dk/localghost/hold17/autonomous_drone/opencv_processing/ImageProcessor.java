@@ -1,12 +1,5 @@
 package dk.localghost.hold17.autonomous_drone.opencv_processing;
 
-import org.opencv.core.*;
-import org.opencv.core.Mat;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -16,14 +9,21 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opencv.core.*;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
-
 import static org.opencv.imgproc.Imgproc.*;
 
+// TODO: Clean up unused code
 public class ImageProcessor {
 
     private final Scalar NEON_GREEN = new Scalar(20, 255, 57);
-    private final Scalar RED = new Scalar (0, 0, 255);
+    private final Scalar RED = new Scalar(0, 0, 255);
     private final Scalar YELLOW = new Scalar(0, 255, 255);
     private final Scalar CYAN = new Scalar(255, 255, 0);
 
@@ -38,7 +38,8 @@ public class ImageProcessor {
     private String outputName = "4filtered.jpg";
     private String imgNumber = "4";
 
-    private int count;
+    // Global variabel for centrum af største cirkel.
+    private Point biggestCircle = new Point();
 
     static {
         nu.pattern.OpenCV.loadShared(); // loading maven version of OpenCV
@@ -46,28 +47,15 @@ public class ImageProcessor {
     }
 
     public ImageProcessor() {
-//        try {
-//            BufferedImage img = matToBufferedImage(openFile(fileName));
-//            /* filterImage() runs detectWhiteMat(), then finds contours and runs drawRectangles() */
-//            int counter = 0;
-//            long startTime = System.currentTimeMillis();
-//            int count = 0;
-//            while(10000 >  System.currentTimeMillis() - startTime) {
-//                externalCustomRectangles.clear();
-//                externalRects.clear();
-//                QRCodes.clear();
-//                filterImage(img);
-//                counter++;
-//            }
-////            saveFile(outputName, filterImage());
-//            long stopTime = System.currentTimeMillis();
-//            System.out.println("Total time: " + (double)(stopTime-startTime)/1000 + " seconds.");
-//            System.out.println("Program ran " + counter + " times.");
-//            System.out.println("Ran rectangle() " + count + " times.");
-//        } catch (Exception e) {
-//            System.err.println("Something went wrong: " + e.toString());
-//            e.printStackTrace();
-//        }
+//        BufferedImage img = matToBufferedImage(openFile(fileName));
+//        benchmark(Shape.CIRCLE);
+//        benchmark(Shape.RECTANGLE);
+
+//        Mat img_circle = openFile("3.jpg");
+//        findCircleAndDraw(img_circle, 1, 150);
+//        Direction direction = findDirectionFromCircle(biggestCircle);
+//        System.out.println(direction);
+//        saveFile(outputName, img_circle);
     }
 
 //    public static void main(String[] args) {
@@ -93,14 +81,13 @@ public class ImageProcessor {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
     /*** Save matrix to file ***/
     public void saveFile(String fileName, Mat testMat) {
         final String path = Paths.get("").toAbsolutePath().toString();
-            final String filePath = (path + "/DroneImagesFiltered/" + fileName).replace('/', '\\');
+        final String filePath = (path + "/DroneImagesFiltered/" + fileName).replace('/', '\\');
         Imgcodecs.imwrite(filePath, testMat);
         System.out.println("File saved to " + filePath);
     }
@@ -167,7 +154,7 @@ public class ImageProcessor {
 //        Imgproc.drawContours(imgcol, externalContours, -1, CYAN, 3);
 
         //Detect and draw rectangles on RGB image
-        imgcol = drawRectangles(imgcol,contours, externalContours, hierarchy1,0.06);
+        imgcol = drawRectangles(imgcol, contours, externalContours, hierarchy1, 0.06);
 //        determinePaperOrientation(imgcol);
 //        saveFile("filtered.jpg", imgcol);
 
@@ -189,16 +176,16 @@ public class ImageProcessor {
         MatOfPoint2f approx = new MatOfPoint2f();
         MatOfPoint2f matOfPoint2f = new MatOfPoint2f();
 
-        for(MatOfPoint externalContour : externalContours) {
+        for (MatOfPoint externalContour : externalContours) {
             matOfPoint2f.fromList(externalContour.toList());
 
             /* Check if current contour has approximately approx.total() vertices. We check for 4 = rectangle. */
-            Imgproc.approxPolyDP(matOfPoint2f, approx,Imgproc.arcLength(matOfPoint2f, true) * accuracy, true);
+            Imgproc.approxPolyDP(matOfPoint2f, approx, Imgproc.arcLength(matOfPoint2f, true) * accuracy, true);
 
             long total = approx.total();
 
             /* If 4 vertices are found, the contour is approximately a rectangle */
-            if(total == 4) {
+            if (total == 4) {
                 Rect rect = Imgproc.boundingRect(externalContour);
 
                 /* Find the centerpoints and area */
@@ -207,9 +194,9 @@ public class ImageProcessor {
                 double rectArea = rect.width * rect.height;
 
                 if (rectArea > 2000 /* && aspectRatio > 0.2 /* && rect.width > 50 && rect.height > 100 */) {
-                 /***   System.out.print("External rectangle detected. ");
-                    System.out.print("Coordinates: " + "(" + centerX + ", " + centerY + ") ");
-                    System.out.println("Width: " + rect.width + ", Height: " + rect.height); ***/
+                    /***   System.out.print("External rectangle detected. ");
+                     System.out.print("Coordinates: " + "(" + centerX + ", " + centerY + ") ");
+                     System.out.println("Width: " + rect.width + ", Height: " + rect.height); ***/
 //                    Imgproc.rectangle(imgcol, rect.br(), rect.tl(), NEON_GREEN, 4, 8, 0);
 //                    saveFile(imgNumber + "ExternalRect.jpg", imgcol);
                     //Create rotated rectangle by defining the minimum area in which the contour will fit
@@ -225,16 +212,16 @@ public class ImageProcessor {
         }
 
         /* Look through contours */
-        for(MatOfPoint contour : contours) {
+        for (MatOfPoint contour : contours) {
             matOfPoint2f.fromList(contour.toList());
 
             /* Check if current contour has approximately approx.total() vertices. We check for 4 = rectangle. */
-            Imgproc.approxPolyDP(matOfPoint2f, approx,Imgproc.arcLength(matOfPoint2f, true) * accuracy, true);
+            Imgproc.approxPolyDP(matOfPoint2f, approx, Imgproc.arcLength(matOfPoint2f, true) * accuracy, true);
 
             long total = approx.total();
 
             /* If 4 vertices are found, the contour is approximately a rectangle */
-            if(total == 4) {
+            if (total == 4) {
 
                 /* Create a boundingRect from the current contour. A boundingRect is the smallest
                  * possible rectangle in which the contour will fit */
@@ -246,11 +233,12 @@ public class ImageProcessor {
                 double rectArea = rect.width * rect.height;
 
                 boolean skip = false;
-                for(Rect erect : externalRects) {
+                for (Rect erect : externalRects) {
                     if (rect == erect) {
                         skip = true;
                     }
-                } if(skip) {
+                }
+                if (skip) {
                     continue;
                 }
 
@@ -260,27 +248,27 @@ public class ImageProcessor {
 
                 /* If the rect area is over 3000 we want to draw it
                  * Might need to add more requirements */
-                if(rectArea > 3000 /* && aspectRatio > 0.2 /* && rect.width > 50 && rect.height > 100 */) {
+                if (rectArea > 3000 /* && aspectRatio > 0.2 /* && rect.width > 50 && rect.height > 100 */) {
                     /*** System.out.print("Rectangle detected. ");
-                    System.out.print("Coordinates: " + "(" +centerX + ", " + centerY + ") ");
-                    System.out.print("Width: " + rect.width + ", Height: " + rect.height); ***/
+                     System.out.print("Coordinates: " + "(" +centerX + ", " + centerY + ") ");
+                     System.out.print("Width: " + rect.width + ", Height: " + rect.height); ***/
 
                     /* Small QR rects. TODO: Need to detect these from within the larger rect area instead */
-                    for(int j = 0; j < externalRects.size(); j++) {
+                    for (int j = 0; j < externalRects.size(); j++) {
                         Rect erect = externalRects.get(j);
 
-                        if(rect == erect) {
+                        if (rect == erect) {
                             continue;
                         }
 
-                        if(rect.x > erect.x && rect.width < erect.width && rect.y > erect.y && rect.height < erect.height) {
-                           /*** System.out.println(" | INTERNAL"); ***/
+                        if (rect.x > erect.x && rect.width < erect.width && rect.y > erect.y && rect.height < erect.height) {
+                            /*** System.out.println(" | INTERNAL"); ***/
                             externalCustomRectangles.get(j).addChild(1);
                             Imgproc.rectangle(imgcol, rect.br(), rect.tl(), RED, 3, 8, 0);
                         } else {
-                           /***  System.out.println(" | NOT INTERNAL "); **/
+                            /***  System.out.println(" | NOT INTERNAL "); **/
                         }
-                   }
+                    }
                 }
             }
         }
@@ -302,16 +290,16 @@ public class ImageProcessor {
         boolean first = true;
 
         /* Define and find QRCodes as rectangles with 3 or more children */
-        for(ExternalRectangle e : externalCustomRectangles) {
-            if(e.getChildren() >= 2) {
+        for (ExternalRectangle e : externalCustomRectangles) {
+            if (e.getChildren() >= 2) {
                 QRCodes.add(e);
-               /*** System.out.println("QR code found!"); ***/
+                /*** System.out.println("QR code found!"); ***/
             }
         }
 
         /* Determine the largest height */
-        for(ExternalRectangle e : QRCodes) {
-            if(first) {
+        for (ExternalRectangle e : QRCodes) {
+            if (first) {
                 biggestQRCode = e.getRect();
                 first = false;
             } else if (e.getRect().height > biggestQRCode.height) {
@@ -319,14 +307,11 @@ public class ImageProcessor {
             }
         }
 
-        if(biggestQRCode != null) {
+        if (biggestQRCode != null) {
             // set field
             this.biggestQRCode = biggestQRCode;
-//            long time = System.currentTimeMillis();
             Imgproc.rectangle(imgcol, biggestQRCode.br(), biggestQRCode.tl(), NEON_GREEN, 3, 8, 0);
-//            System.out.println("Imgproc.rectangle() ran for " + (double) (time-System.currentTimeMillis())/1000 + " seconds");
-            count++;
-            /*** System.out.println("Biggest QR code is at: " + "(" + e.getRect().x + ", " + e.getRect().y + ")"); ***/
+            /*** System.out.println("Biggest QR code is at: " + "(" + biggestQRCode.x + ", " + biggestQRCode.y + ")"); ***/
         }
     }
 
@@ -347,8 +332,8 @@ public class ImageProcessor {
 //
 //        /* Find the object with the biggest QRCode,
 //         * then define its rotated rect */
-//        for(ExternalRectangle e : QRCodes) {
-//            if(e.getRect() == biggestQRCode) {
+//        for (ExternalRectangle e : QRCodes) {
+//            if (e.getRect() == biggestQRCode) {
 //                matOfPoint2f.fromList(e.getContour().toList());
 //                rRect = Imgproc.minAreaRect(matOfPoint2f);
 //            }
@@ -398,25 +383,25 @@ public class ImageProcessor {
 //    }
 
     // Tjekker forholdet for den fundne rektangel
-    void checkForA4Papir(Rect rect){
+    void checkForA4Papir(Rect rect) {
         // Er det et A4 papir frontalt foran kameraet skal det være ~ 1:1.5 højde/bredde ratio.
         double ratio = (double) rect.height / (double) rect.width;
-        if ( ratio < 1.5 && ratio > 1.3){
+        if (ratio < 1.5 && ratio > 1.3) {
             System.out.println("Fandt A4 papir med Width: " + rect.width + ", Heigth: " + rect.height);
         }
     }
 
     // TODO: Skift værdierne der tjekkes for, så de passer til dronens kameraopløsning
-    public Direction findPaperPosition(Rect rect){
-        if (rect.x > 0 && rect.x < 426){
+    public Direction findPaperPosition(Rect rect) {
+        if (rect.x > 0 && rect.x < 512) {
             return Direction.LEFT;
         }
 
-        if (rect.x > 426 && rect.x < 854){
+        if (rect.x > 512 && rect.x < 768) {
             return Direction.CENTER;
         }
 
-        if (rect.x > 854 && rect.x < 1280){
+        if (rect.x > 768 && rect.x < 1280) {
             return Direction.RIGHT;
         }
         return Direction.UNKNOWN;
@@ -440,18 +425,17 @@ public class ImageProcessor {
      * @param mat Mat
      * @return BufferedImage
      */
-    public BufferedImage matToBufferedImage(Mat mat){
+    public BufferedImage matToBufferedImage(Mat mat) {
         try {
             MatOfByte mob = new MatOfByte();
             Imgcodecs.imencode(".jpg", mat, mob);
             return ImageIO.read(new ByteArrayInputStream(mob.toArray()));
-        } catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
         return null;
     }
-
 
     /***TEST METHOD ## Detect edges using a threshold ***/
 //    public Mat detectEdgesThreshold() {
@@ -469,4 +453,137 @@ public class ImageProcessor {
     public Rect getBiggestQRCode() {
         return biggestQRCode;
     }
+
+    /*
+     * Funktion der finder cirkler samt tegner dem
+     * dp = pixelreduktionsgrad
+     * minDist = minimum radius i pixelantal
+     * TODO: Udvid funktion således at det returneres om cirklen er til henholdsvis venstre/højre/centrum af billedet. Kig på Point koordinater.
+     *
+     * PROBLEM: Finder mange cirkler, også hvor der ikke giver mening.
+     */
+
+    private Mat findCircleAndDraw(Mat image, int dp, int minDist) {
+        Mat circlePosition = new Mat();
+        Mat hsv_image = new Mat();
+        //Parameter tjek
+        if (dp <= 0) dp = 1;
+        if (minDist <= 0) minDist = 1;
+
+        cvtColor(image, hsv_image, Imgproc.COLOR_BGR2HSV);
+        Mat lower_red = new Mat();
+        Mat upper_red = new Mat();
+
+        Core.inRange(hsv_image, new Scalar(0, 100, 100), new Scalar(10, 255, 255), lower_red);
+        Core.inRange(hsv_image, new Scalar(160, 100, 100), new Scalar(179, 255, 255), upper_red);
+
+        Mat red_hue_image = new Mat();
+        Core.addWeighted(lower_red, 1, upper_red, 1, 0, red_hue_image);
+
+        GaussianBlur(red_hue_image, red_hue_image, new Size(9, 9), 2, 2);
+
+        Imgproc.HoughCircles(red_hue_image, circlePosition, Imgproc.CV_HOUGH_GRADIENT, dp, red_hue_image.rows() / 8, 100, 30, 50, 10000);
+
+        //cvtColor(image, image, Imgproc.COLOR_BGR2GRAY);
+        //medianBlur(image, image, 15);   // averaging filter for ksize pixels
+        // finder objekter der ligner cirkler og gemmer deres position i circlePosition
+
+        // fortsæt kun, hvis der er fundet én eller flere cirkler
+        Point maxCenter;
+        if (circlePosition.empty() == false) {
+            //System.out.println("Fandt: " + circlePosition.cols() + " cirkler");
+
+            // sætter cirklens farve
+            double farve = 100;
+            Scalar color = new Scalar(farve);
+
+            int maxRadius = 0;
+            for (int i = 0; i < circlePosition.cols(); i++) // antallet af kolonner angiver antallet af cirkler fundet
+            {
+                double[] testArr = circlePosition.get(0, i);
+                //System.out.println("\nCirkel nr. " + (i + 1) + " fundet på:\nx-koord: " + testArr[0] + "\ny-koord: " + testArr[1] + "\nradius: " + testArr[2]);
+
+
+                // sætter cirklens centrum
+                Point center = new Point(testArr[0], testArr[1]);
+
+                // parser radius til int for at efterleve parametre krav i circle()
+                double radiusDouble = testArr[2];
+                int radius = (int) radiusDouble;
+                // Vi ønsker kun at tegne den største cirkel
+                if (maxRadius < radius) {
+                    maxRadius = radius;
+                    biggestCircle.x = center.x;
+                    biggestCircle.y = center.y;
+                }
+            }
+            // tegner cirklen
+            Imgproc.circle(image, biggestCircle, maxRadius, color);
+        } else {
+            System.out.println("Der blev ikke fundet nogle cirkler i billedet");
+            return null;
+        }
+        return image;
+    }
+
+
+    public Direction findDirectionFromCircle(Point circleCoordinate) {
+        if (circleCoordinate == null) {
+            System.out.println("Point er ikke initialiseret");
+            return Direction.UNKNOWN;
+        } else {
+            double x = circleCoordinate.x;
+            if (x > 0 && x < 512) return Direction.LEFT;
+            else if (x > 512 && x < 768) return Direction.CENTER; // 256px (1/5 af billedeopløsningen på 1280)
+            else if (x > 768 && x < 1280) return Direction.RIGHT;
+            else {
+                return Direction.UNKNOWN;
+            }
+        }
+    }
+
+    private void benchmark(Shape s) {
+        int counter = 0;
+        long startTime = System.currentTimeMillis();
+        Mat img = openFile("3.jpg");
+
+        while (10000 > System.currentTimeMillis() - startTime) {
+            if (s == Shape.CIRCLE) {
+                findCircleAndDraw(img, 1, 150);
+            } else if (s == Shape.RECTANGLE) {
+                filterImage(matToBufferedImage(img));
+            } else {
+                System.out.println("No valid shape");
+            }
+            counter++;
+        }
+
+        long stopTime = System.currentTimeMillis();
+        System.out.println("Total time: " + (double) (stopTime - startTime) / 1000 + " seconds.");
+        System.out.println("Program ran " + counter + " times.");
+    }
+
+
+    /*
+     * Ikke færdig.
+     *
+     * Skal finde cirkel, lige nu forsøges med diverse metoder for at se hvad virker bedst
+     */
+//    Mat FindCircle_v2(Mat img){
+//        //Sorterer vise farver fra, så vi ender med tydeligere cirkler
+//        img = detectEdgesThreshold(img); // from javacv... find opencv alternative
+//
+//        // Fjerner farver, så vi kun har røde farver tilbage
+//        Scalar lower_red = new Scalar(0,0,125);
+//        Scalar upper_red = new Scalar(0,0,255);
+//        Core.inRange(img, lower_red, upper_red, img);
+//
+//
+//        // Find kanter med canny()
+//        int threshold1 = 100;
+//        int threshhold2 = 200;
+//        //img = detectEdgesCanny(img, threshold1, threshhold2); // denne funk virker kun halvt
+//
+//        return img;
+//    }
 }
