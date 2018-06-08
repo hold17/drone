@@ -4,7 +4,6 @@ import dk.localghost.hold17.base.IARDrone;
 import javafx.event.EventHandler;
 import javafx.scene.input.KeyEvent;
 
-
 public class KeyboardCommandManager implements EventHandler<KeyEvent> {
     private DroneController controller;
     private IARDrone drone;
@@ -36,9 +35,9 @@ public class KeyboardCommandManager implements EventHandler<KeyEvent> {
                 drone.getCommandManager().spinLeft(DroneController.getSpeed()); break;
             case E: case RIGHT:
                 drone.getCommandManager().spinRight(DroneController.getSpeed()); break;
-            case X: case UP:
+            case UP:
                 drone.up(); break;
-            case Z: case DOWN:
+            case DOWN:
                 drone.down(); break;
             case SPACE:
                 controller.takeoffOrLand();
@@ -55,6 +54,9 @@ public class KeyboardCommandManager implements EventHandler<KeyEvent> {
             case BACK_SPACE:
                 controller.stop();
                 System.exit(0);
+                break;
+            case X:
+                controller.bum(); break;
         }
     }
 }

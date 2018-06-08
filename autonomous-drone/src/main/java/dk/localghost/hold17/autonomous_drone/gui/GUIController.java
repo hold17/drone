@@ -56,5 +56,4 @@ public class GUIController {
         // update imageView with new image every 33ms (30 fps)
         this.timer.schedule(frameGrabber, 0, 33);
     }
-
 }

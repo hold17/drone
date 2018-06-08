@@ -42,26 +42,7 @@ public class ImageProcessor {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
 
-    public ImageProcessor() {
-        try {
-            /* filterImage() runs detectWhiteMat(), then finds contours and runs drawRectangles() */
-            long startTime = System.currentTimeMillis();
-            int count = 0;
-            while(10000 >  System.currentTimeMillis() - startTime) {
-                filterImage();
-                count++;
-            }
-            System.out.println("Program ran " + count + " times.");
-            saveFile("filtered.jpg", filterImage());
-        } catch (Exception e) {
-            System.err.println("Something went wrong: " + e.toString());
-            e.printStackTrace();
-        }
-    }
-
-    public static void main(String[] args) {
-        new ImageProcessor();
-    }
+    public ImageProcessor() { }
 
     /***
      * Open file as matrix
@@ -84,7 +65,7 @@ public class ImageProcessor {
     /*** Save matrix to file ***/
     public void saveFile(String fileName, Mat testMat) {
         final String path = Paths.get("").toAbsolutePath().toString();
-        final String filePath = (path + "/TestImages/" + fileName).replace('/', '\\');
+        final String filePath = (path + "/TestImages/" + fileName)/*.replace('/', '\\')*/;
         Imgcodecs.imwrite(filePath, testMat);
         System.out.println("File saved to " + filePath);
     }
@@ -93,22 +74,13 @@ public class ImageProcessor {
      * Convert image to a binary matrix and remove everything that is not the desired shade of white
      * @return Mat
      */
-    public Mat detectWhiteMat() {
-        Mat img, imgbin;
+    public Mat detectWhiteMat(Mat image) {
+        Mat imgbin = new Mat();
 
-        try {
-            img = openFile("unfiltered.jpg");
-            imgbin = new Mat();
+        /* Write 1 if in range of the two scalars, 0 if not. Binary image result written to imgbin */
+        Core.inRange(image, new Scalar(180, 180, 180, 0), new Scalar(255, 255, 255, 0), imgbin);
 
-            /* Write 1 if in range of the two scalars, 0 if not. Binary image result written to imgbin */
-            Core.inRange(img, new Scalar(225, 225, 225, 0), new Scalar(255, 255, 255, 0), imgbin);
-
-            return imgbin;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        return imgbin;
     }
 
     /*** Denoise binary image,
@@ -118,15 +90,28 @@ public class ImageProcessor {
      *   Run determinePaperOrientation;
      * @return Mat
      */
-    public Mat filterImage() {
-        Mat imgbin = detectWhiteMat();
+    public Mat filterImage(BufferedImage bufferedImage) {
+        QRCodes.clear();
+        externalRects.clear();
+
+        Mat originalImage = null;
+
+        try {
+            originalImage = bufferedImageToMat(bufferedImage);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        saveFile("originialImage.jpg", originalImage);
+
+        Mat imgbin = detectWhiteMat(originalImage);
         Mat imgcol = new Mat();
         Mat hierarchy1 = new Mat();
         Mat hierarchy2 = new Mat();
 
         //Denoise binary image using medianBlur and OPEN
-        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
-        Imgproc.medianBlur(imgbin, imgbin, 5);
+        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3));
+//        Imgproc.medianBlur(imgbin, imgbin, 3);
         Imgproc.morphologyEx(imgbin, imgbin, Imgproc.MORPH_OPEN, kernel);
 
         //Contours are matrices of points. We store all of them in this list.
@@ -262,7 +247,7 @@ public class ImageProcessor {
                 }
             }
         }
-
+        saveFile("rectangles.jpg", imgcol);
         findBiggestQRCode(imgcol);
 
         return imgcol;
@@ -334,47 +319,47 @@ public class ImageProcessor {
         /* Take the vertices of rRect and store in vertices[], then make a rotatedBox
          * from by drawing the contour. Use approxPolyDP() to approximate the endpoints,
          * and store them in a list. */
-        Point[] vertices = new Point[4];
-        rRect.points(vertices);
-        rotatedBox.add(new MatOfPoint(vertices));
-        boxMop2f.fromList(rotatedBox.get(0).toList());
-        drawContours(imgcol, rotatedBox, 0, YELLOW, 3);
-
-        Imgproc.approxPolyDP(boxMop2f, approx, Imgproc.arcLength(boxMop2f, true) * 0.1, true);
-        List<Point> approxList = approx.toList();
-
-        /* Make sure that approxPolyDP found 4 points */
-        if (approxList.size() == 4) {
-
-            /* Sort the coordinates in ascending y-coords
-             * Index 0 is the lowest point of the rotated rectangle */
-            Collections.sort(approxList, PointComparator.Y_COORD);
-            Point lower1 = approxList.get(0);
-            Point lower2 = approxList.get(1);
-
-            /* Draw all points as filled circles in red */
-            for (Point p : approxList) {
-                Imgproc.circle(imgcol, new Point(p.x, p.y), 10, RED, Core.FILLED);
-            }
-
-            /* If the lowest point is to the right of the second lowest point,
-             * the drone is to the right of the paper. Then the opposite.
-             */
-            if(lower1.x > lower2.x) {
-               /*** System.out.println("Lowest point is in the right side of rotated rect at point " + lower1);
-                System.out.println("Drone is looking at the QR code from the RIGHT"); ***/
-                Imgproc.circle(imgcol, lower1, 15, CYAN, Core.FILLED);
-            }
-            else if(lower1.x < lower2.x) {
-                /*** System.out.println("Lowest point is in the right side of rotated rect at point " + lower1);
-                System.out.println("Drone is looking at the QR code from the LEFT"); ***/
-                Imgproc.circle(imgcol, lower1, 15, CYAN, Core.FILLED);
-            }
-        }
+//        Point[] vertices = new Point[4];
+//        rRect.points(vertices);
+//        rotatedBox.add(new MatOfPoint(vertices));
+//        boxMop2f.fromList(rotatedBox.get(0).toList());
+//        drawContours(imgcol, rotatedBox, 0, YELLOW, 3);
+//
+//        Imgproc.approxPolyDP(boxMop2f, approx, Imgproc.arcLength(boxMop2f, true) * 0.1, true);
+//        List<Point> approxList = approx.toList();
+//
+//        /* Make sure that approxPolyDP found 4 points */
+//        if (approxList.size() == 4) {
+//
+//            /* Sort the coordinates in ascending y-coords
+//             * Index 0 is the lowest point of the rotated rectangle */
+//            Collections.sort(approxList, PointComparator.Y_COORD);
+//            Point lower1 = approxList.get(0);
+//            Point lower2 = approxList.get(1);
+//
+//            /* Draw all points as filled circles in red */
+//            for (Point p : approxList) {
+//                Imgproc.circle(imgcol, new Point(p.x, p.y), 10, RED, Core.FILLED);
+//            }
+//
+//            /* If the lowest point is to the right of the second lowest point,
+//             * the drone is to the right of the paper. Then the opposite.
+//             */
+//            if(lower1.x > lower2.x) {
+//               /*** System.out.println("Lowest point is in the right side of rotated rect at point " + lower1);
+//                System.out.println("Drone is looking at the QR code from the RIGHT"); ***/
+//                Imgproc.circle(imgcol, lower1, 15, CYAN, Core.FILLED);
+//            }
+//            else if(lower1.x < lower2.x) {
+//                /*** System.out.println("Lowest point is in the right side of rotated rect at point " + lower1);
+//                System.out.println("Drone is looking at the QR code from the LEFT"); ***/
+//                Imgproc.circle(imgcol, lower1, 15, CYAN, Core.FILLED);
+//            }
+//        }
     }
 
     // Tjekker forholdet for den fundne rektangel
-    void TjekForA4Papir(Rect rect){
+    void checkForA4Papir(Rect rect){
         // Er det et A4 papir frontalt foran kameraet skal det være ~ 1:1.5 højde/bredde ratio.
         double ratio = (double) rect.height / (double) rect.width;
         if ( ratio < 1.5 && ratio > 1.3){
@@ -385,19 +370,19 @@ public class ImageProcessor {
 
 
     // TODO: Skift værdierne der tjekkes for, så de passer til dronens kameraopløsning
-    String FindPaperPosition(Rect rect){
-        if (rect.x > 0 && rect.x < 1533){
-            return "Til venstre\n";
+    public Direction findPaperPosition(Rect rect){
+        if (rect.x > 0 && rect.x < 426){
+            return Direction.LEFT;
         }
 
-        if (rect.x > 1533 && rect.x < 3066){
-            return "I centrum\n";
+        if (rect.x > 426 && rect.x < 854){
+            return Direction.CENTER;
         }
 
-        if (rect.x > 3066 && rect.x < 4640){
-            return "Til højre\n";
+        if (rect.x > 854 && rect.x < 1280){
+            return Direction.RIGHT;
         }
-        return "Papirets position blev ikke fundet\n";
+        return Direction.UNKNOWN;
     }
 
     /***
@@ -426,17 +411,21 @@ public class ImageProcessor {
     }
 
 
-    /***TEST METHOD ## Detect edges using a threshold ***/
-    public Mat detectEdgesThreshold() {
-        Mat imgbin = detectWhiteMat();
-        threshold(imgbin, imgbin, 127, 255, Imgproc.THRESH_BINARY);
-        return imgbin;
-    }
+//    /***TEST METHOD ## Detect edges using a threshold ***/
+//    public Mat detectEdgesThreshold() {
+//        Mat imgbin = detectWhiteMat();
+//        threshold(imgbin, imgbin, 127, 255, Imgproc.THRESH_BINARY);
+//        return imgbin;
+//    }
+//
+//    /***TEST METHOD ## Detect edges using canny ***/
+//    public Mat detectEdgesCanny() {
+//        Mat imgbin = detectWhiteMat();
+//        Imgproc.Canny(imgbin, imgbin, 100, 200);
+//        return imgbin;
+//    }
 
-    /***TEST METHOD ## Detect edges using canny ***/
-    public Mat detectEdgesCanny() {
-        Mat imgbin = detectWhiteMat();
-        Imgproc.Canny(imgbin, imgbin, 100, 200);
-        return imgbin;
+    public Rect getBiggestQRCode() {
+        return biggestQRCode;
     }
 }
