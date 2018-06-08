@@ -60,10 +60,6 @@ public class DroneController {
         qrScanner.addListener(qrController);
 
         LEDSuccess();
-
-        QRCodeScanner qrScanner = new QRCodeScanner();
-        drone.getVideoManager().addImageListener(qrScanner::imageUpdated);
-        qrScanner.addListener(new QRScannerController());
     }
 
     private void initializeListeners() {
@@ -233,7 +229,7 @@ public class DroneController {
             cmd.hover();
             cmd.waitFor(1000);
 
-            qrController.resetQrDirection();
+//            qrController.resetQrDirection();
         }
     }
 
