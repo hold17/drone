@@ -40,9 +40,6 @@ public class ImageProcessor {
     private String outputName = "4filtered.jpg";
     private String imgNumber = "4";
 
-    private int count;
-
-
     // Global variabel for centrum af største cirkel.
     private Point biggestCircle = new Point();
 
@@ -52,25 +49,15 @@ public class ImageProcessor {
     }
 
     public ImageProcessor() {
-        try {
-            BufferedImage img = matToBufferedImage(openFile(fileName));
-            /* filterImage() runs detectWhiteMat(), then finds contours and runs drawRectangles() */
+//            BufferedImage img = matToBufferedImage(openFile(fileName));
+//            benchmark(Shape.CIRCLE);
+//            benchmark(Shape.RECTANGLE);
 
-            //benchmark(Shape.CIRCLE);
-            //benchmark(Shape.RECTANGLE);
-
-
-            Mat img_circle = new Mat();
-            img_circle = openFile("3.jpg");
-            findCircleAndDraw(img_circle, 1, 150);
-            Direction direction = findDirectionFromCircle(biggestCircle);
-            System.out.println(direction);
-            saveFile(outputName, img_circle);
-
-        } catch (Exception e) {
-            System.err.println("Something went wrong: " + e.toString());
-            e.printStackTrace();
-        }
+        Mat img_circle = openFile("3.jpg");
+        findCircleAndDraw(img_circle, 1, 150);
+        Direction direction = findDirectionFromCircle(biggestCircle);
+        System.out.println(direction);
+        saveFile(outputName, img_circle);
     }
 
 //    public static void main(String[] args) {
@@ -322,14 +309,11 @@ public class ImageProcessor {
             }
         }
 
-        if(biggestQRCode != null) {
+        if (biggestQRCode != null) {
             // set field
             this.biggestQRCode = biggestQRCode;
-//            long time = System.currentTimeMillis();
             Imgproc.rectangle(imgcol, biggestQRCode.br(), biggestQRCode.tl(), NEON_GREEN, 3, 8, 0);
-//            System.out.println("Imgproc.rectangle() ran for " + (double) (time-System.currentTimeMillis())/1000 + " seconds");
-            count++;
-            /*** System.out.println("Biggest QR code is at: " + "(" + e.getRect().x + ", " + e.getRect().y + ")"); ***/
+            /*** System.out.println("Biggest QR code is at: " + "(" + biggestQRCode.x + ", " + biggestQRCode.y + ")"); ***/
         }
     }
 
@@ -443,18 +427,17 @@ public class ImageProcessor {
      * @param mat Mat
      * @return BufferedImage
      */
-    public BufferedImage matToBufferedImage(Mat mat){
+    public BufferedImage matToBufferedImage(Mat mat) {
         try {
             MatOfByte mob = new MatOfByte();
             Imgcodecs.imencode(".jpg", mat, mob);
             return ImageIO.read(new ByteArrayInputStream(mob.toArray()));
-        } catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
         return null;
     }
-
 
     /***TEST METHOD ## Detect edges using a threshold ***/
 //    public Mat detectEdgesThreshold() {
@@ -488,7 +471,6 @@ public class ImageProcessor {
         //Parameter tjek
         if (dp <= 0) dp = 1;
         if (minDist <= 0) minDist = 1;
-
 
         cvtColor(image, hsv_image, Imgproc.COLOR_BGR2HSV);
         Mat lower_red = new Mat();
@@ -548,8 +530,7 @@ public class ImageProcessor {
 
 
     public Direction findDirectionFromCircle(Point circleCoordinate) {
-        if (circleCoordinate == null)
-        {
+        if (circleCoordinate == null) {
             System.out.println("Point er ikke initialiseret");
             return Direction.UNKNOWN;
         } else {
@@ -563,20 +544,17 @@ public class ImageProcessor {
         }
     }
 
-    private void benchmark(Shape s){
+    private void benchmark(Shape s) {
         int counter = 0;
         long startTime = System.currentTimeMillis();
-        int count = 0;
-        Mat img = new Mat();
-        img = openFile("3.jpg");
+        Mat img = openFile("3.jpg");
 
-        while (10000 > System.currentTimeMillis() - startTime)
-        {
+        while (10000 > System.currentTimeMillis() - startTime) {
             if (s == Shape.CIRCLE) {
                 findCircleAndDraw(img, 1, 150);
-            } else if (s == Shape.RECTANGLE){
+            } else if (s == Shape.RECTANGLE) {
                 filterImage(matToBufferedImage(img));
-            } else{
+            } else {
                 System.out.println("No valid shape");
             }
             counter++;
@@ -585,8 +563,6 @@ public class ImageProcessor {
         long stopTime = System.currentTimeMillis();
         System.out.println("Total time: " + (double) (stopTime - startTime) / 1000 + " seconds.");
         System.out.println("Program ran " + counter + " times.");
-        System.out.println("Ran rectangle() " + count + " times.");
-
     }
 
 
