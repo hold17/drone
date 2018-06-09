@@ -547,19 +547,7 @@ public class ImageProcessor {
         } else {
             double x = circleCoordinate.x;
             double y = circleCoordinate.y;
-            if(Direction.upCenter(x,y) != null) return Direction.UPCENTER;
-            else if(Direction.center(x,y) != null) return Direction.CENTER;
-            else if(Direction.downCenter(x,y) != null) return Direction.DOWNCENTER;
-            else if(Direction.upLeft(x,y) != null) return Direction.UPLEFT;
-            else if(Direction.left(x,y) !=null) return Direction.LEFT;
-            else if(Direction.downLeft(x,y) != null) return Direction.DOWNLEFT;
-            else if(Direction.upRight(x,y) != null) return Direction.UPRIGHT;
-            else if(Direction.right(x,y) != null) return Direction.RIGHT;
-            else if(Direction.downRight(x,y) != null) return Direction.DOWNRIGHT;
-
-            else {
-                return Direction.UNKNOWN;
-            }
+            return Direction.exactDirection(x,y);
         }
     }
 
