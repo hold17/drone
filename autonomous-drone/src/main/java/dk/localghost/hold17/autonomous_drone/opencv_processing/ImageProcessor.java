@@ -119,12 +119,7 @@ public class ImageProcessor {
 
         Mat originalImage = null;
 
-        try {
-            originalImage = bufferedImageToMat(bufferedImage);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        originalImage = bufferedImageToMat(bufferedImage);
         //saveFile("originialImage.jpg", originalImage);
 
         Mat imgbin = detectWhiteMat(originalImage);
@@ -413,11 +408,15 @@ public class ImageProcessor {
      * @return Mat
      * @throws IOException
      */
-    public Mat bufferedImageToMat(BufferedImage img) throws IOException {
-        ByteArrayOutputStream outstream = new ByteArrayOutputStream();
-        ImageIO.write(img, "jpg", outstream);
-        outstream.flush();
-        return Imgcodecs.imdecode(new MatOfByte(outstream.toByteArray()), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
+    public Mat bufferedImageToMat(BufferedImage img) {
+        try (ByteArrayOutputStream outstream = new ByteArrayOutputStream()) {
+            ImageIO.write(img, "jpg", outstream);
+            outstream.flush();
+            return Imgcodecs.imdecode(new MatOfByte(outstream.toByteArray()), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /***
@@ -463,7 +462,7 @@ public class ImageProcessor {
      * PROBLEM: Finder mange cirkler, også hvor der ikke giver mening.
      */
 
-    private Mat findCircleAndDraw(Mat image, int dp, int minDist) {
+    public Mat findCircleAndDraw(Mat image, int dp, int minDist) {
         Mat circlePosition = new Mat();
         Mat hsv_image = new Mat();
         //Parameter tjek
@@ -541,6 +540,28 @@ public class ImageProcessor {
             }
         }
     }
+    public Direction findDirectionFromCircleGRID(Point circleCoordinate) {
+        if (circleCoordinate == null) {
+            System.out.println("Point er ikke initialiseret");
+            return Direction.UNKNOWN;
+        } else {
+            double x = circleCoordinate.x;
+            double y = circleCoordinate.y;
+            if(Direction.upCenter(x,y) != null) return Direction.UPCENTER;
+            else if(Direction.center(x,y) != null) return Direction.CENTER;
+            else if(Direction.downCenter(x,y) != null) return Direction.DOWNCENTER;
+            else if(Direction.upLeft(x,y) != null) return Direction.UPLEFT;
+            else if(Direction.left(x,y) !=null) return Direction.LEFT;
+            else if(Direction.downLeft(x,y) != null) return Direction.DOWNLEFT;
+            else if(Direction.upRight(x,y) != null) return Direction.UPRIGHT;
+            else if(Direction.right(x,y) != null) return Direction.RIGHT;
+            else if(Direction.downRight(x,y) != null) return Direction.DOWNRIGHT;
+
+            else {
+                return Direction.UNKNOWN;
+            }
+        }
+    }
 
     private void benchmark(Shape s) {
         int counter = 0;
@@ -562,6 +583,7 @@ public class ImageProcessor {
         System.out.println("Total time: " + (double) (stopTime - startTime) / 1000 + " seconds.");
         System.out.println("Program ran " + counter + " times.");
     }
+
 
 
     /*
