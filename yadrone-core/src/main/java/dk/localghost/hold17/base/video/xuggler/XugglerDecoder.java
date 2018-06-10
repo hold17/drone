@@ -38,6 +38,7 @@ public class XugglerDecoder implements VideoDecoder {
             IStreamCoder coder = stream.getStreamCoder();
 
             if (coder.getCodecType() == ICodec.Type.CODEC_TYPE_VIDEO) {
+                System.out.println("framerate: " + stream.getFrameRate());
                 videoStreamId = i;
                 videoCoder = coder;
                 break;
@@ -52,6 +53,8 @@ public class XugglerDecoder implements VideoDecoder {
          */
         if (videoCoder.open(null, null) < 0)
             throw new RuntimeException("could not open video decoder for container");
+
+        System.out.println("frame dimensions (WxH): " + videoCoder.getWidth() + "x" + videoCoder.getHeight());
 
         IVideoResampler resampler = null;
         if (videoCoder.getPixelType() != IPixelFormat.Type.BGR24) {
@@ -165,13 +168,15 @@ public class XugglerDecoder implements VideoDecoder {
                             //IConverter converter = ConverterFactory.createConverter(ConverterFactory.XUGGLER_BGR_24, picture);
 
                             // And finally, convert the BGR24 to an Java buffered image
-//							System.out.println("3 create BufferedImage");
+							System.out.println("3 create BufferedImage");
                             IConverter converter = ConverterFactory.createConverter(ConverterFactory.XUGGLER_BGR_24, newPic);
                             BufferedImage javaImage = converter.toImage(newPic);
 
                             // and display it on the Java Swing window
                             if (listener != null)
                                 listener.imageUpdated(javaImage);
+                        } else {
+                            System.out.println("frame incomplete!");
                         }
                     } // end of while
                 } catch (Exception exc) {
@@ -185,8 +190,6 @@ public class XugglerDecoder implements VideoDecoder {
                  * This packet isn't part of our video stream, so we just
                  * silently drop it.
                  */
-                do {
-                } while (false);
             }
 
         }

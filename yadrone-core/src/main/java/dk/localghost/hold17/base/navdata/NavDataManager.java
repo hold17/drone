@@ -435,18 +435,19 @@ public class NavDataManager extends AbstractUDPManager {
 
     @Override
     public synchronized void run() {
+        System.out.println("NavDataManager: connect");
         connect(ARDroneUtils.NAV_PORT);
         if (!connected) {
             connectionStateEvent.stateDisconnected();
             return;
         }
+        System.out.println("NavDataManager: tickle");
         ticklePort(ARDroneUtils.NAV_PORT);
         boolean bootstrapping = true;
         boolean controlAck = false;
         DatagramPacket packet = new DatagramPacket(new byte[MAX_PACKET_SIZE], MAX_PACKET_SIZE);
         while (!doStop) {
             try {
-
                 socket.receive(packet);
                 // ticklePort(ARDroneUtils.NAV_PORT);
                 ByteBuffer buffer = ByteBuffer.wrap(packet.getData(), 0, packet.getLength());
@@ -491,7 +492,8 @@ public class NavDataManager extends AbstractUDPManager {
                 System.err.println("Navdata reception timeout");
                 excListener.exceptionOccurred(new dk.localghost.hold17.base.exception.NavDataException(t));
                 connectionStateEvent.stateDisconnected();
-                this.ticklePort(ARDroneUtils.NAV_PORT);
+                System.out.println("NavDataManager: tickle");
+                ticklePort(ARDroneUtils.NAV_PORT);
             } catch (Throwable t) {
                 // continue whatever goes wrong
                 t.printStackTrace();
