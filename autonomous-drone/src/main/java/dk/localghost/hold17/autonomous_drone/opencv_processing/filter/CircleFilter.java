@@ -118,14 +118,14 @@ public class CircleFilter {
         return image;
     }
 
-    public Direction findDirectionFromCircleGrid(Point circleCoordinate) {
+    public Direction findDirectionFromCircle(Point circleCoordinate) {
         if (circleCoordinate == null) {
             System.out.println("Point er ikke initialiseret");
             return Direction.UNKNOWN;
         } else {
             double x = circleCoordinate.x;
-            double y = circleCoordinate.y;
-            return Direction.exactDirection(x, y);
+//            double y = circleCoordinate.y;
+            return Direction.findXDirection(x);
         }
     }
 
