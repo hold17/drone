@@ -61,9 +61,10 @@ public class GUIController {
 //                        filtered.setPreserveRatio(true);
                     });
 
-                } else {
-                   // System.out.println("bufferedImage was null"); // SILENCED UNTIL NEEDED
                 }
+                //else
+                // System.out.println("bufferedImage was null"); // SILENCED UNTIL NEEDED
+
             }
         };
         this.timer = new Timer();

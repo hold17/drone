@@ -279,7 +279,6 @@ public class DroneController {
 
     public void searchForQr() {
         String qrString = null;
-
         goToMinimumAltitude();
 
         for (int i = 0; i < 5; i++) {
@@ -290,8 +289,6 @@ public class DroneController {
             cmd.hover().doFor(1000);
             qrString = qrController.getLastScan();
             if (qrString != null) break;
-
-
 
             // SPIN LEFT
             cmd.spinLeft(100).doFor(100);
@@ -309,8 +306,6 @@ public class DroneController {
             // SPIN BACK (reset)
             cmd.spinLeft(100).doFor(100);
             if (qrString != null) break;
-
-
 
             // PAN LEFT
             cmd.goLeft(speed).doFor(500);
@@ -334,7 +329,6 @@ public class DroneController {
 
         qrController.resetLastScan();
         System.out.println("I FOUND QR: " + qrString);
-
         cmd.landing();
 
         goToMaxmimumAltitude();
