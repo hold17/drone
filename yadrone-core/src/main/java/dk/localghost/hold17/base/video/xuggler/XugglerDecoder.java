@@ -168,7 +168,7 @@ public class XugglerDecoder implements VideoDecoder {
                             //IConverter converter = ConverterFactory.createConverter(ConverterFactory.XUGGLER_BGR_24, picture);
 
                             // And finally, convert the BGR24 to an Java buffered image
-							System.out.println("3 create BufferedImage");
+//							System.out.println("3 create BufferedImage");
                             IConverter converter = ConverterFactory.createConverter(ConverterFactory.XUGGLER_BGR_24, newPic);
                             BufferedImage javaImage = converter.toImage(newPic);
 

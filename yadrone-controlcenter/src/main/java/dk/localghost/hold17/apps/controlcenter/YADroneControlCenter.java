@@ -2,7 +2,6 @@ package dk.localghost.hold17.apps.controlcenter;
 
 import dk.localghost.hold17.base.ARDrone;
 
-
 public class YADroneControlCenter {
     private ARDrone ardrone = null;
 
@@ -13,7 +12,7 @@ public class YADroneControlCenter {
     private void initialize() {
         try {
             //ardrone = new ARDrone();
-            ardrone = new ARDrone("10.0.1.2");
+            ardrone = new ARDrone("192.168.1.1");
             System.out.println("Connect drone controller");
             ardrone.start();
 
