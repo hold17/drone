@@ -11,7 +11,7 @@ public class Benchmark {
     public Benchmark() {
         filterHelper = new FilterHelper();
         rectangleFilter = new RectangleFilter();
-        circleFilter = new CircleFilter();
+//        circleFilter = new CircleFilter();
         benchmark(Shape.CIRCLE);
     }
 
