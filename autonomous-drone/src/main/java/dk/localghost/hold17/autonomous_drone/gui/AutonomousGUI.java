@@ -7,12 +7,10 @@ import dk.localghost.hold17.autonomous_drone.controller.QRScannerController;
 import dk.localghost.hold17.base.ARDrone;
 import dk.localghost.hold17.base.IARDrone;
 import javafx.application.Application;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 public class AutonomousGUI extends Application {
@@ -40,10 +38,11 @@ public class AutonomousGUI extends Application {
     public void start(Stage primaryStage) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("AutonomousGUI.fxml"));
-            BorderPane rootElement = loader.load();
-            Scene scene = new Scene(rootElement, 1280, 720);
+            Pane rootElement = loader.load();
+            Scene scene = new Scene(rootElement, 1020, 720);
             primaryStage.setTitle("Autonomous GUI for Hold 17");
             primaryStage.setScene(scene);
+
 
             droneController = new DroneController(drone, SPEED);
             KeyboardCommandManager keyboardManager = new KeyboardCommandManager(droneController);
