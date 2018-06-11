@@ -59,6 +59,8 @@ public class KeyboardCommandManager implements EventHandler<KeyEvent> {
             case X:
 //                controller.bum();
 //                drone.getCommandManager().schedule(0, controller::alignQrCode);
+                drone.getCommandManager().schedule(0, controller::searchForQr);
+//                drone.getCommandManager().schedule(0, controller::alignQrCode);
                 break;
             case Z:
 //                controller.bum();
