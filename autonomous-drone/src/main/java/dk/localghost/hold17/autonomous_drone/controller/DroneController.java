@@ -14,6 +14,7 @@ import java.awt.image.BufferedImage;
 public class DroneController {
     private IARDrone drone;
     private CommandManager cmd;
+    private QRScannerController qrController;
 
     private final static int MAX_ALTITUDE = 1400;
     private final static int MIN_ALTITUDE = 900;
@@ -25,6 +26,9 @@ public class DroneController {
     private BufferedImage droneCamera;
 
     private static int speed;
+
+    public static int cameraWidth;
+    public static int cameraHeight;
 
     public DroneController(IARDrone drone, int speed) {
         this.drone = drone;
@@ -49,6 +53,11 @@ public class DroneController {
         }
 
         drone.getVideoManager().addImageListener(camera -> this.droneCamera = camera);
+
+        final QRCodeScanner qrScanner = new QRCodeScanner();
+        qrController = new QRScannerController();
+        drone.getVideoManager().addImageListener(qrScanner::imageUpdated);
+        qrScanner.addListener(qrController);
 
         LEDSuccess();
     }
@@ -201,6 +210,27 @@ public class DroneController {
 
         rectangleFilter.findBiggestQRCode(rectangleFilter.filterImage(droneCamera));
         return rectangleFilter.findPaperPosition(rectangleFilter.getBiggestQRCode());
+    }
+
+    public void alignQrCode() {
+        final Direction qrDirection = qrController.getQrDirection();
+
+        for (int i = 0; i < 10; i++) {
+            if (qrDirection == Direction.LEFT) {
+                cmd.goLeft(speed).doFor(500);
+            } else if (qrDirection == Direction.RIGHT) {
+                cmd.goRight(speed).doFor(500);
+            } else if (qrDirection == Direction.CENTER) {
+                cmd.setLedsAnimation(LEDAnimation.BLINK_RED, 10, 2);
+            } else if (qrDirection == Direction.UNKNOWN) {
+                System.out.println("UNKNOWN");
+            }
+
+            cmd.hover();
+            cmd.waitFor(1000);
+
+            qrController.resetQrDirection();
+        }
     }
 
     public void LEDSuccess() {
