@@ -5,7 +5,7 @@ import dk.localghost.hold17.autonomous_drone.opencv_processing.Direction;
 
 public class QRScannerController implements TagListener {
 
-    private String lastScan = "";
+    private String lastScan = null;
     private Direction qrDirection = Direction.UNKNOWN;
 
     @Override
@@ -13,7 +13,6 @@ public class QRScannerController implements TagListener {
         final int CAMERA_HALF_WIDTH = DroneController.cameraWidth / 2;
 
         if (result == null) {
-//            qrDirection = Direction.UNKNOWN;
             return;
         }
 
@@ -28,9 +27,17 @@ public class QRScannerController implements TagListener {
         else
             qrDirection = Direction.CENTER;
 
-//        if (!lastScan.equals(result.getText()))
-        System.out.println("QR Scanned, Result: " + result.getText() + " at " + X + ", " + Y + "\tDirection: " + qrDirection);
         lastScan = result.getText();
+
+        System.out.println("QR Scanned, Result: " + lastScan + " at " + X + ", " + Y + "\tDirection: " + qrDirection);
+    }
+
+    public String getLastScan() {
+        return lastScan;
+    }
+
+    public void resetLastScan() {
+        lastScan = null;
     }
 
     public Direction getQrDirection() {
