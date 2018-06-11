@@ -231,7 +231,6 @@ public class DroneController {
 
             qrController.resetQrDirection();
         }
-
     }
 
     public void LEDSuccess() {
