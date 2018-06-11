@@ -194,11 +194,11 @@ public class DroneController {
         final Direction paperDirection = getPaperDirection();
 
         switch (paperDirection) {
-            case LEFT:
+            case LEFTCENTER:
                 System.out.println("Left"); break;
-            case RIGHT:
+            case RIGHTCENTER:
                 System.out.println("Right"); break;
-            case CENTER:
+            case CENTERCENTER:
                 System.out.println("Center"); break;
             case UNKNOWN:
                 System.out.println("Unknown"); break;
@@ -216,11 +216,11 @@ public class DroneController {
         final Direction qrDirection = qrController.getQrDirection();
 
         for (int i = 0; i < 10; i++) {
-            if (qrDirection == Direction.LEFT) {
+            if (qrDirection == Direction.LEFTCENTER) {
                 cmd.goLeft(speed).doFor(500);
-            } else if (qrDirection == Direction.RIGHT) {
+            } else if (qrDirection == Direction.RIGHTCENTER) {
                 cmd.goRight(speed).doFor(500);
-            } else if (qrDirection == Direction.CENTER) {
+            } else if (qrDirection == Direction.CENTERCENTER) {
                 cmd.setLedsAnimation(LEDAnimation.BLINK_RED, 10, 2);
             } else if (qrDirection == Direction.UNKNOWN) {
                 System.out.println("UNKNOWN");

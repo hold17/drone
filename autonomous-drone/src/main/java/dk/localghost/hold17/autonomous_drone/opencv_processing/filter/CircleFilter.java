@@ -116,9 +116,9 @@ public class CircleFilter {
             return Direction.UNKNOWN;
         } else {
             double x = circleCoordinate.x;
-            if (x > 0 && x < 512) return Direction.LEFT;
-            else if (x > 512 && x < 768) return Direction.CENTER; // 256px (1/5 af billedeopløsningen på 1280)
-            else if (x > 768 && x < 1280) return Direction.RIGHT;
+            if (x > 0 && x < 512) return Direction.LEFTCENTER;
+            else if (x > 512 && x < 768) return Direction.CENTERCENTER; // 256px (1/5 af billedeopløsningen på 1280)
+            else if (x > 768 && x < 1280) return Direction.RIGHTCENTER;
             else {
                 return Direction.UNKNOWN;
             }

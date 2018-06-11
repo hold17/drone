@@ -22,11 +22,11 @@ public class QRScannerController implements TagListener {
 
         // Center = 640
         if (X < CAMERA_HALF_WIDTH)
-            qrDirection = Direction.LEFT;
+            qrDirection = Direction.LEFTCENTER;
         else if (X > CAMERA_HALF_WIDTH)
-            qrDirection = Direction.RIGHT;
+            qrDirection = Direction.RIGHTCENTER;
         else
-            qrDirection = Direction.CENTER;
+            qrDirection = Direction.CENTERCENTER;
 
 //        if (!lastScan.equals(result.getText()))
         System.out.println("QR Scanned, Result: " + result.getText() + " at " + X + ", " + Y + "\tDirection: " + qrDirection);
