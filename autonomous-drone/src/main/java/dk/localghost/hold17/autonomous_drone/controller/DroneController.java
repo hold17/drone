@@ -233,6 +233,69 @@ public class DroneController {
         }
     }
 
+    public void searchForQr() {
+        String qrString = null;
+
+        goToMinimumAltitude();
+
+        for (int i = 0; i < 5; i++) {
+            System.out.println("Iteration: " + i);
+
+            // FORWARD
+            cmd.forward(speed).doFor(1000);
+            cmd.hover().doFor(1000);
+            qrString = qrController.getLastScan();
+            if (qrString != null) break;
+
+
+
+            // SPIN LEFT
+            cmd.spinLeft(100).doFor(100);
+            cmd.hover().doFor(1000);
+            qrString = qrController.getLastScan();
+            if (qrString != null) {
+                cmd.goRight(100).doFor(100);
+                break;
+            }
+
+            // SPIN RIGHT
+            cmd.spinRight(100).doFor(200);
+            cmd.hover().doFor(1000);
+            qrString = qrController.getLastScan();
+            // SPIN BACK (reset)
+            cmd.spinLeft(100).doFor(100);
+            if (qrString != null) break;
+
+
+
+            // PAN LEFT
+            cmd.goLeft(speed).doFor(500);
+            cmd.hover().doFor(1000);
+            qrString = qrController.getLastScan();
+            if (qrString != null) {
+                cmd.goRight(speed).doFor(250);
+                break;
+            }
+
+            // PAN RIGHT
+            cmd.goRight(speed).doFor(500);
+            cmd.hover().doFor(1000);
+            qrString = qrController.getLastScan();
+            // PAN BACK (reset)
+            cmd.goLeft(speed).doFor(250);
+            if (qrString != null) break;
+
+            cmd.hover().doFor(1000);
+        }
+
+        qrController.resetLastScan();
+        System.out.println("I FOUND QR: " + qrString);
+
+        cmd.landing();
+
+        goToMaxmimumAltitude();
+    }
+
     public void LEDSuccess() {
         drone.getCommandManager().setLedsAnimation(LEDAnimation.BLINK_GREEN, 10, 1);
     }
