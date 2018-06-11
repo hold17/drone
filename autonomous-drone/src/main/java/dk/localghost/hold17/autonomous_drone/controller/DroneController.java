@@ -1,6 +1,7 @@
 package dk.localghost.hold17.autonomous_drone.controller;
 
 import dk.localghost.hold17.autonomous_drone.opencv_processing.Direction;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.filter.CircleFilter;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.filter.RectangleFilter;
 import dk.localghost.hold17.base.IARDrone;
 import dk.localghost.hold17.base.command.CommandManager;
@@ -203,6 +204,48 @@ public class DroneController {
             case UNKNOWN:
                 System.out.println("Unknown"); break;
         }
+    }
+
+    public void alignCircle() {
+        CircleFilter filter = new CircleFilter(this);
+        Direction directionToCircleCenter = null;
+        goToMaxmimumAltitude();
+        System.out.println("IM AT TOP");
+        int count = 0;
+        while (directionToCircleCenter != Direction.CENTER && count < 20) {
+            directionToCircleCenter = filter.findDirectionFromCircle(filter.getBiggestCircle());
+
+            System.err.print("*** ");
+            System.out.println("CIRCLE IS TO THE" + directionToCircleCenter);
+            System.err.print(" ***");
+            switch (directionToCircleCenter) {
+                case UP:
+                    cmd.up(speed).doFor(500);
+                    break;
+                case LEFT:
+                case DOWNLEFT:
+                case UPLEFT:
+                    cmd.setLedsAnimation(LEDAnimation.BLINK_RED, 6, 1);
+                    cmd.goLeft(speed).doFor(500);
+                    break;
+                case UPRIGHT:
+                case RIGHT:
+                case DOWNRIGHT:
+                    cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 6, 1);
+                    cmd.goRight(speed).doFor(500);
+                    break;
+                case DOWNCENTER:
+                case UPCENTER:
+                case CENTER:
+                    LEDSuccess();
+                    break;
+            }
+            count++; // TODO: TBD if this if can stay in while loop until.
+            cmd.hover();
+            cmd.waitFor(1000);
+        }
+        cmd.setLedsAnimation(LEDAnimation.SNAKE_GREEN_RED, 1, 10);
+        drone.landing();
     }
 
     private Direction getPaperDirection() {

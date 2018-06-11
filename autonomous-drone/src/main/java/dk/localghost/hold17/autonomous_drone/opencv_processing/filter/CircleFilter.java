@@ -1,5 +1,6 @@
 package dk.localghost.hold17.autonomous_drone.opencv_processing.filter;
 
+import dk.localghost.hold17.autonomous_drone.controller.DroneController;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.Direction;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
@@ -19,6 +20,12 @@ public class CircleFilter {
     private String outputName = "4filtered.jpg";
     private String imgNumber = "4";
 
+    private DroneController droneController;
+
+    public Point getBiggestCircle() {
+        return biggestCircle;
+    }
+
     // Global variabel for centrum af største cirkel.
     private Point biggestCircle = new Point();
 
@@ -28,7 +35,8 @@ public class CircleFilter {
     }
 
     //Udkommenteret test funktion
-    public CircleFilter() {
+    public CircleFilter(final DroneController droneController) {
+        this.droneController = droneController;
 //        BufferedImage img = matToBufferedImage(openFile(fileName));
 //        benchmark(Shape.CIRCLE);
 //        benchmark(Shape.RECTANGLE);
@@ -74,7 +82,7 @@ public class CircleFilter {
 
         // fortsæt kun, hvis der er fundet én eller flere cirkler
         Point maxCenter;
-        if (circlePosition.empty() == false) {
+//        if (circlePosition.empty() == false) {
             //System.out.println("Fandt: " + circlePosition.cols() + " cirkler");
 
             // sætter cirklens farve
@@ -103,14 +111,15 @@ public class CircleFilter {
             }
             // tegner cirklen
             Imgproc.circle(image, biggestCircle, maxRadius, color);
-        } else {
-            System.out.println("Der blev ikke fundet nogle cirkler i billedet");
-            return null;
-        }
+//        } else {
+//            System.out.println("Der blev ikke fundet nogle cirkler i billedet");
+//            return null;
+//        }
         return image;
     }
 
     public Direction findDirectionFromCircle(Point circleCoordinate) {
+
         if (circleCoordinate == null) {
             System.out.println("Point er ikke initialiseret");
             return Direction.UNKNOWN;
@@ -120,6 +129,8 @@ public class CircleFilter {
             else if (x > 512 && x < 768) return Direction.CENTER; // 256px (1/5 af billedeopløsningen på 1280)
             else if (x > 768 && x < 1280) return Direction.RIGHT;
             else {
+                System.err.println("Cannot find the direction to the circle is the resolution correct?");
+                System.err.println("Current resolution is ");
                 return Direction.UNKNOWN;
             }
         }

@@ -1,6 +1,5 @@
 package dk.localghost.hold17.autonomous_drone.gui;
 
-import dk.localghost.hold17.autonomous_drone.opencv_processing.filter.CircleFilter;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.filter.FilterHelper;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.filter.RectangleFilter;
 import dk.localghost.hold17.base.IARDrone;
@@ -27,7 +26,7 @@ public class GUIController {
     private ImageView filtered;
 
     private static FilterHelper filterHelper = new FilterHelper();
-    private static CircleFilter circleFilter = new CircleFilter();
+    //    private static CircleFilter circleFilter = new CircleFilter();
     private static RectangleFilter rectangleFilter = new RectangleFilter();
 
     void init(IARDrone drone) {
@@ -48,7 +47,7 @@ public class GUIController {
             public void run() {
                 if (bufferedImage != null) {
                     Image image = SwingFXUtils.toFXImage(bufferedImage, null);
-                    Image imageFiltered = SwingFXUtils.toFXImage(filterHelper.matToBufferedImage(circleFilter.findCircleAndDraw(filterHelper.bufferedImageToMat(bufferedImage), 1, 150)), null);
+//                    Image imageFiltered = SwingFXUtils.toFXImage(filterHelper.matToBufferedImage(circleFilter.findCircleAndDraw(filterHelper.bufferedImageToMat(bufferedImage), 1, 150)), null);
                     // show the image
                     Platform.runLater(() -> {
                         live.setImage(image);
@@ -57,9 +56,9 @@ public class GUIController {
                         // preserve bufferedImage ratio
                         live.setPreserveRatio(true);
 
-                        filtered.setImage(imageFiltered);
-                        filtered.setFitWidth(640);
-                        filtered.setPreserveRatio(true);
+//                        filtered.setImage(imageFiltered);
+//                        filtered.setFitWidth(640);
+//                        filtered.setPreserveRatio(true);
                     });
 
                 } else {
