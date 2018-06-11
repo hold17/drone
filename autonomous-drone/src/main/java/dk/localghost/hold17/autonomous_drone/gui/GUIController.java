@@ -1,6 +1,8 @@
 package dk.localghost.hold17.autonomous_drone.gui;
 
-import dk.localghost.hold17.autonomous_drone.opencv_processing.ImageProcessor;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.filter.CircleFilter;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.filter.FilterHelper;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.filter.RectangleFilter;
 import dk.localghost.hold17.base.IARDrone;
 import dk.localghost.hold17.base.command.VideoChannel;
 import dk.localghost.hold17.base.command.VideoCodec;
@@ -24,7 +26,9 @@ public class GUIController {
     @FXML
     private ImageView filtered;
 
-    private static ImageProcessor imgProc = new ImageProcessor();
+    private static FilterHelper filterHelper = new FilterHelper();
+    private static CircleFilter circleFilter = new CircleFilter();
+    private static RectangleFilter rectangleFilter = new RectangleFilter();
 
     void init(IARDrone drone) {
         ardrone = drone;
@@ -44,7 +48,7 @@ public class GUIController {
             public void run() {
                 if (bufferedImage != null) {
                     Image image = SwingFXUtils.toFXImage(bufferedImage, null);
-                    Image imageFiltered = SwingFXUtils.toFXImage(imgProc.matToBufferedImage(imgProc.findCircleAndDraw(imgProc.bufferedImageToMat(bufferedImage), 1, 150)), null);
+                    Image imageFiltered = SwingFXUtils.toFXImage(filterHelper.matToBufferedImage(circleFilter.findCircleAndDraw(filterHelper.bufferedImageToMat(bufferedImage), 1, 150)), null);
                     // show the image
                     Platform.runLater(() -> {
                         live.setImage(image);
@@ -57,6 +61,7 @@ public class GUIController {
                         filtered.setFitWidth(640);
                         filtered.setPreserveRatio(true);
                     });
+
                 } else {
                    // System.out.println("bufferedImage was null"); // SILENCED UNTIL NEEDED
                 }
