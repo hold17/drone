@@ -12,7 +12,7 @@ public class ExternalRectangle{
     private MatOfPoint2f approx;
     private MatOfPoint contour;
 
-    ExternalRectangle(Rect rect) {
+    public ExternalRectangle(Rect rect) {
         this.rect = rect;
     }
 
@@ -36,7 +36,7 @@ public class ExternalRectangle{
         return rRect;
     }
 
-    public void setrRect(RotatedRect rRect) {
+    void setrRect(RotatedRect rRect) {
         this.rRect = rRect;
     }
 
@@ -44,11 +44,11 @@ public class ExternalRectangle{
         return approx;
     }
 
-    public void setApprox(MatOfPoint2f approx) {
+    void setApprox(MatOfPoint2f approx) {
         this.approx = approx;
     }
 
-    public MatOfPoint getContour() {
+    MatOfPoint getContour() {
         return contour;
     }
 
