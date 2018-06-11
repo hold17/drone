@@ -3,8 +3,7 @@ package dk.localghost.hold17.autonomous_drone.opencv_processing;
 import dk.localghost.hold17.autonomous_drone.controller.DroneController;
 
 public enum Direction {
-    LEFT, CENTER, RIGHT, UP, CENTERDOWN, CENTERUP, LEFTUP, RIGHTUP, DOWN, LEFTDOWN, RIGHTDOWN, LEFTCENTER, CENTERCENTER, RIGHTCENTER, UNKNOWN;
-
+    LEFT, CENTER, RIGHT, UP, LEFTUP, RIGHTUP, DOWN, LEFTDOWN, RIGHTDOWN, LEFTCENTER, CENTERCENTER, RIGHTCENTER, UNKNOWN;
     private static final int CAMERA_WIDTH = DroneController.cameraWidth;
 
     /**
@@ -14,9 +13,9 @@ public enum Direction {
      * @return the direction if it can be determined.
      */
     public static Direction exactDirection(double x, double y){
-        if(Direction.centerUp(x,y) != null) return Direction.CENTERUP;
+        if(Direction.centerUp(x,y) != null) return Direction.UP;
         else if(Direction.centerCenter(x,y) != null) return Direction.CENTER;
-        else if(Direction.centerDown(x,y) != null) return Direction.CENTERDOWN;
+        else if(Direction.centerDown(x,y) != null) return Direction.DOWN;
         else if(Direction.leftUp(x,y) != null) return Direction.LEFTUP;
         else if(Direction.leftCenter(x,y) !=null) return Direction.LEFT;
         else if(Direction.leftDown(x,y) != null) return Direction.LEFTDOWN;
@@ -28,7 +27,6 @@ public enum Direction {
             return Direction.UNKNOWN;
         }
     }
-
 
     /**
      * Methods to find direction from x coordinate
@@ -71,12 +69,12 @@ public enum Direction {
         else return null;
     }
     public static Direction centerDown(double x, double y) {
-        if (x > 512 && x < 768 && y < 320) return Direction.CENTERDOWN; // 256px (1/5 af billedeopløsningen på 1280)
+        if (x > 512 && x < 768 && y < 320) return Direction.DOWN; // 256px (1/5 af billedeopløsningen på 1280)
         else return null;
     }
 
     public static Direction centerUp(double x, double y) {
-        if (x > 512 && x < 768 && y > 400) return Direction.CENTERUP; // 256px (1/5 af billedeopløsningen på 1280)
+        if (x > 512 && x < 768 && y > 400) return Direction.UP; // 256px (1/5 af billedeopløsningen på 1280)
         else return null;
     }
 

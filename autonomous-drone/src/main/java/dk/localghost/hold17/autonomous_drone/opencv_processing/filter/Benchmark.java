@@ -8,14 +8,14 @@ public class Benchmark {
     private CircleFilter circleFilter;
     private FilterHelper filterHelper;
 
-    public Benchmark() {
+    public Benchmark(Shape shape) {
         filterHelper = new FilterHelper();
         rectangleFilter = new RectangleFilter();
         circleFilter = new CircleFilter();
-        benchmark(Shape.CIRCLE);
+        benchmark(shape);
     }
 
-    public void benchmark(Shape s) {
+    private void benchmark(Shape s) {
         int counter = 0;
         long startTime = System.currentTimeMillis();
         Mat img = filterHelper.openFile("3.jpg");

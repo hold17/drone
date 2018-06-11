@@ -30,7 +30,6 @@ public class AutonomousGUI extends Application {
         drone.getVideoManager().addImageListener(qrScanner::imageUpdated);
         qrScanner.addListener(new QRScannerController());
 
-
         launch(args);
     }
 
@@ -43,13 +42,11 @@ public class AutonomousGUI extends Application {
             primaryStage.setTitle("Autonomous GUI for Hold 17");
             primaryStage.setScene(scene);
 
-
             droneController = new DroneController(drone, SPEED);
             KeyboardCommandManager keyboardManager = new KeyboardCommandManager(droneController);
 
             GUIController controller = loader.getController();
             controller.init(drone);
-
             primaryStage.show();
 
             primaryStage.setOnCloseRequest(event -> {

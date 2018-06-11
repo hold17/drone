@@ -6,9 +6,7 @@ import java.util.Comparator;
 
 public class PointComparator {
 
-    public PointComparator() {
-
-    }
+    public PointComparator() {}
 
     public static final Comparator<Point> Y_COORD = new Comparator<Point>() {
         public int compare(Point p1, Point p2) {
@@ -18,6 +16,4 @@ public class PointComparator {
                 return -1;
         }
     };
-
-
 }
