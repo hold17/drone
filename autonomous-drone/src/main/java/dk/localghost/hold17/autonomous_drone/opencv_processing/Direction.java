@@ -1,7 +1,11 @@
 package dk.localghost.hold17.autonomous_drone.opencv_processing;
 
+import dk.localghost.hold17.autonomous_drone.controller.DroneController;
+
 public enum Direction {
-    LEFT, RIGHT, CENTER,UP, DOWNCENTER, UPCENTER, UPLEFT, UPRIGHT, DOWN, DOWNLEFT,DOWNRIGHT, UNKNOWN;
+    LEFT, CENTER, RIGHT, UP, CENTERDOWN, CENTERUP, LEFTUP, RIGHTUP, DOWN, LEFTDOWN, RIGHTDOWN, LEFTCENTER, CENTERCENTER, RIGHTCENTER, UNKNOWN;
+
+    private static final int CAMERA_WIDTH = DroneController.cameraWidth;
 
     /**
      * Method that finds the direction
@@ -10,19 +14,38 @@ public enum Direction {
      * @return the direction if it can be determined.
      */
     public static Direction exactDirection(double x, double y){
-        if(Direction.upCenter(x,y) != null) return Direction.UPCENTER;
-        else if(Direction.center(x,y) != null) return Direction.CENTER;
-        else if(Direction.downCenter(x,y) != null) return Direction.DOWNCENTER;
-        else if(Direction.upLeft(x,y) != null) return Direction.UPLEFT;
-        else if(Direction.left(x,y) !=null) return Direction.LEFT;
-        else if(Direction.downLeft(x,y) != null) return Direction.DOWNLEFT;
-        else if(Direction.upRight(x,y) != null) return Direction.UPRIGHT;
-        else if(Direction.right(x,y) != null) return Direction.RIGHT;
-        else if(Direction.downRight(x,y) != null) return Direction.DOWNRIGHT;
+        if(Direction.centerUp(x,y) != null) return Direction.CENTERUP;
+        else if(Direction.centerCenter(x,y) != null) return Direction.CENTER;
+        else if(Direction.centerDown(x,y) != null) return Direction.CENTERDOWN;
+        else if(Direction.leftUp(x,y) != null) return Direction.LEFTUP;
+        else if(Direction.leftCenter(x,y) !=null) return Direction.LEFT;
+        else if(Direction.leftDown(x,y) != null) return Direction.LEFTDOWN;
+        else if(Direction.rightUp(x,y) != null) return Direction.RIGHTUP;
+        else if(Direction.rightCenter(x,y) != null) return Direction.RIGHT;
+        else if(Direction.rightDown(x,y) != null) return Direction.RIGHTDOWN;
 
         else {
             return Direction.UNKNOWN;
         }
+    }
+
+
+    /**
+     * Methods to find direction from x coordinate
+     * @param x the x coordinate
+     * @return the direction, if any is applicable
+     */
+    public static Direction left(double x) {
+        if (x > 0 && x <= (CAMERA_WIDTH / 5) * 2) return Direction.LEFT;
+        else return null;
+    }
+    public static Direction center(double x) {
+        if (x > (CAMERA_WIDTH / 5) * 2 && x < (CAMERA_WIDTH / 5) * 3) return Direction.CENTER; // center segment is 1/5 of CAMERA_WIDTH
+        else return null;
+    }
+    public static Direction right(double x) {
+        if (x >= (CAMERA_WIDTH / 5) * 3 && x < CAMERA_WIDTH) return Direction.RIGHT;
+        else return null;
     }
 
     /**
@@ -31,44 +54,44 @@ public enum Direction {
      * @param y the y coordinate
      * @return the direction, if any is applicable
      */
-    public static Direction left(double x, double y) {
-        if (x > 0 && x < 512 && y < 400 && y > 320) return Direction.LEFT; // 256px (1/5 af billedeopløsningen på 1280)
+    public static Direction leftCenter(double x, double y) {
+        if (x > 0 && x < 512 && y < 400 && y > 320) return Direction.LEFTCENTER; // 256px (1/5 af billedeopløsningen på 1280)
         else return null;
     }
-    public static Direction downLeft(double x, double y) {
-        if (x > 0 && x < 512 && y < 320) return Direction.DOWNLEFT; // 256px (1/5 af billedeopløsningen på 1280)
+    public static Direction leftDown(double x, double y) {
+        if (x > 0 && x < 512 && y < 320) return Direction.LEFTDOWN; // 256px (1/5 af billedeopløsningen på 1280)
         else return null;
     }
-    public static Direction upLeft(double x, double y) {
-        if (x > 0 && x < 512 && y > 400) return Direction.DOWNLEFT; // 256px (1/5 af billedeopløsningen på 1280)
+    public static Direction leftUp(double x, double y) {
+        if (x > 0 && x < 512 && y > 400) return Direction.LEFTDOWN; // 256px (1/5 af billedeopløsningen på 1280)
         else return null;
     }
-    public static Direction center(double x, double y) {
-        if (x > 512 && x < 768 && y < 400 && y > 320) return Direction.CENTER; // 256px (1/5 af billedeopløsningen på 1280)
+    public static Direction centerCenter(double x, double y) {
+        if (x > 512 && x < 768 && y < 400 && y > 320) return Direction.CENTERCENTER; // 256px (1/5 af billedeopløsningen på 1280)
         else return null;
     }
-    public static Direction downCenter(double x, double y) {
-        if (x > 512 && x < 768 && y < 320) return Direction.DOWNCENTER; // 256px (1/5 af billedeopløsningen på 1280)
-        else return null;
-    }
-
-    public static Direction upCenter(double x, double y) {
-        if (x > 512 && x < 768 && y > 400) return Direction.UPCENTER; // 256px (1/5 af billedeopløsningen på 1280)
+    public static Direction centerDown(double x, double y) {
+        if (x > 512 && x < 768 && y < 320) return Direction.CENTERDOWN; // 256px (1/5 af billedeopløsningen på 1280)
         else return null;
     }
 
-    public static Direction downRight(double x, double y) {
-        if (x > 768 && x < 1280 && y < 320) return Direction.DOWNRIGHT; // 256px (1/5 af billedeopløsningen på 1280)
+    public static Direction centerUp(double x, double y) {
+        if (x > 512 && x < 768 && y > 400) return Direction.CENTERUP; // 256px (1/5 af billedeopløsningen på 1280)
         else return null;
     }
-    public static Direction right(double x, double y) {
+
+    public static Direction rightDown(double x, double y) {
+        if (x > 768 && x < 1280 && y < 320) return Direction.RIGHTDOWN; // 256px (1/5 af billedeopløsningen på 1280)
+        else return null;
+    }
+    public static Direction rightCenter(double x, double y) {
         if (x > 768 && x < 1280 && y < 400 && y > 320)
-            return Direction.RIGHT; // 256px (1/5 af billedeopløsningen på 1280)
+            return Direction.RIGHTCENTER; // 256px (1/5 af billedeopløsningen på 1280)
         else return null;
     }
-    public static Direction upRight(double x, double y) {
+    public static Direction rightUp(double x, double y) {
         if (x > 768 && x < 1280 && y > 400)
-            return Direction.UPRIGHT; // 256px (1/5 af billedeopløsningen på 1280)
+            return Direction.RIGHTUP; // 256px (1/5 af billedeopløsningen på 1280)
         else return null;
     }
 }
