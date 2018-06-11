@@ -18,15 +18,15 @@ public class FilterHelper {
     // TODO: Skift værdierne der tjekkes for, så de passer til dronens kameraopløsning
     public Direction findPaperPosition(Rect rect) {
         if (rect.x > 0 && rect.x < 512) {
-            return Direction.LEFTCENTER;
+            return Direction.LEFT;
         }
 
         if (rect.x > 512 && rect.x < 768) {
-            return Direction.CENTERCENTER;
+            return Direction.CENTER;
         }
 
         if (rect.x > 768 && rect.x < 1280) {
-            return Direction.RIGHTCENTER;
+            return Direction.RIGHT;
         }
         return Direction.UNKNOWN;
     }

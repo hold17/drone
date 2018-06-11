@@ -3,7 +3,7 @@ package dk.localghost.hold17.autonomous_drone.opencv_processing;
 import dk.localghost.hold17.autonomous_drone.controller.DroneController;
 
 public enum Direction {
-    LEFT, CENTER, RIGHT, LEFTCENTER, RIGHTCENTER, CENTERCENTER,UP, CENTERDOWN, CENTERUP, LEFTUP, RIGHTUP, DOWN, LEFTDOWN, RIGHTDOWN, UNKNOWN;
+    LEFT, CENTER, RIGHT, UP, CENTERDOWN, CENTERUP, LEFTUP, RIGHTUP, DOWN, LEFTDOWN, RIGHTDOWN, LEFTCENTER, CENTERCENTER, RIGHTCENTER, UNKNOWN;
 
     private static final int CAMERA_WIDTH = DroneController.cameraWidth;
 
@@ -15,13 +15,13 @@ public enum Direction {
      */
     public static Direction exactDirection(double x, double y){
         if(Direction.centerUp(x,y) != null) return Direction.CENTERUP;
-        else if(Direction.centerCenter(x,y) != null) return Direction.CENTERCENTER;
+        else if(Direction.centerCenter(x,y) != null) return Direction.CENTER;
         else if(Direction.centerDown(x,y) != null) return Direction.CENTERDOWN;
         else if(Direction.leftUp(x,y) != null) return Direction.LEFTUP;
-        else if(Direction.leftCenter(x,y) !=null) return Direction.LEFTCENTER;
+        else if(Direction.leftCenter(x,y) !=null) return Direction.LEFT;
         else if(Direction.leftDown(x,y) != null) return Direction.LEFTDOWN;
         else if(Direction.rightUp(x,y) != null) return Direction.RIGHTUP;
-        else if(Direction.rightCenter(x,y) != null) return Direction.RIGHTCENTER;
+        else if(Direction.rightCenter(x,y) != null) return Direction.RIGHT;
         else if(Direction.rightDown(x,y) != null) return Direction.RIGHTDOWN;
 
         else {
