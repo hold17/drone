@@ -44,7 +44,7 @@ public class GUIController {
             public void run() {
                 if (bufferedImage != null) {
                     Image image = SwingFXUtils.toFXImage(bufferedImage, null);
-                    Image imageFiltered = SwingFXUtils.toFXImage(imgProc.matToBufferedImage(imgProc.filterImage(bufferedImage)), null);
+                    Image imageFiltered = SwingFXUtils.toFXImage(imgProc.matToBufferedImage(imgProc.filterImage(imgProc.bufferedImageToMat(bufferedImage))), null);
                     // show the image
                     Platform.runLater(() -> {
                         live.setImage(image);

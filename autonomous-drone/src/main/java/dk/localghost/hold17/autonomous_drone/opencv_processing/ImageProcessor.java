@@ -2,6 +2,8 @@ package dk.localghost.hold17.autonomous_drone.opencv_processing;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -47,20 +49,12 @@ public class ImageProcessor {
     }
 
     public ImageProcessor() {
-//        BufferedImage img = matToBufferedImage(openFile(fileName));
-//        benchmark(Shape.CIRCLE);
-//        benchmark(Shape.RECTANGLE);
-
-//        Mat img_circle = openFile("3.jpg");
-//        findCircleAndDraw(img_circle, 1, 150);
-//        Direction direction = findDirectionFromCircle(biggestCircle);
-//        System.out.println(direction);
-//        saveFile(outputName, img_circle);
+//        benchmark();
     }
 
-//    public static void main(String[] args) {
-//        new ImageProcessor();
-//    }
+    public static void main(String[] args) {
+        new ImageProcessor();
+    }
 
     /***
      * Open file as matrix
@@ -100,7 +94,8 @@ public class ImageProcessor {
         Mat imgbin = new Mat();
 
         /* Write 1 if in range of the two scalars, 0 if not. Binary image result written to imgbin */
-        Core.inRange(image, new Scalar(200, 200, 200), new Scalar(100, 100, 100), imgbin);
+        Core.inRange(image, new Scalar(0, 0, 0), new Scalar(200, 200, 200), imgbin);
+//        imgbin.convertTo(imgbin, COLOR_BGRA2GRAY);
 
         return imgbin;
     }
@@ -112,53 +107,84 @@ public class ImageProcessor {
      *   Run determinePaperOrientation;
      * @return Mat
      */
-    public Mat filterImage(BufferedImage bufferedImage) {
+    public Mat filterImage(Mat mat) {
         externalCustomRectangles.clear();
         externalRects.clear();
         QRCodes.clear();
 
-        Mat originalImage = null;
-
-        try {
-            originalImage = bufferedImageToMat(bufferedImage);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        //saveFile("originialImage.jpg", originalImage);
-
-        Mat imgbin = detectWhiteMat(originalImage);
+        Mat imgbin = detectWhiteMat(mat);
         Mat imgcol = new Mat();
-        Mat hierarchy1 = new Mat();
+//        Mat hierarchy1 = new Mat();
         Mat hierarchy2 = new Mat();
 
-        //Denoise binary image using medianBlur and OPEN
-//        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
+        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
 //        Imgproc.medianBlur(imgbin, imgbin, 5);
 //        Imgproc.morphologyEx(imgbin, imgbin, Imgproc.MORPH_OPEN, kernel);
+        GaussianBlur(imgbin, imgbin, new Size(3, 3), 2.0, 2.0);
 
-        //Contours are matrices of points. We store all of them in this list.
-        List<MatOfPoint> contours = new ArrayList<>();
+//        List<MatOfPoint> contours = new ArrayList<>();
         List<MatOfPoint> externalContours = new ArrayList<>();
 
-        /* Convert the binary image to an 8-bit image,
-         * then convert to an RGB image so rectangles can be outlined in color */
+        Mat canny = new Mat();
+        Imgproc.Canny(imgbin, canny, 100, 300);
+        cvtColor(canny, imgcol, COLOR_GRAY2RGB);
         imgbin.convertTo(imgbin, CvType.CV_8UC3);
-        cvtColor(imgbin, imgcol, COLOR_GRAY2RGB);
 
-        /* Find contours in the binary image. RETR_TREE creates a perfect hierarchy of contours,
-         * including children, grandchildren, parents and grandparents. Might be useful later, but
-         * is not currently used. Use RETR_EXTERNAL if you only want to find parent contours. */
-        Imgproc.findContours(imgbin, contours, hierarchy1, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-        Imgproc.findContours(imgbin, externalContours, hierarchy2, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-//        Imgproc.drawContours(imgcol, externalContours, -1, CYAN, 3);
 
-        //Detect and draw rectangles on RGB image
-        imgcol = drawRectangles(imgcol, contours, externalContours, hierarchy1, 0.06);
+//        Imgproc.findContours(imgbin, contours, hierarchy1, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+        Imgproc.findContours(canny, externalContours, hierarchy2, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+
+//        imgcol = drawRectangles(imgcol, contours, externalContours, hierarchy1, 0.06);
 //        determinePaperOrientation(imgcol);
 //        saveFile("filtered.jpg", imgcol);
 
+        List<MatOfInt> hullExt = new ArrayList<>();
+        MatOfPoint2f approx = new MatOfPoint2f();
+        MatOfPoint2f matOfPoint2f = new MatOfPoint2f();
+        List<MatOfPoint> realContours = new ArrayList<>();
+
+        for(int i = 0; i < externalContours.size(); i++) {
+            MatOfInt temp;
+            matOfPoint2f.fromList(externalContours.get(i).toList());
+            Imgproc.approxPolyDP(matOfPoint2f, approx, Imgproc.arcLength(matOfPoint2f, true) * 0.05, true);
+
+            if(approx.total() == 4) {
+                Imgproc.convexHull(externalContours.get(i), temp = new MatOfInt(), false);
+                hullExt.add(temp);
+                realContours.add(externalContours.get(i));
+            }
+        }
+
+        MatOfInt hullInt = new MatOfInt();
+        for(MatOfPoint contour : externalContours) {
+            Imgproc.convexHull(contour, hullInt, true);
+        }
+
+            List<MatOfPoint> hullMat = new ArrayList<>();
+        for(int i = 0; i < hullExt.size(); i++) {
+            hullMat.add(convertIndexesToPoints(realContours.get(i), hullExt.get(i)));
+        }
+//        for(int i = 0; i < hullExt.size(); i++) {
+//            Imgproc.drawContours(imgcol, contours, i, CYAN, 2, 8, new MatOfPoint(), 0, new Point());
+            Imgproc.drawContours(imgcol, hullMat, -1, CYAN, 2);
+
+//        }
         return imgcol;
+
+    }
+
+    public static MatOfPoint convertIndexesToPoints(MatOfPoint contour, MatOfInt indexes) {
+        int[] arrIndex = indexes.toArray();
+        Point[] arrContour = contour.toArray();
+        Point[] arrPoints = new Point[arrIndex.length];
+
+        for (int i=0;i<arrIndex.length;i++) {
+            arrPoints[i] = arrContour[arrIndex[i]];
+        }
+
+        MatOfPoint hull = new MatOfPoint();
+        hull.fromArray(arrPoints);
+        return hull;
     }
 
     /*** Use contours to detect vertices,
@@ -315,82 +341,6 @@ public class ImageProcessor {
         }
     }
 
-//    /***
-//     * Draw a rotated rectangle rRect around the biggest QRCode,f
-//     * Find endpoints of rRect,
-//     * Compare the bottom left and bottom right points:
-//     * If left is lower, drone is to the left of paper
-//     * If right is lower, drone is to the right of paper
-//     * @param imgcol Mat
-//     */
-//    public void determinePaperOrientation(Mat imgcol) {
-//        MatOfPoint2f approx = new MatOfPoint2f();
-//        MatOfPoint2f matOfPoint2f = new MatOfPoint2f();
-//        MatOfPoint2f boxMop2f = new MatOfPoint2f();
-//        List<MatOfPoint> rotatedBox = new ArrayList<>();
-//        RotatedRect rRect = null;
-//
-//        /* Find the object with the biggest QRCode,
-//         * then define its rotated rect */
-//        for (ExternalRectangle e : QRCodes) {
-//            if (e.getRect() == biggestQRCode) {
-//                matOfPoint2f.fromList(e.getContour().toList());
-//                rRect = Imgproc.minAreaRect(matOfPoint2f);
-//            }
-//        }
-//
-//        /* Take the vertices of rRect and store in vertices[], then make a rotatedBox
-//         * from by drawing the contour. Use approxPolyDP() to approximate the endpoints,
-//         * and store them in a list. */
-//         TODO: UNCOMMENT CODE
-//        Point[] vertices = new Point[4];
-//        rRect.points(vertices);
-//        rotatedBox.add(new MatOfPoint(vertices));
-//        boxMop2f.fromList(rotatedBox.get(0).toList());
-//        drawContours(imgcol, rotatedBox, 0, YELLOW, 3);
-//
-//        Imgproc.approxPolyDP(boxMop2f, approx, Imgproc.arcLength(boxMop2f, true) * 0.1, true);
-//        List<Point> approxList = approx.toList();
-//
-//        /* Make sure that approxPolyDP found 4 points */
-//        if (approxList.size() == 4) {
-//
-//            /* Sort the coordinates in ascending y-coords
-//             * Index 0 is the lowest point of the rotated rectangle */
-//            Collections.sort(approxList, PointComparator.Y_COORD);
-//            Point lower1 = approxList.get(0);
-//            Point lower2 = approxList.get(1);
-//
-//          /***  Draw all points as filled circles in red
-//            for (Point p : approxList) {
-//                Imgproc.circle(imgcol, new Point(p.x, p.y), 10, RED, Core.FILLED);
-//            } ***/
-//
-//            /* If the lowest point is to the right of the second lowest point,
-//             * the drone is to the right of the paper. Then the opposite.
-//             */
-//            if(lower1.x > lower2.x) {
-//                System.out.println("Lowest point is in the right side of rotated rect at point " + lower1);
-//                System.out.println("Drone is looking at the QR code from the RIGHT");
-//                Imgproc.circle(imgcol, lower1, 15, CYAN, Core.FILLED);
-//            }
-//            else if(lower1.x < lower2.x) {
-//                System.out.println("Lowest point is in the right side of rotated rect at point " + lower1);
-//                System.out.println("Drone is looking at the QR code from the LEFT");
-//                Imgproc.circle(imgcol, lower1, 15, CYAN, Core.FILLED);
-//            }
-//        }
-//    }
-
-    // Tjekker forholdet for den fundne rektangel
-    void checkForA4Papir(Rect rect) {
-        // Er det et A4 papir frontalt foran kameraet skal det være ~ 1:1.5 højde/bredde ratio.
-        double ratio = (double) rect.height / (double) rect.width;
-        if (ratio < 1.5 && ratio > 1.3) {
-            System.out.println("Fandt A4 papir med Width: " + rect.width + ", Heigth: " + rect.height);
-        }
-    }
-
     // TODO: Skift værdierne der tjekkes for, så de passer til dronens kameraopløsning
     public Direction findPaperPosition(Rect rect) {
         if (rect.x > 0 && rect.x < 512) {
@@ -411,13 +361,38 @@ public class ImageProcessor {
      * Needed for drone video feed
      * @param img BufferedImage
      * @return Mat
-     * @throws IOException
      */
-    public Mat bufferedImageToMat(BufferedImage img) throws IOException {
-        ByteArrayOutputStream outstream = new ByteArrayOutputStream();
-        ImageIO.write(img, "jpg", outstream);
-        outstream.flush();
-        return Imgcodecs.imdecode(new MatOfByte(outstream.toByteArray()), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
+    public Mat bufferedImageToMat(BufferedImage img) {
+//        ByteArrayOutputStream outstream = new ByteArrayOutputStream();
+//        try {
+//            long start1 = System.currentTimeMillis();
+//            ImageIO.write(img, "jpg", outstream);
+//            System.out.println("imgwrite took: " + (System.currentTimeMillis()-start1));
+//            long start2 = System.currentTimeMillis();
+//            outstream.flush();
+//            System.out.println("flush took: " + (System.currentTimeMillis()-start2));
+//            long start3 = System.currentTimeMillis();
+//            MatOfByte matOfByte = new MatOfByte(outstream.toByteArray());
+//            System.out.println("matofbyte took: " + (System.currentTimeMillis()-start3));
+//            long start4 = System.currentTimeMillis();
+//            Mat mat = Imgcodecs.imdecode(matOfByte, Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
+//            System.out.println("decode took: " + (System.currentTimeMillis()-start4));
+
+//            long start1 = System.currentTimeMillis();
+            byte[] data = ((DataBufferByte) img.getRaster().getDataBuffer()).getData();
+//            System.out.println("imgwrite took: " + (System.currentTimeMillis()-start1));
+//            long start2 = System.currentTimeMillis();
+            Mat mat = new Mat(img.getHeight(), img.getWidth(), CvType.CV_8UC3);
+//            System.out.println("imgwrite took: " + (System.currentTimeMillis()-start2));
+//            long start3 = System.currentTimeMillis();
+            mat.put(0, 0, data);
+//            System.out.println("imgwrite took: " + (System.currentTimeMillis()-start3));
+
+            return mat;
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
     }
 
     /***
@@ -426,135 +401,61 @@ public class ImageProcessor {
      * @return BufferedImage
      */
     public BufferedImage matToBufferedImage(Mat mat) {
-        try {
-            MatOfByte mob = new MatOfByte();
-            Imgcodecs.imencode(".jpg", mat, mob);
-            return ImageIO.read(new ByteArrayInputStream(mob.toArray()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            MatOfByte mob = new MatOfByte();
+//            Imgcodecs.imencode(".jpg", mat, mob);
+//            return ImageIO.read(new ByteArrayInputStream(mob.toArray()));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//        long start1 = System.currentTimeMillis();
+        BufferedImage image = new BufferedImage(mat.width(), mat.height(), BufferedImage.TYPE_3BYTE_BGR);
+//        System.out.println("imgwrite took: " + (System.currentTimeMillis()-start1));
 
-        return null;
+//        long start2 = System.currentTimeMillis();
+        WritableRaster raster = image.getRaster();
+//        System.out.println("imgwrite took: " + (System.currentTimeMillis()-start2));
+
+//        long start3 = System.currentTimeMillis();
+        DataBufferByte dataBuffer = (DataBufferByte) raster.getDataBuffer();
+//        System.out.println("imgwrite took: " + (System.currentTimeMillis()-start3));
+
+//        long start4 = System.currentTimeMillis();
+        byte[] data = dataBuffer.getData();
+//        System.out.println("imgwrite took: " + (System.currentTimeMillis()-start4));
+
+//        long start5 = System.currentTimeMillis();
+        mat.get(0, 0, data);
+//        System.out.println("imgwrite took: " + (System.currentTimeMillis()-start5));
+
+        return image;
     }
 
-    /***TEST METHOD ## Detect edges using a threshold ***/
-//    public Mat detectEdgesThreshold() {
-//        Mat imgbin = detectWhiteMat();
-//        threshold(imgbin, imgbin, 127, 255, Imgproc.THRESH_BINARY);
-//        return imgbin;
-//    }
-
-    /***TEST METHOD ## Detect edges using canny ***/
-//    public Mat detectEdgesCanny() {
-//        Mat imgbin = detectWhiteMat();
-//        Imgproc.Canny(imgbin, imgbin, 100, 200);
-//        return imgbin;
-//    }
     public Rect getBiggestQRCode() {
         return biggestQRCode;
     }
 
-    /*
-     * Funktion der finder cirkler samt tegner dem
-     * dp = pixelreduktionsgrad
-     * minDist = minimum radius i pixelantal
-     * TODO: Udvid funktion således at det returneres om cirklen er til henholdsvis venstre/højre/centrum af billedet. Kig på Point koordinater.
-     *
-     * PROBLEM: Finder mange cirkler, også hvor der ikke giver mening.
-     */
-
-    private Mat findCircleAndDraw(Mat image, int dp, int minDist) {
-        Mat circlePosition = new Mat();
-        Mat hsv_image = new Mat();
-        //Parameter tjek
-        if (dp <= 0) dp = 1;
-        if (minDist <= 0) minDist = 1;
-
-        cvtColor(image, hsv_image, Imgproc.COLOR_BGR2HSV);
-        Mat lower_red = new Mat();
-        Mat upper_red = new Mat();
-
-        Core.inRange(hsv_image, new Scalar(0, 100, 100), new Scalar(10, 255, 255), lower_red);
-        Core.inRange(hsv_image, new Scalar(160, 100, 100), new Scalar(179, 255, 255), upper_red);
-
-        Mat red_hue_image = new Mat();
-        Core.addWeighted(lower_red, 1, upper_red, 1, 0, red_hue_image);
-
-        GaussianBlur(red_hue_image, red_hue_image, new Size(9, 9), 2, 2);
-
-        Imgproc.HoughCircles(red_hue_image, circlePosition, Imgproc.CV_HOUGH_GRADIENT, dp, red_hue_image.rows() / 8, 100, 30, 50, 10000);
-
-        //cvtColor(image, image, Imgproc.COLOR_BGR2GRAY);
-        //medianBlur(image, image, 15);   // averaging filter for ksize pixels
-        // finder objekter der ligner cirkler og gemmer deres position i circlePosition
-
-        // fortsæt kun, hvis der er fundet én eller flere cirkler
-        Point maxCenter;
-        if (circlePosition.empty() == false) {
-            //System.out.println("Fandt: " + circlePosition.cols() + " cirkler");
-
-            // sætter cirklens farve
-            double farve = 100;
-            Scalar color = new Scalar(farve);
-
-            int maxRadius = 0;
-            for (int i = 0; i < circlePosition.cols(); i++) // antallet af kolonner angiver antallet af cirkler fundet
-            {
-                double[] testArr = circlePosition.get(0, i);
-                //System.out.println("\nCirkel nr. " + (i + 1) + " fundet på:\nx-koord: " + testArr[0] + "\ny-koord: " + testArr[1] + "\nradius: " + testArr[2]);
-
-
-                // sætter cirklens centrum
-                Point center = new Point(testArr[0], testArr[1]);
-
-                // parser radius til int for at efterleve parametre krav i circle()
-                double radiusDouble = testArr[2];
-                int radius = (int) radiusDouble;
-                // Vi ønsker kun at tegne den største cirkel
-                if (maxRadius < radius) {
-                    maxRadius = radius;
-                    biggestCircle.x = center.x;
-                    biggestCircle.y = center.y;
-                }
-            }
-            // tegner cirklen
-            Imgproc.circle(image, biggestCircle, maxRadius, color);
-        } else {
-            System.out.println("Der blev ikke fundet nogle cirkler i billedet");
-            return null;
-        }
-        return image;
-    }
-
-
-    public Direction findDirectionFromCircle(Point circleCoordinate) {
-        if (circleCoordinate == null) {
-            System.out.println("Point er ikke initialiseret");
-            return Direction.UNKNOWN;
-        } else {
-            double x = circleCoordinate.x;
-            if (x > 0 && x < 512) return Direction.LEFT;
-            else if (x > 512 && x < 768) return Direction.CENTER; // 256px (1/5 af billedeopløsningen på 1280)
-            else if (x > 768 && x < 1280) return Direction.RIGHT;
-            else {
-                return Direction.UNKNOWN;
-            }
-        }
-    }
-
-    private void benchmark(Shape s) {
+    private void benchmark(/* Shape s*/) {
+//        try {
+//            Thread.sleep(10000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
         int counter = 0;
         long startTime = System.currentTimeMillis();
-        Mat img = openFile("3.jpg");
+        Mat img = openFile("4.jpg");
 
         while (10000 > System.currentTimeMillis() - startTime) {
-            if (s == Shape.CIRCLE) {
-                findCircleAndDraw(img, 1, 150);
-            } else if (s == Shape.RECTANGLE) {
-                filterImage(matToBufferedImage(img));
-            } else {
-                System.out.println("No valid shape");
-            }
+//            if (s == Shape.CIRCLE) {
+//                findCircleAndDraw(img, 1, 150);
+//            } else if (s == Shape.RECTANGLE) {
+            BufferedImage bufferedImage = matToBufferedImage(img);
+            img = bufferedImageToMat(bufferedImage);
+                filterImage(img);
+//            } else {
+//                System.out.println("No valid shape");
+//            }
             counter++;
         }
 
@@ -562,28 +463,4 @@ public class ImageProcessor {
         System.out.println("Total time: " + (double) (stopTime - startTime) / 1000 + " seconds.");
         System.out.println("Program ran " + counter + " times.");
     }
-
-
-    /*
-     * Ikke færdig.
-     *
-     * Skal finde cirkel, lige nu forsøges med diverse metoder for at se hvad virker bedst
-     */
-//    Mat FindCircle_v2(Mat img){
-//        //Sorterer vise farver fra, så vi ender med tydeligere cirkler
-//        img = detectEdgesThreshold(img); // from javacv... find opencv alternative
-//
-//        // Fjerner farver, så vi kun har røde farver tilbage
-//        Scalar lower_red = new Scalar(0,0,125);
-//        Scalar upper_red = new Scalar(0,0,255);
-//        Core.inRange(img, lower_red, upper_red, img);
-//
-//
-//        // Find kanter med canny()
-//        int threshold1 = 100;
-//        int threshhold2 = 200;
-//        //img = detectEdgesCanny(img, threshold1, threshhold2); // denne funk virker kun halvt
-//
-//        return img;
-//    }
 }

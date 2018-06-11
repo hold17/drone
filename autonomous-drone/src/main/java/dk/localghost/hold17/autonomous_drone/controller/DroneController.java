@@ -199,7 +199,7 @@ public class DroneController {
     private Direction getPaperDirection() {
         ImageProcessor imageProcessor = new ImageProcessor();
 
-        imageProcessor.findBiggestQRCode(imageProcessor.filterImage(droneCamera));
+        imageProcessor.findBiggestQRCode(imageProcessor.filterImage(imageProcessor.bufferedImageToMat(droneCamera)));
         return imageProcessor.findPaperPosition(imageProcessor.getBiggestQRCode());
     }
 
