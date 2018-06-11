@@ -1,7 +1,11 @@
 package dk.localghost.hold17.autonomous_drone.opencv_processing;
 
+import dk.localghost.hold17.autonomous_drone.controller.DroneController;
+
 public enum Direction {
-    LEFTCENTER, RIGHTCENTER, CENTERCENTER,UP, CENTERDOWN, CENTERUP, LEFTUP, RIGHTUP, DOWN, LEFTDOWN, RIGHTDOWN, UNKNOWN;
+    LEFT, CENTER, RIGHT, LEFTCENTER, RIGHTCENTER, CENTERCENTER,UP, CENTERDOWN, CENTERUP, LEFTUP, RIGHTUP, DOWN, LEFTDOWN, RIGHTDOWN, UNKNOWN;
+
+    private static final int CAMERA_WIDTH = DroneController.cameraWidth;
 
     /**
      * Method that finds the direction
@@ -23,6 +27,25 @@ public enum Direction {
         else {
             return Direction.UNKNOWN;
         }
+    }
+
+
+    /**
+     * Methods to find direction from x coordinate
+     * @param x the x coordinate
+     * @return the direction, if any is applicable
+     */
+    public static Direction left(double x) {
+        if (x > 0 && x <= (CAMERA_WIDTH / 5) * 2) return Direction.LEFT;
+        else return null;
+    }
+    public static Direction center(double x) {
+        if (x > (CAMERA_WIDTH / 5) * 2 && x < (CAMERA_WIDTH / 5) * 3) return Direction.CENTER; // center segment is 1/5 of CAMERA_WIDTH
+        else return null;
+    }
+    public static Direction right(double x) {
+        if (x >= (CAMERA_WIDTH / 5) * 3 && x < CAMERA_WIDTH) return Direction.RIGHT;
+        else return null;
     }
 
     /**
