@@ -118,24 +118,6 @@ public class CircleFilter {
         return image;
     }
 
-    public Direction findDirectionFromCircle(Point circleCoordinate) {
-
-        if (circleCoordinate == null) {
-            System.out.println("Point er ikke initialiseret");
-            return Direction.UNKNOWN;
-        } else {
-            double x = circleCoordinate.x;
-            if (x > 0 && x < 512) return Direction.LEFT;
-            else if (x > 512 && x < 768) return Direction.CENTER; // 256px (1/5 af billedeopløsningen på 1280)
-            else if (x > 768 && x < 1280) return Direction.RIGHT;
-            else {
-                System.err.println("Cannot find the direction to the circle is the resolution correct?");
-                System.err.println("Current resolution is ");
-                return Direction.UNKNOWN;
-            }
-        }
-    }
-
     public Direction findDirectionFromCircleGrid(Point circleCoordinate) {
         if (circleCoordinate == null) {
             System.out.println("Point er ikke initialiseret");
@@ -146,6 +128,25 @@ public class CircleFilter {
             return Direction.exactDirection(x, y);
         }
     }
+
+    //    public Direction findDirectionFromCircle(Point circleCoordinate) {
+//
+//        if (circleCoordinate == null) {
+//            System.out.println("Point er ikke initialiseret");
+//            return Direction.UNKNOWN;
+//        } else {
+//            double x = circleCoordinate.x;
+//            if (x > 0 && x < 512) return Direction.LEFT;
+//            else if (x > 512 && x < 768) return Direction.CENTER; // 256px (1/5 af billedeopløsningen på 1280)
+//            else if (x > 768 && x < 1280) return Direction.RIGHT;
+//            else {
+//                System.err.println("Cannot find the direction to the circle is the resolution correct?");
+//                System.err.println("Current resolution is ");
+//                return Direction.UNKNOWN;
+//            }
+//        }
+//    }
+
 
     /*
      * Ikke færdig.

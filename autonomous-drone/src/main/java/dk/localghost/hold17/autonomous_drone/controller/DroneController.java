@@ -213,7 +213,7 @@ public class DroneController {
         System.out.println("IM AT TOP");
         int count = 0;
         while (directionToCircleCenter != Direction.CENTER && count < 20) {
-            directionToCircleCenter = filter.findDirectionFromCircle(filter.getBiggestCircle());
+            directionToCircleCenter = filter.findDirectionFromCircleGrid(filter.getBiggestCircle());
 
             System.err.print("*** ");
             System.out.println("CIRCLE IS TO THE" + directionToCircleCenter);
