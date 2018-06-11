@@ -223,19 +223,19 @@ public class DroneController {
                     cmd.up(speed).doFor(500);
                     break;
                 case LEFT:
-                case DOWNLEFT:
-                case UPLEFT:
+                case LEFTDOWN:
+                case LEFTUP:
                     cmd.setLedsAnimation(LEDAnimation.BLINK_RED, 6, 1);
                     cmd.goLeft(speed).doFor(500);
                     break;
-                case UPRIGHT:
+                case RIGHTUP:
                 case RIGHT:
-                case DOWNRIGHT:
+                case RIGHTDOWN:
                     cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 6, 1);
                     cmd.goRight(speed).doFor(500);
                     break;
-                case DOWNCENTER:
-                case UPCENTER:
+                case CENTERDOWN:
+                case CENTERUP:
                 case CENTER:
                     LEDSuccess();
                     break;
@@ -244,6 +244,7 @@ public class DroneController {
             cmd.hover();
             cmd.waitFor(1000);
         }
+
         cmd.setLedsAnimation(LEDAnimation.SNAKE_GREEN_RED, 1, 10);
         drone.landing();
     }
