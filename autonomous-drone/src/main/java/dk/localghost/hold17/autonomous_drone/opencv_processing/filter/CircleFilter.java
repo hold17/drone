@@ -125,7 +125,7 @@ public class CircleFilter {
         }
     }
 
-    public Direction findDirectionFromCircleGRID(Point circleCoordinate) {
+    public Direction findDirectionFromCircleGrid(Point circleCoordinate) {
         if (circleCoordinate == null) {
             System.out.println("Point er ikke initialiseret");
             return Direction.UNKNOWN;

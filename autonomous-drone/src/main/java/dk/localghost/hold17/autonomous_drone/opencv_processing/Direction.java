@@ -9,7 +9,6 @@ public enum Direction {
      * @param y the y coordinate
      * @return the direction if it can be determined.
      */
-
     public static Direction exactDirection(double x, double y){
         if(Direction.upCenter(x,y) != null) return Direction.UPCENTER;
         else if(Direction.center(x,y) != null) return Direction.CENTER;
@@ -26,14 +25,12 @@ public enum Direction {
         }
     }
 
-
     /**
      * Methods to find direction from coordinates
      * @param x the x coordinate
      * @param y the y coordinate
      * @return the direction, if any is applicable
      */
-
     public static Direction left(double x, double y) {
         if (x > 0 && x < 512 && y < 400 && y > 320) return Direction.LEFT; // 256px (1/5 af billedeopløsningen på 1280)
         else return null;
