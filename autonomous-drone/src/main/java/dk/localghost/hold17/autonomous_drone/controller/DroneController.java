@@ -229,7 +229,7 @@ public class DroneController {
             cmd.hover();
             cmd.waitFor(1000);
 
-//            qrController.resetQrDirection();
+            qrController.resetQrDirection();
         }
     }
 
