@@ -1,4 +1,4 @@
-package dk.localghost.hold17.autonomous_drone.opencv_processing;
+package dk.localghost.hold17.autonomous_drone.opencv_processing.util;
 
 import org.opencv.core.Point;
 
@@ -18,6 +18,5 @@ public class PointComparator {
                 return -1;
         }
     };
-
 
 }

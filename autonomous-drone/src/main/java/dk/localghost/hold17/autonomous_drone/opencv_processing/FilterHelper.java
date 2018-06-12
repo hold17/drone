@@ -1,34 +1,18 @@
-package dk.localghost.hold17.autonomous_drone.opencv_processing.filter;
+package dk.localghost.hold17.autonomous_drone.opencv_processing;
 
-import dk.localghost.hold17.autonomous_drone.opencv_processing.Direction;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.core.Rect;
+import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.awt.image.DataBufferByte;
+import java.awt.image.WritableRaster;
 import java.nio.file.Paths;
 
 public class FilterHelper {
 
-    // TODO: Skift værdierne der tjekkes for, så de passer til dronens kameraopløsning
-    public Direction findPaperPosition(Rect rect) {
-        if (rect.x > 0 && rect.x < 512) {
-            return Direction.LEFT;
-        }
-
-        if (rect.x > 512 && rect.x < 768) {
-            return Direction.CENTER;
-        }
-
-        if (rect.x > 768 && rect.x < 1280) {
-            return Direction.RIGHT;
-        }
-        return Direction.UNKNOWN;
+    static {
+        nu.pattern.OpenCV.loadShared(); // loading maven version of OpenCV
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
 
     /**
@@ -70,17 +54,12 @@ public class FilterHelper {
      * Needed for drone video feed
      * @param img BufferedImage
      * @return Mat
-     * @throws IOException
      */
     public Mat bufferedImageToMat(BufferedImage img) {
-        try (ByteArrayOutputStream outstream = new ByteArrayOutputStream()) {
-            ImageIO.write(img, "jpg", outstream);
-            outstream.flush();
-            return Imgcodecs.imdecode(new MatOfByte(outstream.toByteArray()), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        byte[] data = ((DataBufferByte) img.getRaster().getDataBuffer()).getData();
+        Mat mat = new Mat(img.getHeight(), img.getWidth(), CvType.CV_8UC3);
+        mat.put(0, 0, data);
+        return mat;
     }
 
     /***
@@ -89,14 +68,12 @@ public class FilterHelper {
      * @return BufferedImage
      */
     public BufferedImage matToBufferedImage(Mat mat) {
-        try {
-            MatOfByte mob = new MatOfByte();
-            Imgcodecs.imencode(".jpg", mat, mob);
-            return ImageIO.read(new ByteArrayInputStream(mob.toArray()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        BufferedImage image = new BufferedImage(mat.width(), mat.height(), BufferedImage.TYPE_3BYTE_BGR);
+        WritableRaster raster = image.getRaster();
+        DataBufferByte dataBuffer = (DataBufferByte) raster.getDataBuffer();
+        byte[] data = dataBuffer.getData();
+        mat.get(0, 0, data);
+        return image;
     }
+
 }

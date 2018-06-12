@@ -1,7 +1,7 @@
-package dk.localghost.hold17.autonomous_drone.opencv_processing.filter;
+package dk.localghost.hold17.autonomous_drone.opencv_processing;
 
-import dk.localghost.hold17.autonomous_drone.opencv_processing.Direction;
-import dk.localghost.hold17.autonomous_drone.opencv_processing.ExternalRectangle;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Direction;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.util.ExternalRectangle;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
@@ -13,6 +13,12 @@ import static org.opencv.imgproc.Imgproc.COLOR_GRAY2RGB;
 import static org.opencv.imgproc.Imgproc.cvtColor;
 
 public class RectangleFilter {
+
+    static {
+        nu.pattern.OpenCV.loadShared(); // loading maven version of OpenCV
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+    }
+
     private List<Rect> externalRects = new ArrayList<>();
     private List<ExternalRectangle> externalCustomRectangles = new ArrayList<>();
     private List<ExternalRectangle> QRCodes = new ArrayList<>();
@@ -29,11 +35,6 @@ public class RectangleFilter {
 
     public RectangleFilter() {
         filterHelperter = new FilterHelper();
-    }
-
-    static {
-        nu.pattern.OpenCV.loadShared(); // loading maven version of OpenCV
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
 
     // TODO: Skift værdierne der tjekkes for, så de passer til dronens kameraopløsning

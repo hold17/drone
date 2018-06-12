@@ -1,7 +1,7 @@
-package dk.localghost.hold17.autonomous_drone.opencv_processing;
+package dk.localghost.hold17.autonomous_drone.opencv_processing.util;
 
 public enum Direction {
-    LEFT, RIGHT, CENTER,UP, DOWNCENTER, UPCENTER, UPLEFT, UPRIGHT, DOWN, DOWNLEFT,DOWNRIGHT, UNKNOWN;
+    LEFT, RIGHT, CENTER, UP, DOWNCENTER, UPCENTER, UPLEFT, UPRIGHT, DOWN, DOWNLEFT,DOWNRIGHT, UNKNOWN;
 
     /**
      * Method that finds the direction
