@@ -1,8 +1,8 @@
 package dk.localghost.hold17.autonomous_drone.controller;
 
-import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Direction;
-import dk.localghost.hold17.autonomous_drone.opencv_processing.filter.CircleFilter;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.CircleFilter;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.RectangleFilter;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Direction;
 import dk.localghost.hold17.base.IARDrone;
 import dk.localghost.hold17.base.command.CommandManager;
 import dk.localghost.hold17.base.command.LEDAnimation;
@@ -27,7 +27,7 @@ public class DroneController {
     private BufferedImage droneCamera;
 
     private static int speed;
-
+    CircleFilter circleFilter;
     public static int cameraWidth;
     public static int cameraHeight;
 
@@ -35,6 +35,7 @@ public class DroneController {
         this.drone = drone;
         this.cmd = this.drone.getCommandManager();
         this.speed = speed;
+        circleFilter = new CircleFilter();
 
         initializeDrone();
     }
@@ -59,6 +60,13 @@ public class DroneController {
         qrController = new QRScannerController();
         drone.getVideoManager().addImageListener(qrScanner::imageUpdated);
         qrScanner.addListener(qrController);
+
+        drone.getVideoManager().addImageListener(image -> {
+            circleFilter.findCircleAndDraw(image);
+            Direction.CAMERA_WIDTH = droneCamera.getWidth();
+            alignCircle();
+        });
+
 
         LEDSuccess();
     }
@@ -208,44 +216,47 @@ public class DroneController {
 
 
     public void alignCircle() {
-        CircleFilter filter = new CircleFilter();
         Direction directionToCircleCenter = null;
-        goToMaxmimumAltitude();
+//        goToMaxmimumAltitude();
         System.out.println("IM AT TOP");
-
         int count = 0;
         while (directionToCircleCenter != Direction.CENTER && count < 20) {
-            directionToCircleCenter = filter.findDirectionFromCircle(filter.getBiggestCircle());
+            Direction tempDirection = Direction.findXDirection(circleFilter.getBiggestCircle().x); // henter enum ud fra fundne stoerste cirkel
+            if (tempDirection != Direction.UNKNOWN) {
+                directionToCircleCenter = tempDirection;
+            }
 
             System.err.print("*** ");
             System.out.println("CIRCLE IS TO THE" + directionToCircleCenter);
             System.err.print(" ***");
-            switch (directionToCircleCenter) {
-                case LEFT:
-                case LEFTDOWN:
-                case LEFTUP:
-                    cmd.setLedsAnimation(LEDAnimation.BLINK_RED, 6, 1);
-                    cmd.goLeft(speed).doFor(500);
-                    break;
-                case RIGHT:
-                case RIGHTUP:
-                case RIGHTDOWN:
-                    cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 6, 1);
-                    cmd.goRight(speed).doFor(500);
-                    break;
-                case DOWN:
-                case UP:
-                case CENTER:
-                    LEDSuccess();
-                    break;
+            if (directionToCircleCenter != null) {
+                switch (directionToCircleCenter) {
+                    case LEFT:
+                    case LEFTDOWN:
+                    case LEFTUP:
+                        cmd.setLedsAnimation(LEDAnimation.BLINK_RED, 6, 1);
+                        //                    cmd.goLeft(speed).doFor(500);
+                        break;
+                    case RIGHT:
+                    case RIGHTUP:
+                    case RIGHTDOWN:
+                        cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 6, 1);
+                        //                    cmd.goRight(speed).doFor(500);
+                        break;
+                    case DOWN:
+                    case UP:
+                    case CENTER:
+                        LEDSuccess();
+                        break;
+                }
             }
             count++; // TODO: TBD if this if can stay in while loop until.
-            cmd.hover();
+//            cmd.hover();
             cmd.waitFor(1000);
         }
 
         cmd.setLedsAnimation(LEDAnimation.SNAKE_GREEN_RED, 1, 10);
-        drone.landing();
+//        drone.landing();
     }
 
     private Direction getPaperDirection() {
@@ -357,4 +368,5 @@ public class DroneController {
     public IARDrone getDrone() {
         return drone;
     }
+
 }
