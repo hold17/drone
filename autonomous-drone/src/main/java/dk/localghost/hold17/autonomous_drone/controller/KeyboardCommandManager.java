@@ -7,6 +7,7 @@ import javafx.scene.input.KeyEvent;
 public class KeyboardCommandManager implements EventHandler<KeyEvent> {
     private DroneController controller;
     private IARDrone drone;
+    private static final int MANUAL_FLIGHT_SPEED = 30;
 
     public KeyboardCommandManager(DroneController controller) {
         this.controller = controller;
@@ -24,17 +25,17 @@ public class KeyboardCommandManager implements EventHandler<KeyEvent> {
                 controller.LEDSuccess();
                 break;
             case W:
-                drone.forward(); break;
+                drone.getCommandManager().forward(MANUAL_FLIGHT_SPEED); break;
             case S:
-                drone.backward(); break;
+                drone.getCommandManager().backward(MANUAL_FLIGHT_SPEED); break;
             case A:
-                drone.goLeft(); break;
+                drone.getCommandManager().goLeft(MANUAL_FLIGHT_SPEED); break;
             case D:
-                drone.goRight(); break;
+                drone.getCommandManager().goRight(MANUAL_FLIGHT_SPEED); break;
             case Q: case LEFT:
-                drone.getCommandManager().spinLeft(DroneController.getSpeed()); break;
+                drone.getCommandManager().spinLeft(50); break;
             case E: case RIGHT:
-                drone.getCommandManager().spinRight(DroneController.getSpeed()); break;
+                drone.getCommandManager().spinRight(50); break;
             case UP:
                 drone.up(); break;
             case DOWN:
@@ -56,7 +57,10 @@ public class KeyboardCommandManager implements EventHandler<KeyEvent> {
                 System.exit(0);
                 break;
             case X:
-                controller.bum(); break;
+//                controller.bum();
+//                drone.getCommandManager().schedule(0, controller::alignQrCode);
+                drone.getCommandManager().schedule(0, controller::searchForQr);
+                break;
         }
     }
 }
