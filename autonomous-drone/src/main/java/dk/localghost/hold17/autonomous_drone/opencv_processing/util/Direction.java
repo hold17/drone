@@ -2,7 +2,7 @@ package dk.localghost.hold17.autonomous_drone.opencv_processing.util;
 
 public enum Direction {
     LEFT, CENTER, RIGHT, UP, LEFTUP, RIGHTUP, DOWN, LEFTDOWN, RIGHTDOWN, LEFTCENTER, CENTERCENTER, RIGHTCENTER, UNKNOWN;
-    public static int CAMERA_WIDTH;
+    public static int CAMERA_WIDTH = 1280;
 
     /**
      * Methods to find direction from x coordinate

@@ -1,11 +1,7 @@
 package dk.localghost.hold17.autonomous_drone.opencv_processing;
 
-import dk.localghost.hold17.autonomous_drone.controller.DroneController;
-import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Direction;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
-
-import java.awt.image.BufferedImage;
 
 import static org.opencv.imgproc.Imgproc.GaussianBlur;
 import static org.opencv.imgproc.Imgproc.cvtColor;
@@ -23,11 +19,11 @@ public class CircleFilter {
     private final Scalar YELLOW = new Scalar(0, 255, 255);
     private final Scalar CYAN = new Scalar(255, 255, 0);
 
-    private String fileName = "4.jpg";
-    private String outputName = "4filtered.jpg";
-    private String imgNumber = "4";
+//    private String fileName = "4.jpg";
+//    private String outputName = "4filtered.jpg";
+//    private String imgNumber = "4";
 
-    private DroneController droneController;
+//    private DroneController droneController;
 
     public Point getBiggestCircle() {
         return biggestCircle;
@@ -53,10 +49,7 @@ public class CircleFilter {
      * Funktion der finder cirkler samt tegner dem
      * TODO: Metode kan forveksle den største cirkel i scenarier hvor der er flere cirkler.
      */
-    public Mat findCircleAndDraw(BufferedImage bufferedImage) {
-        FilterHelper filterHelper = new FilterHelper();
-        Mat image = filterHelper.bufferedImageToMat(bufferedImage); /// buffered image fra videostream laves om til mat
-
+    public Mat findCircleAndDraw(Mat image) {
         Mat circlePosition = new Mat();
         Mat hsv_image = new Mat();
 
@@ -75,13 +68,13 @@ public class CircleFilter {
 
         // 4th argument = downscaling. Higher values = lower resolution. 1 = no downscaling.
         // 5th argument = minDist between circles
-        Imgproc.HoughCircles(red_hue_image, circlePosition, Imgproc.CV_HOUGH_GRADIENT, 1, (red_hue_image.rows() / 8), 100, 30, 50, 600);
+        Imgproc.HoughCircles(red_hue_image, circlePosition, Imgproc.CV_HOUGH_GRADIENT, 1, (red_hue_image.rows() / 8), 100, 30, 50, 1000);
 
         // finder objekter der ligner cirkler og gemmer deres position i circlePosition
 
         // fortsæt kun, hvis der er fundet én eller flere cirkler
 
-        if (circlePosition.empty() == false) {
+        if (!circlePosition.empty()) {
 //        Point maxCenter;
             //System.out.println("Fandt: " + circlePosition.cols() + " cirkler");
 
@@ -112,20 +105,20 @@ public class CircleFilter {
         } else {
             return image;
         }
-        System.out.println(biggestCircle.toString());
+//        System.out.println(biggestCircle.toString());
         return image;
     }
 
-    public Direction findDirectionFromCircle(Point circleCoordinate) {
-        if (circleCoordinate == null) {
-            System.out.println("Point er ikke initialiseret");
-            return Direction.UNKNOWN;
-        } else {
-            double x = circleCoordinate.x;
-//            double y = circleCoordinate.y;
-            return Direction.findXDirection(x);
-        }
-    }
+//    public Direction findDirectionFromCircle(Point circleCoordinate) {
+//        if (circleCoordinate == null) {
+//            System.out.println("Point er ikke initialiseret");
+//            return Direction.UNKNOWN;
+//        } else {
+//            double x = circleCoordinate.x;
+////            double y = circleCoordinate.y;
+//            return Direction.findXDirection(x);
+//        }
+//    }
 
     //    public Direction findDirectionFromCircle(Point circleCoordinate) {
 //
