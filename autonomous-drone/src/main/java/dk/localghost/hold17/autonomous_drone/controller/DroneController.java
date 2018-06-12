@@ -1,8 +1,8 @@
 package dk.localghost.hold17.autonomous_drone.controller;
 
-import dk.localghost.hold17.autonomous_drone.opencv_processing.Direction;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Direction;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.filter.CircleFilter;
-import dk.localghost.hold17.autonomous_drone.opencv_processing.filter.RectangleFilter;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.RectangleFilter;
 import dk.localghost.hold17.base.IARDrone;
 import dk.localghost.hold17.base.command.CommandManager;
 import dk.localghost.hold17.base.command.LEDAnimation;
@@ -278,6 +278,7 @@ public class DroneController {
 
     public void searchForQr() {
         String qrString = null;
+
         goToMinimumAltitude();
 
         for (int i = 0; i < 5; i++) {

@@ -1,15 +1,20 @@
-package dk.localghost.hold17.autonomous_drone.opencv_processing.filter;
+package dk.localghost.hold17.autonomous_drone.opencv_processing;
 
+import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Direction;
 import dk.localghost.hold17.autonomous_drone.controller.DroneController;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.Direction;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
-import static org.opencv.imgproc.Imgproc.GaussianBlur;
-import static org.opencv.imgproc.Imgproc.cvtColor;
+import static org.opencv.imgproc.Imgproc.*;
 
 // TODO: Clean up unused code
 public class CircleFilter {
+
+    static {
+        nu.pattern.OpenCV.loadShared(); // loading maven version of OpenCV
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+    }
 
     private final Scalar NEON_GREEN = new Scalar(20, 255, 57);
     private final Scalar RED = new Scalar(0, 0, 255);
@@ -29,39 +34,26 @@ public class CircleFilter {
     // Global variabel for centrum af største cirkel.
     private Point biggestCircle = new Point();
 
-    static {
-        nu.pattern.OpenCV.loadShared(); // loading maven version of OpenCV
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-    }
-
-    //Udkommenteret test funktion
     public CircleFilter() {
 //        BufferedImage img = matToBufferedImage(openFile(fileName));
-//        benchmark(Shape.CIRCLE);
-//        benchmark(Shape.RECTANGLE);
-
 //        Mat img_circle = openFile("3.jpg");
-//        findCircleAndDraw(img_circle, 1, 150);
+//        findCircleAndDraw(img_circle);
 //        Direction direction = findDirectionFromCircle(biggestCircle);
 //        System.out.println(direction);
 //        saveFile(outputName, img_circle);
     }
 
-    //    public static void main(String[] args) {
+//    public static void main(String[] args) {
 //        new CircleFilter();
 //    }
+
     /*
      * Funktion der finder cirkler samt tegner dem
-     * dp = pixelreduktionsgrad
-     * minDist = minimum radius i pixelantal
      * TODO: Metode kan forveksle den største cirkel i scenarier hvor der er flere cirkler.
      */
-    public Mat findCircleAndDraw(Mat image, int dp, int minDist) {
+    public Mat findCircleAndDraw(Mat image) {
         Mat circlePosition = new Mat();
         Mat hsv_image = new Mat();
-        //Parameter tjek
-        if (dp <= 0) dp = 1;
-        if (minDist <= 0) minDist = 1;
 
         cvtColor(image, hsv_image, Imgproc.COLOR_BGR2HSV);
         Mat lower_red = new Mat();
@@ -75,51 +67,48 @@ public class CircleFilter {
 
         GaussianBlur(red_hue_image, red_hue_image, new Size(9, 9), 2, 2);
 
-        Imgproc.HoughCircles(red_hue_image, circlePosition, Imgproc.CV_HOUGH_GRADIENT, dp, red_hue_image.rows() / 8, 100, 30, 50, 10000);
+        // 4th argument = downscaling. Higher values = lower resolution. 1 = no downscaling.
+        // 5th argument = minDist between circles
+        Imgproc.HoughCircles(red_hue_image, circlePosition, Imgproc.CV_HOUGH_GRADIENT, 1, (red_hue_image.rows()/8), 100, 30, 100, 600);
 
         // finder objekter der ligner cirkler og gemmer deres position i circlePosition
-
         // fortsæt kun, hvis der er fundet én eller flere cirkler
-        Point maxCenter;
-//        if (circlePosition.empty() == false) {
+        if (circlePosition.empty()) {
+            System.out.println("No circles found!");
+        }
+//        Point maxCenter;
             //System.out.println("Fandt: " + circlePosition.cols() + " cirkler");
 
             // sætter cirklens farve
-            double farve = 100;
-            Scalar color = new Scalar(farve);
+        Scalar color = new Scalar(100);
 
-            int maxRadius = 0;
-            for (int i = 0; i < circlePosition.cols(); i++) // antallet af kolonner angiver antallet af cirkler fundet
-            {
-                double[] testArr = circlePosition.get(0, i);
-                //System.out.println("\nCirkel nr. " + (i + 1) + " fundet på:\nx-koord: " + testArr[0] + "\ny-koord: " + testArr[1] + "\nradius: " + testArr[2]);
-
-
-                // sætter cirklens centrum
-                Point center = new Point(testArr[0], testArr[1]);
-
-                // parser radius til int for at efterleve parametre krav i circle()
-                double radiusDouble = testArr[2];
-                int radius = (int) radiusDouble;
-                // Vi ønsker kun at tegne den største cirkel
-                if (maxRadius < radius) {
-                    maxRadius = radius;
-                    biggestCircle.x = center.x;
-                    biggestCircle.y = center.y;
-                }
+        int maxRadius = 0;
+        for (int i = 0; i < circlePosition.cols(); i++) { // antallet af kolonner angiver antallet af cirkler fundet
+            double[] testArr = circlePosition.get(0, i);
+//                //System.out.println("\nCirkel nr. " + (i + 1) + " fundet på:\nx-koord: " + testArr[0] + "\ny-koord: " + testArr[1] + "\nradius: " + testArr[2]);
+//
+//                // sætter cirklens centrum
+            Point center = new Point(testArr[0], testArr[1]);
+//
+//                // parser radius til int for at efterleve parametre krav i circle()
+            double radiusDouble = testArr[2];
+            int radius = (int) radiusDouble;
+            // Vi ønsker kun at tegne den største cirkel
+            if (maxRadius < radius) {
+                maxRadius = radius;
+                biggestCircle.x = center.x;
+                biggestCircle.y = center.y;
             }
+        }
             // tegner cirklen
-            Imgproc.circle(image, biggestCircle, maxRadius, color);
-//        } else {
-//            System.out.println("Der blev ikke fundet nogle cirkler i billedet");
-//            return null;
-//        }
-        return image;
+        cvtColor(upper_red, red_hue_image, COLOR_GRAY2BGR);
+        Imgproc.circle(red_hue_image, biggestCircle, maxRadius, color, 3, 8, 0);
+        return red_hue_image;
     }
 
     public Direction findDirectionFromCircle(Point circleCoordinate) {
         if (circleCoordinate == null) {
-            System.out.println("Point er ikke initialiseret");
+            System.out.println("Point not initialized");
             return Direction.UNKNOWN;
         } else {
             double x = circleCoordinate.x;

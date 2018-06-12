@@ -1,4 +1,4 @@
-package dk.localghost.hold17.autonomous_drone.opencv_processing;
+package dk.localghost.hold17.autonomous_drone.opencv_processing.util;
 
 import dk.localghost.hold17.autonomous_drone.controller.DroneController;
 

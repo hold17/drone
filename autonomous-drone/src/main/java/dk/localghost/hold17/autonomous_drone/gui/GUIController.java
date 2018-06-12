@@ -1,7 +1,8 @@
 package dk.localghost.hold17.autonomous_drone.gui;
 
-import dk.localghost.hold17.autonomous_drone.opencv_processing.filter.FilterHelper;
-import dk.localghost.hold17.autonomous_drone.opencv_processing.filter.RectangleFilter;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.CircleFilter;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.FilterHelper;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.RectangleFilter;
 import dk.localghost.hold17.base.IARDrone;
 import dk.localghost.hold17.base.command.VideoChannel;
 import dk.localghost.hold17.base.command.VideoCodec;
@@ -10,6 +11,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import org.opencv.core.Mat;
 
 import java.awt.image.BufferedImage;
 import java.util.Timer;
@@ -26,8 +28,8 @@ public class GUIController {
     private ImageView filtered;
 
     private static FilterHelper filterHelper = new FilterHelper();
-    //    private static CircleFilter circleFilter = new CircleFilter();
-    private static RectangleFilter rectangleFilter = new RectangleFilter();
+    private static CircleFilter circleFilter = new CircleFilter();
+//    private static RectangleFilter rectangleFilter = new RectangleFilter();
 
     void init(IARDrone drone) {
         ardrone = drone;
@@ -36,9 +38,9 @@ public class GUIController {
 
     private void startRecording() {
         bufferedImage = null;
-        ardrone.getCommandManager().setVideoChannel(VideoChannel.HORI);
-        ardrone.getCommandManager().setVideoCodec(VideoCodec.H264_720P);
-        ardrone.getVideoManager().reinitialize();
+//        ardrone.getCommandManager().setVideoChannel(VideoChannel.HORI);
+//        ardrone.getCommandManager().setVideoCodec(VideoCodec.H264_720P);
+//        ardrone.getVideoManager().reinitialize();
 
         ardrone.getVideoManager().addImageListener(newImage -> bufferedImage = newImage);
 
@@ -47,7 +49,9 @@ public class GUIController {
             public void run() {
                 if (bufferedImage != null) {
                     Image image = SwingFXUtils.toFXImage(bufferedImage, null);
-//                    Image imageFiltered = SwingFXUtils.toFXImage(filterHelper.matToBufferedImage(circleFilter.findCircleAndDraw(filterHelper.bufferedImageToMat(bufferedImage), 1, 150)), null);
+                    Mat mat = circleFilter.findCircleAndDraw(filterHelper.bufferedImageToMat(bufferedImage));
+                    BufferedImage bf = filterHelper.matToBufferedImage(mat);
+                    Image imageFiltered = SwingFXUtils.toFXImage(bf, null);
                     // show the image
                     Platform.runLater(() -> {
                         live.setImage(image);
@@ -56,15 +60,14 @@ public class GUIController {
                         // preserve bufferedImage ratio
                         live.setPreserveRatio(true);
 
-//                        filtered.setImage(imageFiltered);
-//                        filtered.setFitWidth(640);
-//                        filtered.setPreserveRatio(true);
+                        filtered.setImage(imageFiltered);
+                        filtered.setFitWidth(640);
+                        filtered.setPreserveRatio(true);
                     });
 
+                } else {
+                   // System.out.println("bufferedImage was null"); // SILENCED UNTIL NEEDED
                 }
-                //else
-                // System.out.println("bufferedImage was null"); // SILENCED UNTIL NEEDED
-
             }
         };
         this.timer = new Timer();
