@@ -5,9 +5,7 @@ import dk.localghost.hold17.autonomous_drone.opencv_processing.RectangleFilter;
 import dk.localghost.hold17.base.IARDrone;
 import dk.localghost.hold17.base.command.CommandManager;
 import dk.localghost.hold17.base.command.LEDAnimation;
-import dk.localghost.hold17.base.navdata.Altitude;
-import dk.localghost.hold17.base.navdata.AltitudeListener;
-import dk.localghost.hold17.base.navdata.BatteryListener;
+import dk.localghost.hold17.base.navdata.*;
 
 import java.awt.image.BufferedImage;
 
@@ -52,12 +50,12 @@ public class DroneController {
             System.out.println("WARNING: Battery percentage low (" + droneBattery + "%)!");
         }
 
-        drone.getVideoManager().addImageListener(camera -> this.droneCamera = camera);
+//        drone.getVideoManager().addImageListener(camera -> this.droneCamera = camera);
 
-        final QRCodeScanner qrScanner = new QRCodeScanner();
-        qrController = new QRScannerController();
-        drone.getVideoManager().addImageListener(qrScanner::imageUpdated);
-        qrScanner.addListener(qrController);
+//        final QRCodeScanner qrScanner = new QRCodeScanner();
+//        qrController = new QRScannerController();
+//        drone.getVideoManager().addImageListener(qrScanner::imageUpdated);
+//        qrScanner.addListener(qrController);
 
         LEDSuccess();
     }
