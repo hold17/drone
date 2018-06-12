@@ -803,8 +803,9 @@ public class CommandManager extends AbstractUDPManager {
     }
 
     private synchronized void sendCommand(ATCommand c) throws InterruptedException, IOException {
+        final String ANSI_BLUE = "\u001B[34m";
         if (!(c instanceof KeepAliveCommand)) {
-            System.out.println("CommandManager: send " + c.getCommandString(seq));
+            System.out.println(ANSI_BLUE + "CommandManager: send " + c.getCommandString(seq) + ANSI_BLUE);
         }
         String config = "AT*CONFIG_IDS=" + (seq++) + ",\"" + CommandManager.SESSION_ID + "\",\"" + CommandManager.PROFILE_ID + "\",\"" + CommandManager.APPLICATION_ID + "\"" + "\r"; // AT*CONFIG_IDS=5,"aabbccdd","bbccddee","ccddeeff"
         byte[] configPrefix = config.getBytes("ASCII");

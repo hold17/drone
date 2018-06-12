@@ -19,7 +19,9 @@ public class DroneController {
 
     private final static int MAX_ALTITUDE = 1400;
     private final static int MIN_ALTITUDE = 900;
-
+    private static final String ANSI_CYAN = "\u001B[36m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_RED_BACKGROUND = "\u001B[41m";
     private int droneAltitude = 0;
     private int droneBattery = 0;
     private boolean droneFlying = false;
@@ -219,6 +221,7 @@ public class DroneController {
 
     public void alignCircle() {
         Direction directionToCircleCenter = null;
+//        Remove this line of code if testing on table.
 //        goToMaxmimumAltitude();
         System.out.println("IM AT TOP");
         int count = 0;
@@ -249,16 +252,17 @@ public class DroneController {
                     case DOWN:
                     case UP:
                     case CENTER:
-                        cmd.landing();
-                        return;
-//                        LEDSuccess();
-//                        break;
+//                        cmd.landing();
+//                        return;
+                        LEDSuccess();
+                        System.out.println(ANSI_RED_BACKGROUND + ANSI_GREEN + "Found circle" + ANSI_GREEN + ANSI_RED_BACKGROUND);
+                        break;
                 }
             }
             count++; // TODO: TBD if this if can stay in while loop until.
             cmd.hover();
             cmd.waitFor(1000);
-//        }
+        }
 
         cmd.setLedsAnimation(LEDAnimation.SNAKE_GREEN_RED, 1, 10);
 //        drone.landing();
@@ -290,7 +294,7 @@ public class DroneController {
 //
 //            qrController.resetQrDirection();
 //        }
-    }
+
 
     public void searchForQr() {
         String qrString = null;
@@ -348,7 +352,7 @@ public class DroneController {
         }
 
         qrController.resetLastScan();
-        System.out.println("I FOUND QR: " + qrString);
+        System.out.println(ANSI_CYAN + "I FOUND QR: " + qrString + ANSI_CYAN);
         cmd.landing();
 
         goToMaxmimumAltitude();
