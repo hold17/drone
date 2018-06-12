@@ -21,6 +21,7 @@ public class AutonomousGUI extends Application {
             System.err.println("You must assign an ip address as argument.");
             System.exit(-1);
         }
+//        System.out.println(ConsoleColors.WHITE_UNDERLINED+ConsoleColors.CYAN+"Test"+ConsoleColors.RESET);
         drone = new ARDrone(args[0]);
         drone.start();
 

@@ -1,5 +1,6 @@
 package dk.localghost.hold17.autonomous_drone.controller;
 
+import dk.localghost.hold17.autonomous_drone.ConsoleColors;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.CircleFilter;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Direction;
 import dk.localghost.hold17.base.IARDrone;
@@ -19,9 +20,6 @@ public class DroneController {
 
     private final static int MAX_ALTITUDE = 1400;
     private final static int MIN_ALTITUDE = 900;
-    private static final String ANSI_CYAN = "\u001B[36m";
-    public static final String ANSI_GREEN = "\u001B[32m";
-    public static final String ANSI_RED_BACKGROUND = "\u001B[41m";
     private int droneAltitude = 0;
     private int droneBattery = 0;
     private boolean droneFlying = false;
@@ -50,10 +48,10 @@ public class DroneController {
         drone.setMaxAltitude(4000);
         initializeListeners();
 
-        System.out.println("CURRENT BATTERY: " + droneBattery + "%");
+        System.out.println(ConsoleColors.BLUE_BRIGHT + "CURRENT BATTERY: " + droneBattery + "%" + ConsoleColors.RESET);
 
         if (droneBattery < 20) {
-            System.out.println("WARNING: Battery percentage low (" + droneBattery + "%)!");
+            System.out.println(ConsoleColors.YELLOW_BOLD_BRIGHT + "WARNING: Battery percentage low (" + droneBattery + "%)!" + ConsoleColors.RESET);
         }
 
 //        drone.getVideoManager().addImageListener(camera -> this.droneCamera = camera);
@@ -233,7 +231,7 @@ public class DroneController {
             }
 
 //            System.err.print("*** ");
-            System.out.println("CIRCLE IS TO THE " + directionToCircleCenter);
+            System.out.println(ConsoleColors.WHITE_UNDERLINED + ConsoleColors.GREEN + "CIRCLE IS TO THE " + directionToCircleCenter + ConsoleColors.RESET);
 //            System.err.print(" ***");
             if (directionToCircleCenter != null) {
                 switch (directionToCircleCenter) {
@@ -255,7 +253,7 @@ public class DroneController {
 //                        cmd.landing();
 //                        return;
                         LEDSuccess();
-                        System.out.println(ANSI_RED_BACKGROUND + ANSI_GREEN + "Found circle" + ANSI_GREEN + ANSI_RED_BACKGROUND);
+                        System.out.println(ConsoleColors.GREEN_BOLD_BRIGHT + "Found circle" + ConsoleColors.RESET);
                         break;
                 }
             }
@@ -352,7 +350,7 @@ public class DroneController {
         }
 
         qrController.resetLastScan();
-        System.out.println(ANSI_CYAN + "I FOUND QR: " + qrString + ANSI_CYAN);
+        System.out.println(ConsoleColors.CYAN_BOLD_BRIGHT + "I FOUND QR: " + qrString + ConsoleColors.RESET);
         cmd.landing();
 
         goToMaxmimumAltitude();

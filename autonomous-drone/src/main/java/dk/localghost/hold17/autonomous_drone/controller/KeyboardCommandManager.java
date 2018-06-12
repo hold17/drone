@@ -1,5 +1,6 @@
 package dk.localghost.hold17.autonomous_drone.controller;
 
+import dk.localghost.hold17.autonomous_drone.ConsoleColors;
 import dk.localghost.hold17.base.IARDrone;
 import javafx.event.EventHandler;
 import javafx.scene.input.KeyEvent;
@@ -48,7 +49,7 @@ public class KeyboardCommandManager implements EventHandler<KeyEvent> {
                 break;
             case P:
                 System.out.println("DRONE Altitude: " + controller.getDroneAltitude());
-                System.out.println("DRONE Battery: " + controller.getDroneBattery());
+                System.out.println(ConsoleColors.YELLOW_BOLD_BRIGHT + "DRONE Battery: " + controller.getDroneBattery() + ConsoleColors.RESET);
                 break;
             case M:
                 drone.restart(); break;
