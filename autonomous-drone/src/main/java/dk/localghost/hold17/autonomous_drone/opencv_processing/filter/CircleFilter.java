@@ -35,8 +35,7 @@ public class CircleFilter {
     }
 
     //Udkommenteret test funktion
-    public CircleFilter(final DroneController droneController) {
-        this.droneController = droneController;
+    public CircleFilter() {
 //        BufferedImage img = matToBufferedImage(openFile(fileName));
 //        benchmark(Shape.CIRCLE);
 //        benchmark(Shape.RECTANGLE);

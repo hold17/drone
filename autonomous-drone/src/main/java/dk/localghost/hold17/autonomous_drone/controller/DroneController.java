@@ -206,11 +206,13 @@ public class DroneController {
         }
     }
 
+
     public void alignCircle() {
-        CircleFilter filter = new CircleFilter(this);
+        CircleFilter filter = new CircleFilter();
         Direction directionToCircleCenter = null;
         goToMaxmimumAltitude();
         System.out.println("IM AT TOP");
+
         int count = 0;
         while (directionToCircleCenter != Direction.CENTER && count < 20) {
             directionToCircleCenter = filter.findDirectionFromCircle(filter.getBiggestCircle());
@@ -219,23 +221,20 @@ public class DroneController {
             System.out.println("CIRCLE IS TO THE" + directionToCircleCenter);
             System.err.print(" ***");
             switch (directionToCircleCenter) {
-                case UP:
-                    cmd.up(speed).doFor(500);
-                    break;
                 case LEFT:
                 case LEFTDOWN:
                 case LEFTUP:
                     cmd.setLedsAnimation(LEDAnimation.BLINK_RED, 6, 1);
                     cmd.goLeft(speed).doFor(500);
                     break;
-                case RIGHTUP:
                 case RIGHT:
+                case RIGHTUP:
                 case RIGHTDOWN:
                     cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 6, 1);
                     cmd.goRight(speed).doFor(500);
                     break;
-                case CENTERDOWN:
-                case CENTERUP:
+                case DOWN:
+                case UP:
                 case CENTER:
                     LEDSuccess();
                     break;

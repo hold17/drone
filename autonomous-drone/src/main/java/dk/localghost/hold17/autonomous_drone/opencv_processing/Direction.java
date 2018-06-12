@@ -69,24 +69,6 @@ public enum Direction {
     }
 
     /**
-     * Methods to find direction from x coordinate
-     * @param x the x coordinate
-     * @return the direction, if any is applicable
-     */
-    public static Direction left(double x) {
-        if (x > 0 && x <= (CAMERA_WIDTH / 5) * 2) return Direction.LEFT;
-        else return null;
-    }
-    public static Direction center(double x) {
-        if (x > (CAMERA_WIDTH / 5) * 2 && x < (CAMERA_WIDTH / 5) * 3) return Direction.CENTER; // center segment is 1/5 of CAMERA_WIDTH
-        else return null;
-    }
-    public static Direction right(double x) {
-        if (x >= (CAMERA_WIDTH / 5) * 3 && x < CAMERA_WIDTH) return Direction.RIGHT;
-        else return null;
-    }
-
-    /**
      * Methods to find direction from coordinates
      * @param x the x coordinate
      * @param y the y coordinate
