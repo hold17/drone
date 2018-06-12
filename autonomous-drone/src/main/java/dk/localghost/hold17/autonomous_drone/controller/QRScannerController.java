@@ -1,7 +1,7 @@
 package dk.localghost.hold17.autonomous_drone.controller;
 
 import com.google.zxing.Result;
-import dk.localghost.hold17.autonomous_drone.opencv_processing.Direction;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Direction;
 
 public class QRScannerController implements TagListener {
 
