@@ -15,19 +15,16 @@ import java.awt.image.BufferedImage;
 public class DroneController {
     private IARDrone drone;
     private CommandManager cmd;
-    QRCodeScanner qrScanner = new QRCodeScanner();
-    QRScannerController qrController = new QRScannerController();
+    private QRCodeScanner qrScanner = new QRCodeScanner();
+    private QRScannerController qrController = new QRScannerController();
+    private static CircleFilter circleFilter = new CircleFilter();
 
     private final static int MAX_ALTITUDE = 1400;
     private final static int MIN_ALTITUDE = 900;
     private int droneAltitude = 0;
     private int droneBattery = 0;
     private boolean droneFlying = false;
-
-//    private BufferedImage droneCamera;
-
     private static int speed;
-    private static CircleFilter circleFilter;
     public static int cameraWidth = 1280;
     public static int cameraHeight = 720;
 
@@ -35,7 +32,6 @@ public class DroneController {
         this.drone = drone;
         this.cmd = this.drone.getCommandManager();
         this.speed = speed;
-        circleFilter = new CircleFilter();
         qrScanner.addListener(qrController);
         initializeDrone();
     }
@@ -53,14 +49,6 @@ public class DroneController {
         if (droneBattery < 20) {
             System.out.println(ConsoleColors.YELLOW_BOLD_BRIGHT + "WARNING: Battery percentage low (" + droneBattery + "%)!" + ConsoleColors.RESET);
         }
-
-//        drone.getVideoManager().addImageListener(camera -> this.droneCamera = camera);
-
-//        drone.getVideoManager().addImageListener(image -> {
-//            circleFilter.findCircleAndDraw(image);
-//            Direction.CAMERA_WIDTH = droneCamera.getWidth();
-//            alignCircle();
-//        });
 
         LEDSuccess();
     }
@@ -221,17 +209,14 @@ public class DroneController {
         Direction directionToCircleCenter = null;
 //        Remove this line of code if testing on table.
 //        goToMaxmimumAltitude();
-        System.out.println("IM AT TOP");
-        int count = 0;
+        System.out.println("IM AT THE TOP");
         while (directionToCircleCenter != Direction.CENTER) {
             Direction tempDirection = Direction.findXDirection(circleFilter.getBiggestCircle().x); // henter enum ud fra fundne stoerste cirkel
             if (tempDirection != Direction.UNKNOWN) {
                 directionToCircleCenter = tempDirection;
             }
 
-//            System.err.print("*** ");
             System.out.println(ConsoleColors.WHITE_UNDERLINED + ConsoleColors.GREEN + "CIRCLE IS TO THE " + directionToCircleCenter + ConsoleColors.RESET);
-//            System.err.print(" ***");
             if (directionToCircleCenter != null) {
                 switch (directionToCircleCenter) {
                     case LEFT:
@@ -255,7 +240,6 @@ public class DroneController {
                         break;
                 }
             }
-            count++; // TODO: TBD if this if can stay in while loop until.
             cmd.hover();
             cmd.waitFor(1000);
         }

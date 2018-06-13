@@ -33,7 +33,7 @@ public class AutonomousGUI extends Application {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("AutonomousGUI.fxml"));
             Pane rootElement = loader.load();
-            Scene scene = new Scene(rootElement, 1020, 720);
+            Scene scene = new Scene(rootElement, 1080, 720);
             primaryStage.setTitle("Autonomous GUI for Hold 17");
             primaryStage.setScene(scene);
 
