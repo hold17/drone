@@ -209,17 +209,14 @@ public class DroneController {
         Direction directionToCircleCenter = null;
 //        Remove this line of code if testing on table.
 //        goToMaxmimumAltitude();
-        System.out.println("IM AT TOP");
-        int count = 0;
+        System.out.println("IM AT THE TOP");
         while (directionToCircleCenter != Direction.CENTER) {
             Direction tempDirection = Direction.findXDirection(circleFilter.getBiggestCircle().x); // henter enum ud fra fundne stoerste cirkel
             if (tempDirection != Direction.UNKNOWN) {
                 directionToCircleCenter = tempDirection;
             }
 
-//            System.err.print("*** ");
             System.out.println(ConsoleColors.WHITE_UNDERLINED + ConsoleColors.GREEN + "CIRCLE IS TO THE " + directionToCircleCenter + ConsoleColors.RESET);
-//            System.err.print(" ***");
             if (directionToCircleCenter != null) {
                 switch (directionToCircleCenter) {
                     case LEFT:
@@ -243,7 +240,6 @@ public class DroneController {
                         break;
                 }
             }
-            count++; // TODO: TBD if this if can stay in while loop until.
             cmd.hover();
             cmd.waitFor(1000);
         }

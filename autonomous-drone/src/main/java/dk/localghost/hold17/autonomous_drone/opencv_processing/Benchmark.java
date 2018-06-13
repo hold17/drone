@@ -4,10 +4,9 @@ import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Shape;
 import org.opencv.core.Mat;
 
 public class Benchmark {
-    private FilterHelper filterHelper;
+    private FilterHelper filterHelper = new FilterHelper();
 
     public Benchmark(Shape shape) {
-        filterHelper = new FilterHelper();
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
@@ -25,7 +24,7 @@ public class Benchmark {
             CircleFilter circleFilter = new CircleFilter();
             startTime = System.currentTimeMillis();
             while (10000 > System.currentTimeMillis() - startTime) {
-//                circleFilter.findCircleAndDraw(img);
+                circleFilter.findCircleAndDraw(img);
                 counter++;
             }
             System.out.println("Total time: " + (System.currentTimeMillis() - startTime) + " ms.");

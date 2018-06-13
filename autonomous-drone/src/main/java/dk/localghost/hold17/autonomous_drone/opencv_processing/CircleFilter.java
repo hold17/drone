@@ -41,12 +41,12 @@ public class CircleFilter {
     public Mat findCircleAndDraw(Mat image) {
         Mat circlePosition = new Mat();
         Mat hsv_image = new Mat();
+        Mat lower_red = new Mat();
+//        Mat upper_red = new Mat();
+        Mat colorFiltered = new Mat();
 
         GaussianBlur(image, image, new Size(9, 9), 2, 2);
         cvtColor(image, hsv_image, Imgproc.COLOR_BGR2HSV);
-
-        Mat lower_red = new Mat();
-//        Mat upper_red = new Mat();
 
         Core.inRange(hsv_image, HSV_LOWER_RED, HSV_LOWISH_RED, lower_red);
 //        Core.inRange(image, HSV_UPPER_RED, HSV_UPPERISH_RED, upper_red);
@@ -62,15 +62,20 @@ public class CircleFilter {
         // fortsæt kun, hvis der er fundet én eller flere cirkler
         if (!circlePosition.empty()) {
             int maxRadius = 0;
-            for (int i = 0; i < circlePosition.cols(); i++) { // antallet af kolonner angiver antallet af cirkler fundet
-                double[] testArr = circlePosition.get(0, i);
+            double[] testArr;
+            Point center;
+            int radius;
+            // antallet af kolonner angiver antallet af cirkler fundet
+            for (int i = 0; i < circlePosition.cols(); i++) {
+                testArr = circlePosition.get(0, i);
                 //System.out.println("\nCirkel nr. " + (i + 1) + " fundet på:\nx-koord: " + testArr[0] + "\ny-koord: " + testArr[1] + "\nradius: " + testArr[2]);
+
                 // sætter cirklens centrum
-                Point center = new Point(testArr[0], testArr[1]);
+                center = new Point(testArr[0], testArr[1]);
 
                 // parser radius til int for at efterleve parametre krav i circle()
-                double radiusDouble = testArr[2];
-                int radius = (int) radiusDouble;
+                radius = (int) testArr[2];
+
                 // Vi ønsker kun at tegne den største cirkel
                 if (maxRadius < radius) {
                     maxRadius = radius;
@@ -81,12 +86,9 @@ public class CircleFilter {
             // tegner cirklen
             Imgproc.circle(lower_red, biggestCircle, maxRadius, HSV_NEON_GREEN, 3, 8, 0);
         }
-        Mat colorFiltered = new Mat();
         Core.bitwise_and(image, image, colorFiltered, lower_red);
         return colorFiltered;
     }
-
-
 
     public int getFilter1LowerBoundHue() {
         return (int) HSV_LOWER_RED.val[0];
@@ -183,4 +185,5 @@ public class CircleFilter {
     public void setV4(double v4) {
         HSV_LOWISH_RED.set(new double[]{HSV_LOWISH_RED.val[0], HSV_LOWISH_RED.val[1], v4});
     }
+
 }

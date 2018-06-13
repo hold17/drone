@@ -85,10 +85,10 @@ public class GUIController {
             public void run() {
                 if (bufferedImage != null) {
                     droneController.updateQR(bufferedImage);
-                    Mat mat = circleFilter.findCircleAndDraw(filterHelper.bufferedImageToMat(bufferedImage));
+                    final Mat mat = circleFilter.findCircleAndDraw(filterHelper.bufferedImageToMat(bufferedImage));
 //                    droneController.alignCircle();
-                    BufferedImage bf = filterHelper.matToBufferedImage(mat);
-                    Image imageFiltered = SwingFXUtils.toFXImage(bf, null);
+                    final BufferedImage bf = filterHelper.matToBufferedImage(mat);
+                    final Image imageFiltered = SwingFXUtils.toFXImage(bf, null);
                     Platform.runLater(() -> {
                         filtered.setImage(imageFiltered);
                         filtered.setFitWidth(640);
