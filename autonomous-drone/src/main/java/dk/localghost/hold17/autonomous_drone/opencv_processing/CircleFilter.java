@@ -119,16 +119,17 @@ public class CircleFilter {
             // debug
             System.out.println("Koordinater for fundne cirkel" + biggestCircle);
 
-
+            // tegn den største fundne cirkel på billedet
             Imgproc.circle(image, biggestCircle, maxRadius, NEON_GREEN, 8);
 
-            averageCenterArray.add(biggestCircle);
 
+            averageCenterArray.add(biggestCircle);
             System.out.println("RADIUS: " + maxRadius);
         } else {
             System.out.println("Fandt ingen cirkler...");
             return image;
         }
+        // det gennemsnitlige center udregnes
         Point tempAverage = calculateAverageCenter(averageCenterArray);
         System.out.println("AVERAGE: " + tempAverage);
 
@@ -168,7 +169,9 @@ public class CircleFilter {
 }
 
 
-
+    public void clearAverageArray(){
+        averageCenterArray.clear();
+    }
 //    public Direction findDirectionFromCircle(Point circleCoordinate) {
 //        if (circleCoordinate == null) {
 //            System.out.println("Point er ikke initialiseret");

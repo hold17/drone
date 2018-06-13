@@ -236,19 +236,13 @@ public class DroneController {
             if (directionToCircleCenter != null) {
                 switch (directionToCircleCenter) {
                     case LEFT:
-                    case LEFTDOWN:
-                    case LEFTUP:
                         cmd.setLedsAnimation(LEDAnimation.BLINK_RED, 6, 1);
                         cmd.goLeft(speed).doFor(500);
                         break;
                     case RIGHT:
-                    case RIGHTUP:
-                    case RIGHTDOWN:
                         cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 6, 1);
                         cmd.goRight(speed).doFor(500);
                         break;
-                    case DOWN:
-                    case UP:
                     case CENTER:
                         LEDSuccess();
                         cmd.forward(speed).doFor(500);
@@ -386,10 +380,10 @@ public class DroneController {
 
         Direction xDirection;
 
-        while (counter <= 20)
+        while (counter <= 200)
         {
             //
-            xDirection = Direction.findXDirection(circleFilter.getBiggestCircle().x); // henter enum ud fra fundne stoerste cirkel
+            xDirection = Direction.findXDirection(circleFilter.getAverageCenter().x); // henter enum ud fra fundne stoerste cirkel
             //direction = direction;
             if ( xDirection == Direction.UNKNOWN)
             {
@@ -400,16 +394,18 @@ public class DroneController {
                     case LEFT:
                         // TODO: jeg kender ikke til syntaksen for at bevæge dronen
                         //cmd.goLeft(speed).doFor(500);
-                        System.out.println("GOING LEFT....");
+                        System.out.println(ConsoleColors.GREEN_BOLD_BRIGHT+"GOING LEFT...." + ConsoleColors.RESET);
                         break;
                     case RIGHT:
-                        System.out.println("GOING RIGHT...");
                         //cmd.goRight(speed).doFor(500);
+                        System.out.println(ConsoleColors.GREEN_BOLD_BRIGHT+"GOING RIGHT..." + ConsoleColors.RESET);
                         break;
                     case CENTER:
-                        System.out.println("VI FANDT CENTER!!!!");
+                        //cmd.forward(speed).doFor(500);
+                        System.out.println(ConsoleColors.GREEN_BOLD_BRIGHT +"VI FANDT CENTER!!!!"+ ConsoleColors.RESET);
                         break;
                 }
+                circleFilter.clearAverageArray();
             }
 
             counter++;
