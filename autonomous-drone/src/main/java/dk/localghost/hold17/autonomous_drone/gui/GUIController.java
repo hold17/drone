@@ -1,5 +1,6 @@
 package dk.localghost.hold17.autonomous_drone.gui;
 
+import dk.localghost.hold17.autonomous_drone.ConsoleColors;
 import dk.localghost.hold17.autonomous_drone.controller.DroneController;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.FilterHelper;
 import dk.localghost.hold17.base.IARDrone;
@@ -50,7 +51,7 @@ public class GUIController {
             public void run() {
                 if (bufferedImage != null) {
                     if (!hasWrittenImageWidth) {
-                        System.out.println("Image width: " + bufferedImage.getWidth());
+                        System.out.println(ConsoleColors.YELLOW_BOLD_BRIGHT + "Image width: " + bufferedImage.getWidth() + ConsoleColors.RESET);
                         hasWrittenImageWidth = true;
                     }
                     Image image = SwingFXUtils.toFXImage(bufferedImage, null);
