@@ -11,7 +11,6 @@ import dk.localghost.hold17.base.navdata.BatteryListener;
 import dk.localghost.hold17.base.utils.ConsoleColors;
 
 import java.awt.image.BufferedImage;
-import java.sql.SQLOutput;
 
 public class DroneController {
     private IARDrone drone;
@@ -96,10 +95,8 @@ public class DroneController {
 
         if (!droneFlying) {
             cmd.takeOff();
-            cmd.after(1000).hover();
             droneFlying = true;
         } else {
-            cmd.hover().doFor(100);
             cmd.landing();
             droneFlying = false;
         }
@@ -113,8 +110,7 @@ public class DroneController {
     }
 
     public void hover() {
-        // TODO: Test if doFor is really necessary here
-        cmd.hover().doFor(100);
+        cmd.hover();
     }
 
     /**
@@ -363,9 +359,10 @@ public class DroneController {
         int counter = 0;
 
         Direction xDirection;
-
+        goToMaxmimumAltitude();
         while (counter <= 200)
         {
+//            goToMaxmimumAltitude();
             //
             xDirection = Direction.findXDirection(circleFilter.getAverageCenter().x); // henter enum ud fra fundne stoerste cirkel
             //direction = direction;
@@ -377,15 +374,15 @@ public class DroneController {
                 {
                     case LEFT:
                         // TODO: jeg kender ikke til syntaksen for at bevæge dronen
-                        //cmd.goLeft(speed).doFor(500);
+                        cmd.goLeft(speed).doFor(300);
                         System.out.println(ConsoleColors.GREEN_BOLD_BRIGHT+"GOING LEFT...." + ConsoleColors.RESET);
                         break;
                     case RIGHT:
-                        //cmd.goRight(speed).doFor(500);
+                        cmd.goRight(speed).doFor(300);
                         System.out.println(ConsoleColors.GREEN_BOLD_BRIGHT+"GOING RIGHT..." + ConsoleColors.RESET);
                         break;
                     case CENTER:
-                        //cmd.forward(speed).doFor(500);
+                        cmd.forward(speed).doFor(500);
                         System.out.println(ConsoleColors.GREEN_BOLD_BRIGHT +"VI FANDT CENTER!!!!"+ ConsoleColors.RESET);
                         break;
                 }
@@ -393,8 +390,9 @@ public class DroneController {
             }
 
             counter++;
-            System.out.println("Sover 1 sekund...");
-            cmd.waitFor(1000);
+            System.out.println("Sover 0.5 sekund...");
+            cmd.hover();
+            cmd.waitFor(500);
         }
         System.out.println("Counter: " + counter);
         System.out.println("switch done");

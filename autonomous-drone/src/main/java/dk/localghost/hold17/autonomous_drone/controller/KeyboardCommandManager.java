@@ -65,6 +65,12 @@ public class KeyboardCommandManager implements EventHandler<KeyEvent> {
             case Z:
                 drone.getCommandManager().schedule(0, controller::centerRing);
                 break;
+            case PERIOD:
+                drone.getCommandManager().schedule(0, controller::goToMaxmimumAltitude);
+                break;
+            case COMMA:
+                drone.getCommandManager().schedule(0, controller::goToMinimumAltitude);
+                break;
         }
     }
 }

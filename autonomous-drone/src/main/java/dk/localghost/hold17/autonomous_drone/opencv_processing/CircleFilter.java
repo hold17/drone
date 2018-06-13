@@ -1,6 +1,5 @@
 package dk.localghost.hold17.autonomous_drone.opencv_processing;
 
-import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Direction;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
@@ -26,14 +25,14 @@ public class CircleFilter {
     private final Scalar HSV_DEEP_BLUE = new Scalar(120, 90, 70);
 
     // red-green
-    private Scalar HSV_FILTER1_LOWER = new Scalar(0, 0, 0);
-    private Scalar HSV_FILTER1_UPPER = new Scalar(0, 0, 0);
+    private Scalar HSV_FILTER1_LOWER = new Scalar(0, 77, 55);
+    private Scalar HSV_FILTER1_UPPER = new Scalar(5, 221, 255);
     // blue-red
-    private Scalar HSV_FILTER2_LOWER =  new Scalar(161, 75, 27);
-    private Scalar HSV_FILTER2_UPPER = new Scalar(179, 223, 255);
+    private Scalar HSV_FILTER2_LOWER =  new Scalar(141, 74, 55);
+    private Scalar HSV_FILTER2_UPPER = new Scalar(179, 223, 191);
 
     private int param1 = 200;
-    private int param2 = 40;
+    private int param2 = 30;
 
     public Point getBiggestCircle() {
         return biggestCircle;
