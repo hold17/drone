@@ -27,15 +27,13 @@ public class CircleFilter {
 
     // red-green
     private Scalar HSV_FILTER1_LOWER = new Scalar(0, 0, 0);
-    private Scalar HSV_FILTER1_UPPER = new Scalar(14, 255, 255);
+    private Scalar HSV_FILTER1_UPPER = new Scalar(0, 0, 0);
     // blue-red
-    private Scalar HSV_FILTER2_LOWER =  new Scalar(148, 40, 33);
-    private Scalar HSV_FILTER2_UPPER = new Scalar(179, 109, 140);
+    private Scalar HSV_FILTER2_LOWER =  new Scalar(161, 75, 27);
+    private Scalar HSV_FILTER2_UPPER = new Scalar(179, 223, 255);
 
-    private int param1 = 100;
-    private int param2 = 30;
-
-    Direction direction;
+    private int param1 = 200;
+    private int param2 = 40;
 
     public Point getBiggestCircle() {
         return biggestCircle;
@@ -58,8 +56,6 @@ public class CircleFilter {
      */
     public Mat findCircleAndDraw(Mat image) {
         biggestCircle = new Point();
-
-        System.out.println(image);
         Mat circlePosition = new Mat();
         Mat hsv_image = new Mat();
         Mat lower_red = new Mat();
@@ -110,47 +106,47 @@ public class CircleFilter {
                 }
             }
             // debug
-            System.out.println("Koordinater for fundne cirkel" + biggestCircle);
+//            System.out.println("Koordinater for fundne cirkel" + biggestCircle);
 
             averageCenterArray.add(biggestCircle);
-            System.out.println("RADIUS: " + maxRadius);
+//            System.out.println("RADIUS: " + maxRadius);
 
             // tegn den største fundne cirkel på billedet
             Imgproc.circle(filteredOverlay, biggestCircle, maxRadius, HSV_NEON_GREEN, 3, 8, 0);
         }
         // det gennemsnitlige center udregnes
         Point tempAverage = calculateAverageCenter(averageCenterArray);
-        System.out.println("AVERAGE: " + tempAverage);
+//        System.out.println("AVERAGE: " + tempAverage);
 
         // tegner gennemsnit
         Imgproc.circle(filteredOverlay, tempAverage, 10, HSV_DEEP_BLUE, 8);
         return filteredOverlay;
     }
 
-    private Point calculateAverageCenter(List<Point> arr){
+    private Point calculateAverageCenter(List<Point> points){
         double tempx = 0;
         double tempy = 0;
 
         // TODO
-        if (arr.size() >= 29) arr.clear();
+        if (points.size() >= 29) points.clear();
 
 
-        if (!arr.isEmpty())
+        if (!points.isEmpty())
         {
-            for (Point p : arr)
+            for (Point p : points)
             {
-                if (arr.size() >= 30){ // maks 30 elementer i listen
-                    System.out.println("araylist full");
+                if (points.size() >= 30){ // maks 30 elementer i listen
+//                    System.out.println("arraylist full");
                 } else {
                     tempx += p.x;
                     tempy += p.y;
                 }
             }
         } else{
-            System.out.println("Tomt array i calculateAverageCenter()");
+//            System.out.println("Tomt array i calculateAverageCenter()");
         }
 
-        int arraySize = arr.size();
+        int arraySize = points.size();
         averageCenter.x = tempx / arraySize;
         averageCenter.y = tempy / arraySize;
         return averageCenter;
