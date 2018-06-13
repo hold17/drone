@@ -1,6 +1,5 @@
 package dk.localghost.hold17.autonomous_drone.opencv_processing;
 
-import com.sun.org.apache.bcel.internal.generic.SWITCH;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Direction;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
@@ -19,17 +18,24 @@ public class CircleFilter {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
 
+//    private final Scalar RED = new Scalar(0, 0, 255);
+//    private final Scalar YELLOW = new Scalar(0, 255, 255);
+//    private final Scalar CYAN = new Scalar(255, 255, 0);
+//    private final Scalar NEON_GREEN = new Scalar(20, 255, 57);
+    private final Scalar HSV_NEON_GREEN = new Scalar(86, 240, 129);
+    private final Scalar HSV_DEEP_BLUE = new Scalar(120, 90, 70);
+
+    // red-green
+    private Scalar HSV_FILTER1_LOWER = new Scalar(0, 0, 0);
+    private Scalar HSV_FILTER1_UPPER = new Scalar(14, 255, 255);
+    // blue-red
+    private Scalar HSV_FILTER2_LOWER =  new Scalar(148, 40, 33);
+    private Scalar HSV_FILTER2_UPPER = new Scalar(179, 109, 140);
+
+    private int param1 = 100;
+    private int param2 = 30;
+
     Direction direction;
-    private final Scalar NEON_GREEN = new Scalar(20, 255, 57);
-    private final Scalar RED = new Scalar(0, 0, 255);
-    private final Scalar YELLOW = new Scalar(0, 255, 255);
-    private final Scalar CYAN = new Scalar(255, 255, 0);
-
-//    private String fileName = "4.jpg";
-//    private String outputName = "4filtered.jpg";
-//    private String imgNumber = "4";
-
-//    private DroneController droneController;
 
     public Point getBiggestCircle() {
         return biggestCircle;
@@ -44,18 +50,7 @@ public class CircleFilter {
     private Point averageCenter = new Point();
     private List<Point> averageCenterArray = new ArrayList<>();
 
-    public CircleFilter() {
-////        BufferedImage img = matToBufferedImage(openFile(fileName));
-//        filterHelper = new FilterHelper();
-//        BufferedImage img_circle = filterHelper.matToBufferedImage(filterHelper.openFile("3.jpg"));
-////        Direction direction = findDirectionFromCircle(biggestCircle);
-////        System.out.println(direction);
-//        filterHelper.saveFile(outputName, findCircleAndDraw(img_circle));
-    }
-
-    public static void main(String[] args) {
-        new CircleFilter();
-    }
+    public CircleFilter() {}
 
     /*
      * Funktion der finder cirkler samt tegner dem
@@ -67,45 +62,46 @@ public class CircleFilter {
         System.out.println(image);
         Mat circlePosition = new Mat();
         Mat hsv_image = new Mat();
-
-//        medianBlur(image,image,3);
-        cvtColor(image, hsv_image, Imgproc.COLOR_BGR2HSV);
         Mat lower_red = new Mat();
         Mat upper_red = new Mat();
-
-        Core.inRange(hsv_image, new Scalar(0, 100, 100), new Scalar(10, 255, 255), lower_red);
-        Core.inRange(hsv_image, new Scalar(160, 100, 100), new Scalar(179, 255, 255), upper_red);
-
         Mat red_hue_image = new Mat();
-        Core.addWeighted(lower_red, 1, upper_red, 1, 0, red_hue_image);
+        Mat filteredOverlay = new Mat();
 
+        // convert to HSV
+        cvtColor(image, hsv_image, Imgproc.COLOR_BGR2HSV);
+
+        // filter lower and upper red
+        Core.inRange(hsv_image, HSV_FILTER1_LOWER, HSV_FILTER1_UPPER, lower_red);
+        Core.inRange(hsv_image, HSV_FILTER2_LOWER, HSV_FILTER2_UPPER, upper_red);
+
+        // combine filtered images and blur the result
+        Core.addWeighted(lower_red, 1, upper_red, 1, 0, red_hue_image);
         GaussianBlur(red_hue_image, red_hue_image, new Size(9, 9), 2, 2);
 
+        // finder objekter der ligner cirkler og gemmer deres position i circlePosition
         // 4th argument = downscaling. Higher values = lower resolution. 1 = no downscaling.
         // 5th argument = minDist between circles
-        Imgproc.HoughCircles(red_hue_image, circlePosition, Imgproc.CV_HOUGH_GRADIENT, 1, (red_hue_image.rows() / 8), 110, 18, 50, 400);
+        Imgproc.HoughCircles(red_hue_image, circlePosition, Imgproc.CV_HOUGH_GRADIENT, 1, (red_hue_image.rows()/8), param1, param2, 100, 640);
 
+        Core.bitwise_and(image, image, filteredOverlay, red_hue_image);
 
-        // finder objekter der ligner cirkler og gemmer deres position i circlePosition
         // fortsæt kun, hvis der er fundet én eller flere cirkler
-        if (circlePosition.empty() == false) {
-//        Point maxCenter;
-            //System.out.println("Fandt: " + circlePosition.cols() + " cirkler");
-
-            // sætter cirklens farve
-            Scalar color = new Scalar(100);
-
+        if (!circlePosition.empty()) {
             int maxRadius = 0;
-            for (int i = 0; i < circlePosition.cols(); i++) // antallet af kolonner angiver antallet af cirkler fundet
-            {
-                double[] testArr = circlePosition.get(0, i);
-//                //System.out.println("\nCirkel nr. " + (i + 1) + " fundet på:\nx-koord: " + testArr[0] + "\ny-koord: " + testArr[1] + "\nradius: " + testArr[2]);
+            double[] testArr;
+            Point center;
+            int radius;
+            // antallet af kolonner angiver antallet af cirkler fundet
+            for (int i = 0; i < circlePosition.cols(); i++) {
+                testArr = circlePosition.get(0, i);
+                //System.out.println("\nCirkel nr. " + (i + 1) + " fundet på:\nx-koord: " + testArr[0] + "\ny-koord: " + testArr[1] + "\nradius: " + testArr[2]);
+
                 // sætter cirklens centrum
-                Point center = new Point(testArr[0], testArr[1]);
-//
-//                // parser radius til int for at efterleve parametre krav i circle()
-                double radiusDouble = testArr[2];
-                int radius = (int) radiusDouble;
+                center = new Point(testArr[0], testArr[1]);
+
+                // parser radius til int for at efterleve parametre krav i circle()
+                radius = (int) testArr[2];
+
                 // Vi ønsker kun at tegne den største cirkel
                 if (maxRadius < radius) {
                     maxRadius = radius;
@@ -113,30 +109,22 @@ public class CircleFilter {
                     biggestCircle.y = center.y;
                 }
             }
-            // tegner cirklen
-//            cvtColor(upper_red, red_hue_image, COLOR_GRAY2BGR);
-
             // debug
             System.out.println("Koordinater for fundne cirkel" + biggestCircle);
 
-            // tegn den største fundne cirkel på billedet
-            Imgproc.circle(image, biggestCircle, maxRadius, NEON_GREEN, 8);
-
-
             averageCenterArray.add(biggestCircle);
             System.out.println("RADIUS: " + maxRadius);
-        } else {
-            System.out.println("Fandt ingen cirkler...");
-            return image;
+
+            // tegn den største fundne cirkel på billedet
+            Imgproc.circle(filteredOverlay, biggestCircle, maxRadius, HSV_NEON_GREEN, 3, 8, 0);
         }
         // det gennemsnitlige center udregnes
         Point tempAverage = calculateAverageCenter(averageCenterArray);
         System.out.println("AVERAGE: " + tempAverage);
 
         // tegner gennemsnit
-        Imgproc.circle(image, tempAverage, 10, CYAN, 8);
-
-        return image;
+        Imgproc.circle(filteredOverlay, tempAverage, 10, HSV_DEEP_BLUE, 8);
+        return filteredOverlay;
     }
 
     private Point calculateAverageCenter(List<Point> arr){
@@ -147,7 +135,7 @@ public class CircleFilter {
         if (arr.size() >= 29) arr.clear();
 
 
-        if (arr.isEmpty() == false)
+        if (!arr.isEmpty())
         {
             for (Point p : arr)
             {
@@ -166,62 +154,122 @@ public class CircleFilter {
         averageCenter.x = tempx / arraySize;
         averageCenter.y = tempy / arraySize;
         return averageCenter;
-}
+    }
 
 
     public void clearAverageArray(){
         averageCenterArray.clear();
     }
-//    public Direction findDirectionFromCircle(Point circleCoordinate) {
-//        if (circleCoordinate == null) {
-//            System.out.println("Point er ikke initialiseret");
-//            return Direction.UNKNOWN;
-//        } else {
-//            double x = circleCoordinate.x;
-////            double y = circleCoordinate.y;
-//            return Direction.findXDirection(x);
-//        }
-//    }
 
-    //    public Direction findDirectionFromCircle(Point circleCoordinate) {
-//
-//        if (circleCoordinate == null) {
-//            System.out.println("Point er ikke initialiseret");
-//            return Direction.UNKNOWN;
-//        } else {
-//            double x = circleCoordinate.x;
-//            if (x > 0 && x < 512) return Direction.LEFT;
-//            else if (x > 512 && x < 768) return Direction.CENTER; // 256px (1/5 af billedeopløsningen på 1280)
-//            else if (x > 768 && x < 1280) return Direction.RIGHT;
-//            else {
-//                System.err.println("Cannot find the direction to the circle is the resolution correct?");
-//                System.err.println("Current resolution is ");
-//                return Direction.UNKNOWN;
-//            }
-//        }
-//    }
+    public int getFilter1LowerHue() {
+        return (int) HSV_FILTER1_LOWER.val[0];
+    }
 
+    public void setFilter1LowerHue(double h1) {
+        HSV_FILTER1_LOWER.set(new double[]{h1, HSV_FILTER1_LOWER.val[1], HSV_FILTER1_LOWER.val[2]});
+    }
 
-    /*
-     * Ikke færdig.
-     *
-     * Skal finde cirkel, lige nu forsøges med diverse metoder for at se hvad virker bedst
-     */
-//    Mat FindCircle_v2(Mat img){
-//        //Sorterer vise farver fra, så vi ender med tydeligere cirkler
-//        img = detectEdgesThreshold(img); // from javacv... find opencv alternative
-//
-//        // Fjerner farver, så vi kun har røde farver tilbage
-//        Scalar lower_red = new Scalar(0,0,125);
-//        Scalar upper_red = new Scalar(0,0,255);
-//        Core.inRange(img, lower_red, upper_red, img);
-//
-//
-//        // Find kanter med canny()
-//        int threshold1 = 100;
-//        int threshhold2 = 200;
-//        //img = detectEdgesCanny(img, threshold1, threshhold2); // denne funk virker kun halvt
-//
-//        return img;
-//    }
+    public int getFilter1LowerSat() {
+        return (int) HSV_FILTER1_LOWER.val[1];
+    }
+
+    public void setFilter1LowerSat(double s1) {
+        HSV_FILTER1_LOWER.set(new double[]{HSV_FILTER1_LOWER.val[0], s1, HSV_FILTER1_LOWER.val[2]});
+    }
+
+    public int getFilter1LowerVal() {
+        return (int) HSV_FILTER1_LOWER.val[2];
+    }
+
+    public void setFilter1LowerVal(double v1) {
+        HSV_FILTER1_LOWER.set(new double[]{HSV_FILTER1_LOWER.val[0], HSV_FILTER1_LOWER.val[1], v1});
+    }
+
+    public int getFilter1UpperHue() {
+        return (int) HSV_FILTER1_UPPER.val[0];
+    }
+
+    public void setFilter1UpperHue(double h2) {
+        HSV_FILTER1_UPPER.set(new double[]{h2, HSV_FILTER1_UPPER.val[1], HSV_FILTER1_UPPER.val[2]});
+    }
+
+    public int getFilter1UpperSat() {
+        return (int) HSV_FILTER1_UPPER.val[1];
+    }
+
+    public void setFilter1UpperSat(double s2) {
+        HSV_FILTER1_UPPER.set(new double[]{HSV_FILTER1_UPPER.val[0], s2, HSV_FILTER1_UPPER.val[2]});
+    }
+
+    public int getFilter1UpperVal() {
+        return (int) HSV_FILTER1_UPPER.val[2];
+    }
+
+    public void setFilter1UpperVal(double v2) {
+        HSV_FILTER1_UPPER.set(new double[]{HSV_FILTER1_UPPER.val[0], HSV_FILTER1_UPPER.val[1], v2});
+    }
+
+    public int getFilter2LowerHue() {
+        return (int) HSV_FILTER2_LOWER.val[0];
+    }
+
+    public void setFilter2LowerHue(double h3) {
+        HSV_FILTER2_LOWER.set(new double[]{h3, HSV_FILTER2_LOWER.val[1], HSV_FILTER2_LOWER.val[2]});
+    }
+
+    public int getFilter2LowerSat() {
+        return (int) HSV_FILTER2_LOWER.val[1];
+    }
+
+    public void setFilter2LowerSat(double s3) {
+        HSV_FILTER2_LOWER.set(new double[]{HSV_FILTER2_LOWER.val[0], s3, HSV_FILTER2_LOWER.val[2]});
+    }
+
+    public int getFilter2LowerVal() {
+        return (int) HSV_FILTER2_LOWER.val[2];
+    }
+
+    public void setFilter2LowerVal(double v3) {
+        HSV_FILTER2_LOWER.set(new double[]{HSV_FILTER2_LOWER.val[0], HSV_FILTER2_LOWER.val[1], v3});
+    }
+
+    public int getFilter2UpperHue() {
+        return (int) HSV_FILTER2_UPPER.val[0];
+    }
+
+    public void setFilter2UpperHue(double h4) {
+        HSV_FILTER2_UPPER.set(new double[]{h4, HSV_FILTER2_UPPER.val[1], HSV_FILTER2_UPPER.val[2]});
+    }
+
+    public int getFilter2UpperSat() {
+        return (int) HSV_FILTER2_UPPER.val[1];
+    }
+
+    public void setFilter2UpperSat(double s4) {
+        HSV_FILTER2_UPPER.set(new double[]{HSV_FILTER2_UPPER.val[0], s4, HSV_FILTER2_UPPER.val[2]});
+    }
+
+    public int getFilter2UpperVal() {
+        return (int) HSV_FILTER2_UPPER.val[2];
+    }
+
+    public void setFilter2UpperVal(double v4) {
+        HSV_FILTER2_UPPER.set(new double[]{HSV_FILTER2_UPPER.val[0], HSV_FILTER2_UPPER.val[1], v4});
+    }
+
+    public int getParam1() {
+        return this.param1;
+    }
+
+    public void setParam1(int param1) {
+        this.param1 = param1;
+    }
+
+    public int getParam2() {
+        return this.param2;
+    }
+
+    public void setParam2(int param2) {
+        this.param2 = param2;
+    }
 }

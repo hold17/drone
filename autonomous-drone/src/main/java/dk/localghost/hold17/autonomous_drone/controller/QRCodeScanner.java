@@ -10,9 +10,7 @@ import java.util.ArrayList;
 
 public class QRCodeScanner {
     private ArrayList<TagListener> listener = new ArrayList<>();
-
     private Result scanResult;
-
     private long imageCount = 0;
 
     public void lookForQRCode(BufferedImage image) {

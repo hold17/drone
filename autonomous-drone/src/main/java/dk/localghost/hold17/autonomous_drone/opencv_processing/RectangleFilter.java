@@ -30,10 +30,10 @@ public class RectangleFilter {
 
     private Rect biggestQRCode;
 
-    private FilterHelper filterHelperter;
+    private FilterHelper filterHelper;
 
     public RectangleFilter() {
-        filterHelperter = new FilterHelper();
+        filterHelper = new FilterHelper();
     }
 
     // TODO: Skift værdierne der tjekkes for, så de passer til dronens kameraopløsning
@@ -221,7 +221,7 @@ public class RectangleFilter {
 
         Mat originalImage = null;
 
-        originalImage = filterHelperter.bufferedImageToMat(bufferedImage);
+        originalImage = filterHelper.bufferedImageToMat(bufferedImage);
         //saveFile("originialImage.jpg", originalImage);
 
         Mat imgbin = detectWhiteMat(originalImage);
