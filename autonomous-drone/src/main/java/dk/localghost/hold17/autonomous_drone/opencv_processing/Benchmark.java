@@ -25,7 +25,7 @@ public class Benchmark {
             CircleFilter circleFilter = new CircleFilter();
             startTime = System.currentTimeMillis();
             while (10000 > System.currentTimeMillis() - startTime) {
-                circleFilter.findCircleAndDraw(img);
+//                circleFilter.findCircleAndDraw(img);
                 counter++;
             }
             System.out.println("Total time: " + (System.currentTimeMillis() - startTime) + " ms.");
