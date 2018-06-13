@@ -19,10 +19,16 @@ public class CircleFilter {
 //    private final Scalar CYAN = new Scalar(255, 255, 0);
 //    private final Scalar NEON_GREEN = new Scalar(20, 255, 57);
     private final Scalar HSV_NEON_GREEN = new Scalar(86, 240, 129);
-    private Scalar HSV_LOWER_RED = new Scalar(0, 75, 50);
-    private Scalar HSV_LOWISH_RED = new Scalar(14, 255, 200);
-//    private Scalar HSV_UPPER_RED =  new Scalar(0, 0, 0);
-//    private Scalar HSV_UPPERISH_RED = new Scalar(0, 0, 0);
+    
+    // red-green
+    private Scalar HSV_FILTER1_LOWER = new Scalar(0, 0, 0);
+    private Scalar HSV_FILTER1_UPPER = new Scalar(14, 255, 255);
+    // blue-red
+    private Scalar HSV_FILTER2_LOWER =  new Scalar(148, 40, 33);
+    private Scalar HSV_FILTER2_UPPER = new Scalar(179, 109, 140);
+    
+    private int param1 = 100;
+    private int param2 = 30;
 
 
     public Point getBiggestCircle() {
@@ -42,22 +48,25 @@ public class CircleFilter {
         Mat circlePosition = new Mat();
         Mat hsv_image = new Mat();
         Mat lower_red = new Mat();
-//        Mat upper_red = new Mat();
-        Mat colorFiltered = new Mat();
+        Mat upper_red = new Mat();
+        Mat red_hue_image = new Mat();
+        Mat filteredOverlay = new Mat();
 
-        GaussianBlur(image, image, new Size(9, 9), 2, 2);
+        // convert to HSV
         cvtColor(image, hsv_image, Imgproc.COLOR_BGR2HSV);
 
-        Core.inRange(hsv_image, HSV_LOWER_RED, HSV_LOWISH_RED, lower_red);
-//        Core.inRange(image, HSV_UPPER_RED, HSV_UPPERISH_RED, upper_red);
+        // filter lower and upper red
+        Core.inRange(hsv_image, HSV_FILTER1_LOWER, HSV_FILTER1_UPPER, lower_red);
+        Core.inRange(hsv_image, HSV_FILTER2_LOWER, HSV_FILTER2_UPPER, upper_red);
 
-//        Mat red_hue_image = new Mat();
-//        Core.addWeighted(lower_red, 1, upper_red, 1, 0, red_hue_image);
+        // combine filtered images and blur the result
+        Core.addWeighted(lower_red, 1, upper_red, 1, 0, red_hue_image);
+        GaussianBlur(red_hue_image, red_hue_image, new Size(9, 9), 2, 2);
 
         // finder objekter der ligner cirkler og gemmer deres position i circlePosition
         // 4th argument = downscaling. Higher values = lower resolution. 1 = no downscaling.
         // 5th argument = minDist between circles
-        Imgproc.HoughCircles(lower_red, circlePosition, Imgproc.CV_HOUGH_GRADIENT, 1, (lower_red.rows()/8), 100, 30, 100, 640);
+        Imgproc.HoughCircles(red_hue_image, circlePosition, Imgproc.CV_HOUGH_GRADIENT, 1, (red_hue_image.rows()/8), param1, param2, 100, 640);
 
         // fortsæt kun, hvis der er fundet én eller flere cirkler
         if (!circlePosition.empty()) {
@@ -84,106 +93,121 @@ public class CircleFilter {
                 }
             }
             // tegner cirklen
-            Imgproc.circle(lower_red, biggestCircle, maxRadius, HSV_NEON_GREEN, 3, 8, 0);
+            Imgproc.circle(red_hue_image, biggestCircle, maxRadius, HSV_NEON_GREEN, 3, 8, 0);
         }
-        Core.bitwise_and(image, image, colorFiltered, lower_red);
-        return colorFiltered;
+        Core.bitwise_and(image, image, filteredOverlay, red_hue_image);
+        return filteredOverlay;
     }
 
-    public int getFilter1LowerBoundHue() {
-        return (int) HSV_LOWER_RED.val[0];
+    public int getFilter1LowerHue() {
+        return (int) HSV_FILTER1_LOWER.val[0];
     }
 
-    public void setFilter1LowerBoundHue(double h1) {
-        HSV_LOWER_RED.set(new double[]{h1, HSV_LOWER_RED.val[1], HSV_LOWER_RED.val[2]});
+    public void setFilter1LowerHue(double h1) {
+        HSV_FILTER1_LOWER.set(new double[]{h1, HSV_FILTER1_LOWER.val[1], HSV_FILTER1_LOWER.val[2]});
     }
 
-    public int getFilter1LowerBoundSat() {
-        return (int) HSV_LOWER_RED.val[1];
+    public int getFilter1LowerSat() {
+        return (int) HSV_FILTER1_LOWER.val[1];
     }
 
-    public void setFilter1LowerBoundSat(double s1) {
-        HSV_LOWER_RED.set(new double[]{HSV_LOWER_RED.val[0], s1, HSV_LOWER_RED.val[2]});
+    public void setFilter1LowerSat(double s1) {
+        HSV_FILTER1_LOWER.set(new double[]{HSV_FILTER1_LOWER.val[0], s1, HSV_FILTER1_LOWER.val[2]});
     }
 
-    public int getFilter1LowerBoundVal() {
-        return (int) HSV_LOWER_RED.val[2];
+    public int getFilter1LowerVal() {
+        return (int) HSV_FILTER1_LOWER.val[2];
     }
 
-    public void setFilter1LowerBoundVal(double v1) {
-        HSV_LOWER_RED.set(new double[]{HSV_LOWER_RED.val[0], HSV_LOWER_RED.val[1], v1});
+    public void setFilter1LowerVal(double v1) {
+        HSV_FILTER1_LOWER.set(new double[]{HSV_FILTER1_LOWER.val[0], HSV_FILTER1_LOWER.val[1], v1});
     }
 
-    public int getFilter1UpperBoundHue() {
-        return (int) HSV_LOWISH_RED.val[0];
+    public int getFilter1UpperHue() {
+        return (int) HSV_FILTER1_UPPER.val[0];
     }
 
-    public void setFilter1UpperBoundHue(double h2) {
-        HSV_LOWISH_RED.set(new double[]{h2, HSV_LOWISH_RED.val[1], HSV_LOWISH_RED.val[2]});
+    public void setFilter1UpperHue(double h2) {
+        HSV_FILTER1_UPPER.set(new double[]{h2, HSV_FILTER1_UPPER.val[1], HSV_FILTER1_UPPER.val[2]});
     }
 
-    public int getFilter1UpperBoundSat() {
-        return (int) HSV_LOWISH_RED.val[1];
+    public int getFilter1UpperSat() {
+        return (int) HSV_FILTER1_UPPER.val[1];
     }
 
-    public void setFilter1UpperBoundSat(double s2) {
-        HSV_LOWISH_RED.set(new double[]{HSV_LOWISH_RED.val[0], s2, HSV_LOWISH_RED.val[2]});
+    public void setFilter1UpperSat(double s2) {
+        HSV_FILTER1_UPPER.set(new double[]{HSV_FILTER1_UPPER.val[0], s2, HSV_FILTER1_UPPER.val[2]});
     }
 
-    public int getFilter1UpperBoundVal() {
-        return (int) HSV_LOWISH_RED.val[2];
+    public int getFilter1UpperVal() {
+        return (int) HSV_FILTER1_UPPER.val[2];
     }
 
-    public void setFilter1UpperBoundVal(double v2) {
-        HSV_LOWISH_RED.set(new double[]{HSV_LOWISH_RED.val[0], HSV_LOWISH_RED.val[1], v2});
+    public void setFilter1UpperVal(double v2) {
+        HSV_FILTER1_UPPER.set(new double[]{HSV_FILTER1_UPPER.val[0], HSV_FILTER1_UPPER.val[1], v2});
     }
 
-    public int getH3() {
-        return (int) HSV_LOWER_RED.val[0];
+    public int getFilter2LowerHue() {
+        return (int) HSV_FILTER2_LOWER.val[0];
     }
 
-    public void setH3(double h3) {
-        HSV_LOWER_RED.set(new double[]{h3, HSV_LOWER_RED.val[1], HSV_LOWER_RED.val[2]});
+    public void setFilter2LowerHue(double h3) {
+        HSV_FILTER2_LOWER.set(new double[]{h3, HSV_FILTER2_LOWER.val[1], HSV_FILTER2_LOWER.val[2]});
     }
 
-    public int getS3() {
-        return (int) HSV_LOWER_RED.val[1];
+    public int getFilter2LowerSat() {
+        return (int) HSV_FILTER2_LOWER.val[1];
     }
 
-    public void setS3(double s3) {
-        HSV_LOWER_RED.set(new double[]{HSV_LOWER_RED.val[0], s3, HSV_LOWER_RED.val[2]});
+    public void setFilter2LowerSat(double s3) {
+        HSV_FILTER2_LOWER.set(new double[]{HSV_FILTER2_LOWER.val[0], s3, HSV_FILTER2_LOWER.val[2]});
     }
 
-    public int getV3() {
-        return (int) HSV_LOWER_RED.val[2];
+    public int getFilter2LowerVal() {
+        return (int) HSV_FILTER2_LOWER.val[2];
     }
 
-    public void setV3(double v3) {
-        HSV_LOWER_RED.set(new double[]{HSV_LOWER_RED.val[0], HSV_LOWER_RED.val[3], v3});
+    public void setFilter2LowerVal(double v3) {
+        HSV_FILTER2_LOWER.set(new double[]{HSV_FILTER2_LOWER.val[0], HSV_FILTER2_LOWER.val[1], v3});
     }
 
-    public int getH4() {
-        return (int) HSV_LOWISH_RED.val[0];
+    public int getFilter2UpperHue() {
+        return (int) HSV_FILTER2_UPPER.val[0];
     }
 
-    public void setH4(double h4) {
-        HSV_LOWISH_RED.set(new double[]{h4, HSV_LOWISH_RED.val[1], HSV_LOWISH_RED.val[2]});
+    public void setFilter2UpperHue(double h4) {
+        HSV_FILTER2_UPPER.set(new double[]{h4, HSV_FILTER2_UPPER.val[1], HSV_FILTER2_UPPER.val[2]});
     }
 
-    public int getS4() {
-        return (int) HSV_LOWISH_RED.val[1];
+    public int getFilter2UpperSat() {
+        return (int) HSV_FILTER2_UPPER.val[1];
     }
 
-    public void setS4(double s4) {
-        HSV_LOWISH_RED.set(new double[]{HSV_LOWISH_RED.val[0], s4, HSV_LOWISH_RED.val[2]});
+    public void setFilter2UpperSat(double s4) {
+        HSV_FILTER2_UPPER.set(new double[]{HSV_FILTER2_UPPER.val[0], s4, HSV_FILTER2_UPPER.val[2]});
     }
 
-    public int getV4() {
-        return (int) HSV_LOWISH_RED.val[2];
+    public int getFilter2UpperVal() {
+        return (int) HSV_FILTER2_UPPER.val[2];
     }
 
-    public void setV4(double v4) {
-        HSV_LOWISH_RED.set(new double[]{HSV_LOWISH_RED.val[0], HSV_LOWISH_RED.val[1], v4});
+    public void setFilter2UpperVal(double v4) {
+        HSV_FILTER2_UPPER.set(new double[]{HSV_FILTER2_UPPER.val[0], HSV_FILTER2_UPPER.val[1], v4});
+    }
+    
+    public int getParam1() {
+        return this.param1;
     }
 
+    public void setParam1(int param1) {
+        this.param1 = param1;
+    }
+
+    public int getParam2() {
+        return this.param2;
+    }
+
+    public void setParam2(int param2) {
+        this.param2 = param2;
+    }
 }
