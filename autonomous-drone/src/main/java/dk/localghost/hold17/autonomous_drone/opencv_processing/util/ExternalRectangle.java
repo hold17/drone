@@ -1,4 +1,4 @@
-package dk.localghost.hold17.autonomous_drone.opencv_processing;
+package dk.localghost.hold17.autonomous_drone.opencv_processing.util;
 
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
@@ -8,7 +8,7 @@ import org.opencv.core.RotatedRect;
 public class ExternalRectangle{
     private int children = 0;
     private Rect rect;
-    private RotatedRect rRect;
+    private RotatedRect rotatedRect;
     private MatOfPoint2f approx;
     private MatOfPoint contour;
 
@@ -32,12 +32,12 @@ public class ExternalRectangle{
         this.rect = rect;
     }
 
-    public RotatedRect getrRect() {
-        return rRect;
+    public RotatedRect getRotatedRect() {
+        return rotatedRect;
     }
 
-    void setrRect(RotatedRect rRect) {
-        this.rRect = rRect;
+    void setRotatedRect(RotatedRect rotatedRect) {
+        this.rotatedRect = rotatedRect;
     }
 
     public MatOfPoint2f getApprox() {

@@ -2,6 +2,8 @@ package dk.localghost.hold17.autonomous_drone.gui;
 
 import dk.localghost.hold17.autonomous_drone.controller.DroneController;
 import dk.localghost.hold17.autonomous_drone.controller.KeyboardCommandManager;
+import dk.localghost.hold17.autonomous_drone.controller.QRCodeScanner;
+import dk.localghost.hold17.autonomous_drone.controller.QRScannerController;
 import dk.localghost.hold17.base.ARDrone;
 import dk.localghost.hold17.base.IARDrone;
 import javafx.application.Application;
@@ -23,6 +25,12 @@ public class AutonomousGUI extends Application {
         }
         drone = new ARDrone(args[0]);
         drone.start();
+
+        QRCodeScanner qrScanner = new QRCodeScanner();
+        drone.getVideoManager().addImageListener(qrScanner::imageUpdated);
+        qrScanner.addListener(new QRScannerController());
+
+
         launch(args);
     }
 
