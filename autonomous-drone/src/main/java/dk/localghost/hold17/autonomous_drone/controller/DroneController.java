@@ -45,7 +45,7 @@ public class DroneController {
         drone.getCommandManager().flatTrim();
 
         drone.setMinAltitude(MIN_ALTITUDE); // TODO Doesn't work..
-        drone.setMaxAltitude(4000);
+        drone.setMaxAltitude(MAX_ALTITUDE);
         initializeListeners();
 
         System.out.println(ConsoleColors.BLUE_BRIGHT + "CURRENT BATTERY: " + droneBattery + "%" + ConsoleColors.RESET);
