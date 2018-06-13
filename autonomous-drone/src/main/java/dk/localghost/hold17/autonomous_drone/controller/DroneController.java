@@ -382,7 +382,11 @@ public class DroneController {
                         System.out.println(ConsoleColors.GREEN_BOLD_BRIGHT+"GOING RIGHT..." + ConsoleColors.RESET);
                         break;
                     case CENTER:
-                        cmd.forward(speed).doFor(500);
+                        if (doFlyForward()){
+                            cmd.forward(speed).doFor(1250);
+                        } else{
+                            cmd.forward(speed).doFor(300);
+                        }
                         System.out.println(ConsoleColors.GREEN_BOLD_BRIGHT +"VI FANDT CENTER!!!!"+ ConsoleColors.RESET);
                         break;
                 }
@@ -397,4 +401,15 @@ public class DroneController {
         System.out.println("Counter: " + counter);
         System.out.println("switch done");
     }
+
+
+    public boolean doFlyForward(){
+        int maxRadius = 350; // værdi der angiver hvornår vi skal flyve igennem cirklen
+        double radius;
+        radius = circleFilter.getMaxRadius();
+
+        if (radius >= maxRadius) return true;
+        else{ return false; }
+    }
+
 }

@@ -33,6 +33,7 @@ public class CircleFilter {
 
     private int param1 = 200;
     private int param2 = 30;
+    private double maxRadiusGlobal;
 
     public Point getBiggestCircle() {
         return biggestCircle;
@@ -104,11 +105,8 @@ public class CircleFilter {
                     biggestCircle.y = center.y;
                 }
             }
-            // debug
-//            System.out.println("Koordinater for fundne cirkel" + biggestCircle);
-
+            maxRadiusGlobal = (double) maxRadius;
             averageCenterArray.add(biggestCircle);
-//            System.out.println("RADIUS: " + maxRadius);
 
             // tegn den største fundne cirkel på billedet
             Imgproc.circle(filteredOverlay, biggestCircle, maxRadius, HSV_NEON_GREEN, 3, 8, 0);
@@ -126,9 +124,7 @@ public class CircleFilter {
         double tempx = 0;
         double tempy = 0;
 
-        // TODO
         if (points.size() >= 29) points.clear();
-
 
         if (!points.isEmpty())
         {
@@ -144,7 +140,6 @@ public class CircleFilter {
         } else{
 //            System.out.println("Tomt array i calculateAverageCenter()");
         }
-
         int arraySize = points.size();
         averageCenter.x = tempx / arraySize;
         averageCenter.y = tempy / arraySize;
@@ -266,5 +261,9 @@ public class CircleFilter {
 
     public void setParam2(int param2) {
         this.param2 = param2;
+    }
+
+    public double getMaxRadius(){
+        return maxRadiusGlobal;
     }
 }
