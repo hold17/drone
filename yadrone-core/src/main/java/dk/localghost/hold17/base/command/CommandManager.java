@@ -17,14 +17,13 @@ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PRO
  */
 package dk.localghost.hold17.base.command;
 
-import dk.localghost.hold17.base.ARDrone;
 import dk.localghost.hold17.base.command.event.CommandSentEvent;
 import dk.localghost.hold17.base.command.event.CommandSentListener;
 import dk.localghost.hold17.base.exception.CommandException;
 import dk.localghost.hold17.base.exception.IExceptionListener;
 import dk.localghost.hold17.base.manager.AbstractUDPManager;
 import dk.localghost.hold17.base.navdata.CadType;
-import dk.localghost.hold17.base.utils.ARDroneUtils;
+import dk.localghost.hold17.base.utils.ARDronePorts;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -357,11 +356,6 @@ public class CommandManager extends AbstractUDPManager {
         cQueue.add(new ConfigureCommand("detect:enemy_without_shell", (b ? "1" : "0")));
         return this;
     }
-
-//	Only for ARDrone 1.0 with legacy groundstripe detection.
-//	public void setGroundStripeColors(GroundStripeColor c) {
-//		cQueue.add(new ConfigureCommand("detect:groundstripe_colors", c.getValue()));
-//	}
 
     /**
      * The color of the hulls you want to detect.
@@ -722,7 +716,7 @@ public class CommandManager extends AbstractUDPManager {
     @Override
     public synchronized void run() {
         System.out.println("CommandManager: connect ");
-        connect(ARDroneUtils.PORT);
+        connect(ARDronePorts.PORT);
         initARDrone();
         ATCommand c;
         ATCommand cs = null;
@@ -828,7 +822,7 @@ public class CommandManager extends AbstractUDPManager {
             buffer = c.getPacket(seq++);
         }
 
-        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, inetaddr, ARDroneUtils.PORT);
+        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, inetaddr, ARDronePorts.PORT);
         socket.send(packet);
         commandSentEvent.invoke(c);
     }

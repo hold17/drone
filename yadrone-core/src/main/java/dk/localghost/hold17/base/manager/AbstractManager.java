@@ -24,7 +24,7 @@ import java.net.InetAddress;
 
 public abstract class AbstractManager implements Runnable {
 
-    protected InetAddress inetaddr = null;
+    protected InetAddress inetaddr;
     protected Thread thread = null;
     protected boolean connected = false;
     protected ConnectionStateEvent connectionStateEvent = new ConnectionStateEvent();
