@@ -22,8 +22,6 @@ public class GUIController {
     private Timer timer;
     private BufferedImage bufferedImage;
 
-    private boolean hasWrittenImageWidth = false;
-
     @FXML
     private ImageView live;
     @FXML
@@ -50,10 +48,6 @@ public class GUIController {
             @Override
             public void run() {
                 if (bufferedImage != null) {
-                    if (!hasWrittenImageWidth) {
-                        System.out.println(ConsoleColors.YELLOW_BOLD_BRIGHT + "Image width: " + bufferedImage.getWidth() + ConsoleColors.RESET);
-                        hasWrittenImageWidth = true;
-                    }
                     Image image = SwingFXUtils.toFXImage(bufferedImage, null);
                     // show the image
                     Platform.runLater(() -> {
