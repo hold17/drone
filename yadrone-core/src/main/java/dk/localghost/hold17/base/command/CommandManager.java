@@ -30,7 +30,10 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 public class CommandManager extends AbstractUDPManager {
@@ -788,7 +791,6 @@ public class CommandManager extends AbstractUDPManager {
         // pmode parameter and first misc parameter are related
         sendPMode(2);
         sendMisc(2, 20, 2000, 3000);
-        flatTrim();
         setMulticonfiguration();
         freeze();
         landing();

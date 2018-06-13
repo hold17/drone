@@ -38,7 +38,6 @@ public class DroneController {
 
     private void initializeDrone() {
         drone.start();
-        drone.getCommandManager().flatTrim();
 
         drone.setMinAltitude(MIN_ALTITUDE); // TODO Doesn't work..
         drone.setMaxAltitude(MAX_ALTITUDE);
