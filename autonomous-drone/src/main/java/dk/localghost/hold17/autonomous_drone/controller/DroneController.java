@@ -1,40 +1,38 @@
 package dk.localghost.hold17.autonomous_drone.controller;
 
+import dk.localghost.hold17.autonomous_drone.opencv_processing.CircleFilter;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Direction;
-import dk.localghost.hold17.autonomous_drone.opencv_processing.RectangleFilter;
 import dk.localghost.hold17.base.IARDrone;
 import dk.localghost.hold17.base.command.CommandManager;
 import dk.localghost.hold17.base.command.LEDAnimation;
 import dk.localghost.hold17.base.navdata.Altitude;
 import dk.localghost.hold17.base.navdata.AltitudeListener;
 import dk.localghost.hold17.base.navdata.BatteryListener;
+import dk.localghost.hold17.base.utils.ConsoleColors;
 
 import java.awt.image.BufferedImage;
 
 public class DroneController {
     private IARDrone drone;
     private CommandManager cmd;
-    private QRScannerController qrController;
+    private QRCodeScanner qrScanner = new QRCodeScanner();
+    private QRScannerController qrController = new QRScannerController();
+    private static CircleFilter circleFilter = new CircleFilter();
 
     private final static int MAX_ALTITUDE = 1400;
     private final static int MIN_ALTITUDE = 900;
-
     private int droneAltitude = 0;
     private int droneBattery = 0;
     private boolean droneFlying = false;
-
-    private BufferedImage droneCamera;
-
     private static int speed;
-
-    public static int cameraWidth;
-    public static int cameraHeight;
+    public static int cameraWidth = 1280;
+    public static int cameraHeight = 720;
 
     public DroneController(IARDrone drone, int speed) {
         this.drone = drone;
         this.cmd = this.drone.getCommandManager();
         this.speed = speed;
-
+        qrScanner.addListener(qrController);
         initializeDrone();
     }
 
@@ -46,20 +44,21 @@ public class DroneController {
         drone.setMaxAltitude(MAX_ALTITUDE);
         initializeListeners();
 
-        System.out.println("CURRENT BATTERY: " + droneBattery + "%");
+        System.out.println(ConsoleColors.BLUE_BRIGHT + "CURRENT BATTERY: " + droneBattery + "%" + ConsoleColors.RESET);
 
         if (droneBattery < 20) {
-            System.out.println("WARNING: Battery percentage low (" + droneBattery + "%)!");
+            System.out.println(ConsoleColors.YELLOW_BOLD_BRIGHT + "WARNING: Battery percentage low (" + droneBattery + "%)!" + ConsoleColors.RESET);
         }
 
-        drone.getVideoManager().addImageListener(camera -> this.droneCamera = camera);
-
-        final QRCodeScanner qrScanner = new QRCodeScanner();
-        qrController = new QRScannerController();
-        drone.getVideoManager().addImageListener(qrScanner::imageUpdated);
-        qrScanner.addListener(qrController);
-
         LEDSuccess();
+    }
+
+    public void updateQR(BufferedImage bufferedImage) {
+        qrScanner.lookForQRCode(bufferedImage);
+    }
+
+    public CircleFilter getCircleFilter() {
+        return circleFilter;
     }
 
     private void initializeListeners() {
@@ -190,53 +189,98 @@ public class DroneController {
         }
     }
 
-    public void bum() {
-        final Direction paperDirection = getPaperDirection();
+//    public void bum() {
+//        final Direction paperDirection = getPaperDirection();
+//
+//        switch (paperDirection) {
+//            case LEFT:
+//                System.out.println("Left"); break;
+//            case RIGHT:
+//                System.out.println("Right"); break;
+//            case CENTER:
+//                System.out.println("Center"); break;
+//            case UNKNOWN:
+//                System.out.println("Unknown"); break;
+//        }
+//    }
 
-        switch (paperDirection) {
-            case LEFT:
-                System.out.println("Left"); break;
-            case RIGHT:
-                System.out.println("Right"); break;
-            case CENTER:
-                System.out.println("Center"); break;
-            case UNKNOWN:
-                System.out.println("Unknown"); break;
-        }
-    }
 
-    private Direction getPaperDirection() {
-        RectangleFilter rectangleFilter = new RectangleFilter();
-
-        rectangleFilter.findBiggestQRCode(rectangleFilter.filterImage(droneCamera));
-        return rectangleFilter.findPaperPosition(rectangleFilter.getBiggestQRCode());
-    }
-
-    public void alignQrCode() {
-        final Direction qrDirection = qrController.getQrDirection();
-
-        for (int i = 0; i < 10; i++) {
-            if (qrDirection == Direction.LEFT) {
-                cmd.goLeft(speed).doFor(500);
-            } else if (qrDirection == Direction.RIGHT) {
-                cmd.goRight(speed).doFor(500);
-            } else if (qrDirection == Direction.CENTER) {
-                cmd.setLedsAnimation(LEDAnimation.BLINK_RED, 10, 2);
-            } else if (qrDirection == Direction.UNKNOWN) {
-                System.out.println("UNKNOWN");
+    public void alignCircle() {
+        Direction directionToCircleCenter = null;
+//        Remove this line of code if testing on table.
+//        goToMaxmimumAltitude();
+        System.out.println("IM AT THE TOP");
+        while (directionToCircleCenter != Direction.CENTER) {
+            Direction tempDirection = Direction.findXDirection(circleFilter.getBiggestCircle().x); // henter enum ud fra fundne stoerste cirkel
+            if (tempDirection != Direction.UNKNOWN) {
+                directionToCircleCenter = tempDirection;
             }
 
+            System.out.println(ConsoleColors.WHITE_UNDERLINED + ConsoleColors.GREEN + "CIRCLE IS TO THE " + directionToCircleCenter + ConsoleColors.RESET);
+            if (directionToCircleCenter != null) {
+                switch (directionToCircleCenter) {
+                    case LEFT:
+                    case LEFTDOWN:
+                    case LEFTUP:
+                        cmd.setLedsAnimation(LEDAnimation.BLINK_RED, 6, 1);
+                        cmd.goLeft(speed).doFor(500);
+                        break;
+                    case RIGHT:
+                    case RIGHTUP:
+                    case RIGHTDOWN:
+                        cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 6, 1);
+                        cmd.goRight(speed).doFor(500);
+                        break;
+                    case DOWN:
+                    case UP:
+                    case CENTER:
+                        LEDSuccess();
+                        cmd.forward(speed).doFor(500);
+                        System.out.println(ConsoleColors.GREEN_BOLD_BRIGHT + "Found circle" + ConsoleColors.RESET);
+                        break;
+                }
+            }
             cmd.hover();
             cmd.waitFor(1000);
-
-            qrController.resetQrDirection();
         }
+
+        cmd.setLedsAnimation(LEDAnimation.SNAKE_GREEN_RED, 1, 10);
+//        drone.landing();
     }
+
+//    private Direction getPaperDirection() {
+//        RectangleFilter rectangleFilter = new RectangleFilter();
+//
+//        rectangleFilter.findBiggestQRCode(rectangleFilter.filterImage(droneCamera));
+//        return rectangleFilter.findPaperPosition(rectangleFilter.getBiggestQRCode());
+//    }
+
+//    public void alignQrCode() {
+//        final Direction qrDirection = qrController.getQrDirection();
+//
+//        for (int i = 0; i < 10; i++) {
+//            if (qrDirection == Direction.LEFT) {
+//                cmd.goLeft(speed).doFor(500);
+//            } else if (qrDirection == Direction.RIGHT) {
+//                cmd.goRight(speed).doFor(500);
+//            } else if (qrDirection == Direction.CENTER) {
+//                cmd.setLedsAnimation(LEDAnimation.BLINK_RED, 10, 2);
+//            } else if (qrDirection == Direction.UNKNOWN) {
+//                System.out.println("UNKNOWN");
+//            }
+//
+//            cmd.hover();
+//            cmd.waitFor(1000);
+//
+//            qrController.resetQrDirection();
+//        }
+
 
     public void searchForQr() {
         String qrString = null;
 
         goToMinimumAltitude();
+        qrController.resetLastScan();
 
         for (int i = 0; i < 5; i++) {
             System.out.println("Iteration: " + i);
@@ -246,8 +290,6 @@ public class DroneController {
             cmd.hover().doFor(1000);
             qrString = qrController.getLastScan();
             if (qrString != null) break;
-
-
 
             // SPIN LEFT
             cmd.spinLeft(100).doFor(100);
@@ -259,14 +301,13 @@ public class DroneController {
             }
 
             // SPIN RIGHT
-            cmd.spinRight(100).doFor(200);
+            cmd.spinRight(100).doFor(100);
+            cmd.spinRight(100).doFor(100);
             cmd.hover().doFor(1000);
             qrString = qrController.getLastScan();
             // SPIN BACK (reset)
             cmd.spinLeft(100).doFor(100);
             if (qrString != null) break;
-
-
 
             // PAN LEFT
             cmd.goLeft(speed).doFor(500);
@@ -279,18 +320,19 @@ public class DroneController {
 
             // PAN RIGHT
             cmd.goRight(speed).doFor(500);
+            cmd.hover().doFor(500);
+            cmd.goRight(speed).doFor(500);
             cmd.hover().doFor(1000);
             qrString = qrController.getLastScan();
             // PAN BACK (reset)
-            cmd.goLeft(speed).doFor(250);
+            cmd.goLeft(speed).doFor(500);
             if (qrString != null) break;
 
             cmd.hover().doFor(1000);
         }
 
         qrController.resetLastScan();
-        System.out.println("I FOUND QR: " + qrString);
-
+        System.out.println(ConsoleColors.CYAN_BOLD_BRIGHT + "I FOUND QR: " + qrString + ConsoleColors.RESET);
         cmd.landing();
 
         goToMaxmimumAltitude();
@@ -319,4 +361,5 @@ public class DroneController {
     public IARDrone getDrone() {
         return drone;
     }
+
 }

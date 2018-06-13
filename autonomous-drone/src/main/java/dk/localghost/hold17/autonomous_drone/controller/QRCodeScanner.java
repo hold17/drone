@@ -4,19 +4,16 @@ import com.google.zxing.*;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
-import dk.localghost.hold17.base.video.ImageListener;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-public class QRCodeScanner implements ImageListener {
+public class QRCodeScanner {
     private ArrayList<TagListener> listener = new ArrayList<>();
-
     private Result scanResult;
-
     private long imageCount = 0;
 
-    public void imageUpdated(BufferedImage image) {
+    public void lookForQRCode(BufferedImage image) {
         if ((++imageCount % 2) == 0)
             return;
 

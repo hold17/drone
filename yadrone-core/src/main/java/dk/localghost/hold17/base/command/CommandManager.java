@@ -24,6 +24,7 @@ import dk.localghost.hold17.base.exception.IExceptionListener;
 import dk.localghost.hold17.base.manager.AbstractUDPManager;
 import dk.localghost.hold17.base.navdata.CadType;
 import dk.localghost.hold17.base.utils.ARDronePorts;
+import dk.localghost.hold17.base.utils.ConsoleColors;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -728,7 +729,7 @@ public class CommandManager extends AbstractUDPManager {
                 long dt; //dt seems to be time elapsed since the last sticky command: i.e. a command which shall be send repeatedly.
                 if (cs == null) {
                     // we need to reset the watchdog within 50ms
-                    dt = 50;
+                    dt = 40;
                 } else {
                     // if there is a sticky command, we can wait until we need to deliver it.
                     long t = System.currentTimeMillis();
@@ -737,13 +738,8 @@ public class CommandManager extends AbstractUDPManager {
                     //AT-commands every 30 ms for smooth drone movements.
                     dt = Math.max(0, 30 - dt);
                 }
-//                System.out.println("1. SEQ: " + seq);
-//                System.out.println("dt: " + dt);
-//                long startTime = System.currentTimeMillis();
                 c = cQueue.poll(dt, TimeUnit.MILLISECONDS);
-//                System.out.println("time: " + (double) (System.currentTimeMillis() - startTime));
-//                System.out.println(c);
-//                System.out.println("2. SEQ: " + seq);
+                // System.out.println(c);
                 if (c == null) {
                     if (cs == null) {
                         c = cAlive;
@@ -808,16 +804,16 @@ public class CommandManager extends AbstractUDPManager {
         // since MultiConfig is enabled by default, AT*CONFIG_IDS must be sent before AT*CONFIG
         if (c instanceof ConfigureCommand) {
             String config = "AT*CONFIG_IDS=" + (seq++) + ",\"" + CommandManager.SESSION_ID + "\",\"" + CommandManager.PROFILE_ID + "\",\"" + CommandManager.APPLICATION_ID + "\"" + "\r"; // AT*CONFIG_IDS=5,"aabbccdd","bbccddee","ccddeeff"
-            System.out.println("CommandManager: " + "[seq #"+(seq-1)+"] " + config);
+            System.out.println(ConsoleColors.BLUE + "CommandManager: " + "[seq #"+(seq-1)+"] " + config + ConsoleColors.RESET);
             byte[] configPrefix = config.getBytes("ASCII");
-            System.out.println("CommandManager: " + "[seq #"+seq+"] " + c.getCommandString(seq));
+            System.out.println(ConsoleColors.BLUE + "CommandManager: " + "[seq #"+seq+"] " + c.getCommandString(seq) + ConsoleColors.RESET);
             byte[] command = c.getPacket(seq++);
             buffer = new byte[configPrefix.length + command.length];
             System.arraycopy(configPrefix, 0, buffer, 0, configPrefix.length);
             System.arraycopy(command, 0, buffer, configPrefix.length, command.length);
         } else {
             if (!(c instanceof KeepAliveCommand)) {
-                System.out.println("CommandManager: " + "[seq #"+seq+"] " + c.getCommandString(seq));
+                System.out.println(ConsoleColors.BLUE + "CommandManager: " + "[seq #"+seq+"] " + c.getCommandString(seq) + ConsoleColors.RESET);
             }
             buffer = c.getPacket(seq++);
         }
