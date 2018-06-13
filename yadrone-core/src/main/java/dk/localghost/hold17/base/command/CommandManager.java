@@ -716,7 +716,7 @@ public class CommandManager extends AbstractUDPManager {
     @Override
     public synchronized void run() {
         System.out.println("CommandManager: connect ");
-        connect(ARDronePorts.PORT);
+        connect(ARDronePorts.COMMAND_PORT);
         initARDrone();
         ATCommand c;
         ATCommand cs = null;
@@ -822,7 +822,7 @@ public class CommandManager extends AbstractUDPManager {
             buffer = c.getPacket(seq++);
         }
 
-        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, inetaddr, ARDronePorts.PORT);
+        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, inetaddr, ARDronePorts.COMMAND_PORT);
         socket.send(packet);
         commandSentEvent.invoke(c);
     }
