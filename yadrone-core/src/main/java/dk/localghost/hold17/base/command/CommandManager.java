@@ -502,7 +502,6 @@ public class CommandManager extends AbstractUDPManager {
      */
     public CommandManager setMaxAltitude(Location l, int altitude) {
         altitude = limit(altitude, 0, 100000);
-        System.out.println("CommandManager: setMaxAltitude: " + altitude + " mm");
         String command = "control:" + l.getCommandPrefix() + "altitude_max";
         cQueue.add(new ConfigureCommand(command, altitude));
         return this;
