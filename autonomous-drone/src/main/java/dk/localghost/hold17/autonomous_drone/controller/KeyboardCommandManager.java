@@ -1,7 +1,7 @@
 package dk.localghost.hold17.autonomous_drone.controller;
 
-import dk.localghost.hold17.autonomous_drone.ConsoleColors;
 import dk.localghost.hold17.base.IARDrone;
+import dk.localghost.hold17.base.utils.ConsoleColors;
 import javafx.event.EventHandler;
 import javafx.scene.input.KeyEvent;
 

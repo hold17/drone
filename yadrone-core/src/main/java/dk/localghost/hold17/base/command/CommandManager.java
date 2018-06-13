@@ -24,6 +24,7 @@ import dk.localghost.hold17.base.exception.IExceptionListener;
 import dk.localghost.hold17.base.manager.AbstractUDPManager;
 import dk.localghost.hold17.base.navdata.CadType;
 import dk.localghost.hold17.base.utils.ARDroneUtils;
+import dk.localghost.hold17.base.utils.ConsoleColors;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

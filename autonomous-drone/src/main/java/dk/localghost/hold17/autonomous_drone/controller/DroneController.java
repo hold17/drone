@@ -1,6 +1,5 @@
 package dk.localghost.hold17.autonomous_drone.controller;
 
-import dk.localghost.hold17.autonomous_drone.ConsoleColors;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.CircleFilter;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Direction;
 import dk.localghost.hold17.base.IARDrone;
@@ -9,6 +8,7 @@ import dk.localghost.hold17.base.command.LEDAnimation;
 import dk.localghost.hold17.base.navdata.Altitude;
 import dk.localghost.hold17.base.navdata.AltitudeListener;
 import dk.localghost.hold17.base.navdata.BatteryListener;
+import dk.localghost.hold17.base.utils.ConsoleColors;
 
 import java.awt.image.BufferedImage;
 
@@ -223,8 +223,7 @@ public class DroneController {
 //        goToMaxmimumAltitude();
         System.out.println("IM AT TOP");
         int count = 0;
-        while (directionToCircleCenter != Direction.CENTER && count < 20) {
-
+        while (directionToCircleCenter != Direction.CENTER) {
             Direction tempDirection = Direction.findXDirection(circleFilter.getBiggestCircle().x); // henter enum ud fra fundne stoerste cirkel
             if (tempDirection != Direction.UNKNOWN) {
                 directionToCircleCenter = tempDirection;
@@ -250,9 +249,8 @@ public class DroneController {
                     case DOWN:
                     case UP:
                     case CENTER:
-//                        cmd.landing();
-//                        return;
                         LEDSuccess();
+                        cmd.forward(speed).doFor(500);
                         System.out.println(ConsoleColors.GREEN_BOLD_BRIGHT + "Found circle" + ConsoleColors.RESET);
                         break;
                 }

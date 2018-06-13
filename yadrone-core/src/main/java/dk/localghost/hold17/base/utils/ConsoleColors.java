@@ -1,4 +1,4 @@
-package dk.localghost.hold17.base.command;
+package dk.localghost.hold17.base.utils;
 
 public class ConsoleColors {
     // Reset

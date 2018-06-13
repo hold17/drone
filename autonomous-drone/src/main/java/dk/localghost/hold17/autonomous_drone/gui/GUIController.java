@@ -1,9 +1,9 @@
 package dk.localghost.hold17.autonomous_drone.gui;
 
-import dk.localghost.hold17.autonomous_drone.ConsoleColors;
 import dk.localghost.hold17.autonomous_drone.controller.DroneController;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.FilterHelper;
 import dk.localghost.hold17.base.IARDrone;
+import dk.localghost.hold17.base.utils.ConsoleColors;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
