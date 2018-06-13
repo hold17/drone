@@ -28,10 +28,9 @@ public class RectangleFilter {
     private final Scalar YELLOW = new Scalar(0, 255, 255);
     private final Scalar CYAN = new Scalar(255, 255, 0);
 
-    private ExternalRectangle externalCustomRectangle;
     private Rect biggestQRCode;
 
-    public FilterHelper filterHelperter;
+    private FilterHelper filterHelperter;
 
     public RectangleFilter() {
         filterHelperter = new FilterHelper();
@@ -101,7 +100,7 @@ public class RectangleFilter {
      * @param accuracy double
      * @return Mat
      */
-    public Mat drawRectangles(Mat imgcol, List<MatOfPoint> contours, List<MatOfPoint> externalContours, Mat hierarchy, double accuracy) {
+    private Mat drawRectangles(Mat imgcol, List<MatOfPoint> contours, List<MatOfPoint> externalContours, Mat hierarchy, double accuracy) {
         MatOfPoint2f approx = new MatOfPoint2f();
         MatOfPoint2f matOfPoint2f = new MatOfPoint2f();
 
@@ -133,7 +132,7 @@ public class RectangleFilter {
 //                    rectContour.fromList(externalContour.toList());
 //                    RotatedRect rRect = Imgproc.minAreaRect(approx);
                     externalRects.add(rect);
-                    externalCustomRectangle = new ExternalRectangle(rect);
+                    ExternalRectangle externalCustomRectangle = new ExternalRectangle(rect);
                     externalCustomRectangle.setContour(externalContour);
                     externalCustomRectangles.add(externalCustomRectangle);
                 }
@@ -267,7 +266,7 @@ public class RectangleFilter {
      * Convert image to a binary matrix and remove everything that is not the desired shades of white/grey
      * @return Mat
      */
-    public Mat detectWhiteMat(Mat image) {
+    private Mat detectWhiteMat(Mat image) {
         Mat imgbin = new Mat();
 
         /* Write 1 if in range of the two scalars, 0 if not. Binary image result written to imgbin */
