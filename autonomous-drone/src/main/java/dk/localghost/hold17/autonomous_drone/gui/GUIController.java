@@ -85,6 +85,6 @@ public class GUIController {
         this.timer = new Timer();
         // update imageView with new image every 33ms (30 fps)
         this.timer.schedule(frameGrabber, 0, 33);
-        this.timer.schedule(processImage, 0, 250);
+        this.timer.schedule(processImage, 0, 1000);
     }
 }

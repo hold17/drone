@@ -1,7 +1,12 @@
 package dk.localghost.hold17.autonomous_drone.opencv_processing;
 
+import com.sun.org.apache.bcel.internal.generic.SWITCH;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Direction;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.opencv.imgproc.Imgproc.GaussianBlur;
 import static org.opencv.imgproc.Imgproc.cvtColor;
@@ -14,6 +19,7 @@ public class CircleFilter {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
 
+    Direction direction;
     private final Scalar NEON_GREEN = new Scalar(20, 255, 57);
     private final Scalar RED = new Scalar(0, 0, 255);
     private final Scalar YELLOW = new Scalar(0, 255, 255);
@@ -29,8 +35,14 @@ public class CircleFilter {
         return biggestCircle;
     }
 
+    public Point getAverageCenter(){
+        return averageCenter;
+    }
+
     // Global variabel for centrum af største cirkel.
     private Point biggestCircle = new Point();
+    private Point averageCenter = new Point();
+    private List<Point> averageCenterArray = new ArrayList<>();
 
     public CircleFilter() {
 ////        BufferedImage img = matToBufferedImage(openFile(fileName));
@@ -50,6 +62,9 @@ public class CircleFilter {
      * TODO: Metode kan forveksle den største cirkel i scenarier hvor der er flere cirkler.
      */
     public Mat findCircleAndDraw(Mat image) {
+        biggestCircle = new Point();
+
+        System.out.println(image);
         Mat circlePosition = new Mat();
         Mat hsv_image = new Mat();
 
@@ -68,13 +83,12 @@ public class CircleFilter {
 
         // 4th argument = downscaling. Higher values = lower resolution. 1 = no downscaling.
         // 5th argument = minDist between circles
-        Imgproc.HoughCircles(red_hue_image, circlePosition, Imgproc.CV_HOUGH_GRADIENT, 1, (red_hue_image.rows() / 8), 100, 30, 50, 1000);
+        Imgproc.HoughCircles(red_hue_image, circlePosition, Imgproc.CV_HOUGH_GRADIENT, 1, (red_hue_image.rows() / 8), 110, 18, 50, 400);
+
 
         // finder objekter der ligner cirkler og gemmer deres position i circlePosition
-
         // fortsæt kun, hvis der er fundet én eller flere cirkler
-
-        if (!circlePosition.empty()) {
+        if (circlePosition.empty() == false) {
 //        Point maxCenter;
             //System.out.println("Fandt: " + circlePosition.cols() + " cirkler");
 
@@ -101,13 +115,59 @@ public class CircleFilter {
             }
             // tegner cirklen
 //            cvtColor(upper_red, red_hue_image, COLOR_GRAY2BGR);
+
+            // debug
+            System.out.println("Koordinater for fundne cirkel" + biggestCircle);
+
+
             Imgproc.circle(image, biggestCircle, maxRadius, NEON_GREEN, 8);
+
+            averageCenterArray.add(biggestCircle);
+
+            System.out.println("RADIUS: " + maxRadius);
         } else {
+            System.out.println("Fandt ingen cirkler...");
             return image;
         }
-//        System.out.println(biggestCircle.toString());
+        Point tempAverage = calculateAverageCenter(averageCenterArray);
+        System.out.println("AVERAGE: " + tempAverage);
+
+        // tegner gennemsnit
+        Imgproc.circle(image, tempAverage, 10, CYAN, 8);
+
         return image;
     }
+
+    private Point calculateAverageCenter(List<Point> arr){
+        double tempx = 0;
+        double tempy = 0;
+
+        // TODO
+        if (arr.size() >= 29) arr.clear();
+
+
+        if (arr.isEmpty() == false)
+        {
+            for (Point p : arr)
+            {
+                if (arr.size() >= 30){ // maks 30 elementer i listen
+                    System.out.println("araylist full");
+                } else {
+                    tempx += p.x;
+                    tempy += p.y;
+                }
+            }
+        } else{
+            System.out.println("Tomt array i calculateAverageCenter()");
+        }
+
+        int arraySize = arr.size();
+        averageCenter.x = tempx / arraySize;
+        averageCenter.y = tempy / arraySize;
+        return averageCenter;
+}
+
+
 
 //    public Direction findDirectionFromCircle(Point circleCoordinate) {
 //        if (circleCoordinate == null) {

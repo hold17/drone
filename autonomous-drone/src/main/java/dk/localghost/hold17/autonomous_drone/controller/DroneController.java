@@ -11,6 +11,7 @@ import dk.localghost.hold17.base.navdata.BatteryListener;
 import dk.localghost.hold17.base.utils.ConsoleColors;
 
 import java.awt.image.BufferedImage;
+import java.sql.SQLOutput;
 
 public class DroneController {
     private IARDrone drone;
@@ -378,4 +379,44 @@ public class DroneController {
         return drone;
     }
 
+
+    // funk til at centrere ud for cirklen
+    public void centerRing(){
+        int counter = 0;
+
+        Direction xDirection;
+
+        while (counter <= 20)
+        {
+            //
+            xDirection = Direction.findXDirection(circleFilter.getBiggestCircle().x); // henter enum ud fra fundne stoerste cirkel
+            //direction = direction;
+            if ( xDirection == Direction.UNKNOWN)
+            {
+                System.out.println("Fandt ikke retningen");
+            } else{
+                switch (xDirection)
+                {
+                    case LEFT:
+                        // TODO: jeg kender ikke til syntaksen for at bevæge dronen
+                        //cmd.goLeft(speed).doFor(500);
+                        System.out.println("GOING LEFT....");
+                        break;
+                    case RIGHT:
+                        System.out.println("GOING RIGHT...");
+                        //cmd.goRight(speed).doFor(500);
+                        break;
+                    case CENTER:
+                        System.out.println("VI FANDT CENTER!!!!");
+                        break;
+                }
+            }
+
+            counter++;
+            System.out.println("Sover 1 sekund...");
+            cmd.waitFor(1000);
+        }
+        System.out.println("Counter: " + counter);
+        System.out.println("switch done");
+    }
 }
