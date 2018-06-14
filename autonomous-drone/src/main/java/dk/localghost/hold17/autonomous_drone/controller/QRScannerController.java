@@ -3,10 +3,13 @@ package dk.localghost.hold17.autonomous_drone.controller;
 import com.google.zxing.Result;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Direction;
 
-public class QRScannerController implements TagListener {
+public class QRScannerController implements TagListener, FlightController {
 
     private String lastScan = null;
     private Direction qrDirection = Direction.UNKNOWN;
+    private Direction lastKnownQrDirection = Direction.UNKNOWN;
+
+    private static final int MARGIN = 0;
 
     @Override
     public void onTag(Result result, float orientation) {
@@ -20,12 +23,14 @@ public class QRScannerController implements TagListener {
         final double Y = result.getResultPoints()[0].getY();
 
         // Center = 640
-        if (X < CAMERA_HALF_WIDTH)
+        if (X < CAMERA_HALF_WIDTH - MARGIN)
             qrDirection = Direction.LEFT;
-        else if (X > CAMERA_HALF_WIDTH)
+        else if (X > CAMERA_HALF_WIDTH + MARGIN)
             qrDirection = Direction.RIGHT;
         else
             qrDirection = Direction.CENTER;
+
+        lastKnownQrDirection = qrDirection;
 
         lastScan = result.getText();
 
@@ -40,11 +45,19 @@ public class QRScannerController implements TagListener {
         lastScan = null;
     }
 
-    public Direction getQrDirection() {
+    @Override
+    public Direction getFlightDirection() {
         return qrDirection;
     }
 
-    public void resetQrDirection() {
+    @Override
+    public Direction getLastKnownDirection() {
+        return lastKnownQrDirection;
+    }
+
+    @Override
+    public void resetFlightDirection() {
         qrDirection = Direction.UNKNOWN;
+        resetLastScan();
     }
 }
