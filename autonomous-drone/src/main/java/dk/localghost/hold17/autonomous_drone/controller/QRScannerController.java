@@ -9,12 +9,8 @@ public class QRScannerController implements TagListener, QrTracker {
     private Direction qrDirection = Direction.UNKNOWN;
     private Direction lastKnownQrDirection = Direction.UNKNOWN;
 
-    private static final int MARGIN = 0;
-
     @Override
     public void onTag(Result result, float orientation) {
-        final int CAMERA_HALF_WIDTH = DroneController.cameraWidth / 2;
-
         if (result == null) {
             return;
         }
