@@ -1,6 +1,7 @@
 package dk.localghost.hold17.autonomous_drone.controller;
 
 import dk.localghost.hold17.autonomous_drone.opencv_processing.CircleFilter;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.RectangleFilter;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Direction;
 import dk.localghost.hold17.base.IARDrone;
 import dk.localghost.hold17.base.command.CommandManager;
@@ -20,6 +21,7 @@ public class DroneController {
     private FlightController flightController;
 
     private static CircleFilter circleFilter = new CircleFilter();
+    private static RectangleFilter rectangleFilter = new RectangleFilter();
 
     private final static int MAX_ALTITUDE = 1400;
     private final static int MIN_ALTITUDE = 900;
@@ -50,8 +52,8 @@ public class DroneController {
         if (droneBattery < 20) {
             System.out.println(ConsoleColors.YELLOW_BOLD_BRIGHT + "WARNING: Battery percentage low (" + droneBattery + "%)!" + ConsoleColors.RESET);
         }
-
-        qrScanner.addListener(qrController);
+        //TODO Check if this should be commented in
+//        qrScanner.addListener(qrController);
         qrController = new QRScannerController();
         qrScanner = new QRCodeScanner();
 
@@ -67,6 +69,8 @@ public class DroneController {
     public CircleFilter getCircleFilter() {
         return circleFilter;
     }
+    public RectangleFilter getRectangleFilter() { return rectangleFilter;  }
+
 
     private void initializeListeners() {
         drone.getNavDataManager().addAltitudeListener(new AltitudeListener() {
@@ -209,6 +213,7 @@ public class DroneController {
 //    }
 
 
+
     public void alignCircle() {
         Direction directionToCircleCenter = null;
 //        Remove this line of code if testing on table.
@@ -245,12 +250,12 @@ public class DroneController {
         cmd.setLedsAnimation(LEDAnimation.SNAKE_GREEN_RED, 1, 10);
 //        drone.landing();
     }
-
+    //        return rectangleFilter.findPaperPosition(rectangleFilter.getBiggestQRCode());
+    //        rectangleFilter.findBiggestQRCode(rectangleFilter.filterImage(droneCamera));
+    //
+    //        RectangleFilter rectangleFilter = new RectangleFilter();
 //    private Direction getPaperDirection() {
-//        RectangleFilter rectangleFilter = new RectangleFilter();
-//
-//        rectangleFilter.findBiggestQRCode(rectangleFilter.filterImage(droneCamera));
-//        return rectangleFilter.findPaperPosition(rectangleFilter.getBiggestQRCode());
+
 //    }
 
     public void alignQrCode() {
@@ -448,8 +453,8 @@ public class DroneController {
         return drone;
     }
 
-
     // funk til at centrere ud for cirklen
+
     public void centerRing(){
         int counter = 0;
 
@@ -506,5 +511,6 @@ public class DroneController {
         if (radius >= maxRadius) return true;
         else{ return false; }
     }
+
 
 }

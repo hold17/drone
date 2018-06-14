@@ -3,14 +3,16 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1080.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dk.localghost.hold17.autonomous_drone.gui.GUIController">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1080.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dk.localghost.hold17.autonomous_drone.gui.GUIController">
    <children>
-      <VBox prefHeight="720.0" prefWidth="640.0">
+      <VBox prefHeight="1080.0" prefWidth="640.0">
          <children>
             <ImageView fx:id="live" fitHeight="360.0" fitWidth="640.0" pickOnBounds="true" preserveRatio="true">
             </ImageView>
-            <ImageView fx:id="filtered" fitHeight="360.0" fitWidth="640.0" pickOnBounds="true" preserveRatio="true">
+            <ImageView fx:id="filteredImgCircle" fitHeight="360.0" fitWidth="640.0" pickOnBounds="true" preserveRatio="true">
             </ImageView>
+             <ImageView fx:id="filteredImgRectangle" fitHeight="360.0" fitWidth="640.0" pickOnBounds="true" preserveRatio="true">
+             </ImageView>
          </children>
       </VBox>
       <SplitPane dividerPositions="0.5" layoutX="640.0" prefHeight="720.0" prefWidth="380.0">

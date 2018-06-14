@@ -3,6 +3,7 @@ package dk.localghost.hold17.autonomous_drone.gui;
 import dk.localghost.hold17.autonomous_drone.controller.DroneController;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.CircleFilter;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.FilterHelper;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.RectangleFilter;
 import dk.localghost.hold17.base.IARDrone;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
@@ -22,6 +23,7 @@ public class GUIController {
     private DroneController droneController;
     private static FilterHelper filterHelper = new FilterHelper();
     private CircleFilter circleFilter;
+    private RectangleFilter rectangleFilter;
 //    private static RectangleFilter rectangleFilter = new RectangleFilter();
     private Timer timer;
     private BufferedImage bufferedImage;
@@ -29,7 +31,9 @@ public class GUIController {
     @FXML
     private ImageView live;
     @FXML
-    private ImageView filtered;
+    private ImageView filteredImgCircle;
+    @FXML
+    private ImageView filteredImgRectangle;
     @FXML
     private Slider h1_slider, s1_slider, v1_slider,
                    h2_slider, s2_slider, v2_slider,
@@ -46,7 +50,9 @@ public class GUIController {
     void init(IARDrone drone, DroneController droneController) {
         this.ardrone = drone;
         this.droneController = droneController;
-        this. circleFilter = droneController.getCircleFilter();
+        this.circleFilter = droneController.getCircleFilter();
+        this.droneController.getRectangleFilter();
+
         initSliders();
         startRecording();
     }
@@ -79,7 +85,7 @@ public class GUIController {
             }
         };
 
-        TimerTask processedFrame = new TimerTask() {
+        TimerTask processedCircleFrame = new TimerTask() {
             @Override
             public void run() {
                 if (bufferedImage != null) {
@@ -89,9 +95,25 @@ public class GUIController {
                     final BufferedImage bf = filterHelper.matToBufferedImage(mat);
                     final Image imageFiltered = SwingFXUtils.toFXImage(bf, null);
                     Platform.runLater(() -> {
-                        filtered.setImage(imageFiltered);
-//                        filtered.setFitWidth(640);
-//                        filtered.setPreserveRatio(true);
+                        filteredImgCircle.setImage(imageFiltered);
+//                        filteredImgCircle.setFitWidth(640);
+//                        filteredImgCircle.setPreserveRatio(true);
+                    });
+                }
+            }
+        };
+        TimerTask processedRectangleFrame = new TimerTask() {
+            @Override
+            public void run() {
+                if (bufferedImage != null) {
+                    final Mat mat = rectangleFilter.filterImage(bufferedImage);
+//                    droneController.alignCircle();
+                    final BufferedImage bf = filterHelper.matToBufferedImage(mat);
+                    final Image imageFiltered = SwingFXUtils.toFXImage(bf, null);
+                    Platform.runLater(() -> {
+                        filteredImgRectangle.setImage(imageFiltered);
+//                        filteredImgCircle.setFitWidth(640);
+//                        filteredImgCircle.setPreserveRatio(true);
                     });
                 }
             }
@@ -101,7 +123,8 @@ public class GUIController {
         // update imageView with new image every 33ms (30 fps)
         this.timer.schedule(liveFrame, 0, 33);
         // update imageView with new image every 66ms (approx. 15 fps)
-        this.timer.schedule(processedFrame, 0, 66);
+        this.timer.schedule(processedCircleFrame, 0, 66);
+        this.timer.schedule(processedRectangleFrame, 0, 66);
     }
 
     private void initSliders() {
