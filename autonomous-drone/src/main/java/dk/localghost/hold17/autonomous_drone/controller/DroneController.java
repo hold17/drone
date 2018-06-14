@@ -11,13 +11,17 @@ import dk.localghost.hold17.base.navdata.BatteryListener;
 import dk.localghost.hold17.base.utils.ConsoleColors;
 
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DroneController {
     private IARDrone drone;
     private CommandManager cmd;
     private QRCodeScanner qrScanner;
     private QRScannerController qrController;
-    private FlightController flightController;
+
+    private int currentFlightController = 0;
+    private List<FlightController> flightControllers = new ArrayList<>();
 
     private static CircleFilter circleFilter = new CircleFilter();
 
@@ -51,11 +55,13 @@ public class DroneController {
             System.out.println(ConsoleColors.YELLOW_BOLD_BRIGHT + "WARNING: Battery percentage low (" + droneBattery + "%)!" + ConsoleColors.RESET);
         }
 
-        qrScanner.addListener(qrController);
+//        qrScanner.addListener(qrController);
         qrController = new QRScannerController();
         qrScanner = new QRCodeScanner();
 
-        flightController = qrController;
+        flightControllers.add(qrController);
+
+        writeFlightController();
 
         LEDSuccess();
     }
@@ -266,7 +272,7 @@ public class DroneController {
         Direction qrDirection = Direction.UNKNOWN;
 
         for (int i = 0; i < 10; i++) {
-             qrDirection = flightController.getFlightDirection();
+             qrDirection = getCurrentFlightController().getFlightDirection();
 
             switch (qrDirection) {
                 case LEFT:
@@ -287,7 +293,7 @@ public class DroneController {
 
             cmd.hover().waitFor(1000);
 
-            flightController.resetFlightDirection();
+            getCurrentFlightController().resetFlightDirection();
         }
     }
 
@@ -345,7 +351,7 @@ public class DroneController {
     }
 
     private boolean lostQrWasFound() {
-        return qrController.getLastScan() != null && flightController.getFlightDirection() != Direction.UNKNOWN;
+        return qrController.getLastScan() != null && getCurrentFlightController().getFlightDirection() != Direction.UNKNOWN;
     }
 
     private void searchForUnknownQrLocation() {
@@ -457,4 +463,32 @@ public class DroneController {
         return drone;
     }
 
+    public FlightController getCurrentFlightController() {
+        return flightControllers.get(currentFlightController);
+    }
+
+    public String getCurrentFlightControllerName() {
+        final String[] classNameList = getCurrentFlightController().getClass().getName().split("\\.");
+        return classNameList[classNameList.length - 1];
+    }
+
+    public void nextFlightController() {
+        if (currentFlightController < flightControllers.size() - 1) {
+            currentFlightController += 1;
+        } else {
+            currentFlightController = 0;
+        }
+
+        System.out.println(ConsoleColors.CYAN_BRIGHT + "Changed the flight controller." + ConsoleColors.RESET);
+        writeFlightController();
+    }
+
+    private void writeFlightController() {
+        System.out.println(ConsoleColors.CYAN_BRIGHT +
+                "Current flight controller is " +
+                ConsoleColors.YELLOW_BRIGHT + getCurrentFlightControllerName() + ConsoleColors.CYAN_BRIGHT +
+                " (" +
+                ConsoleColors.YELLOW_BRIGHT + currentFlightController + ConsoleColors.CYAN_BRIGHT +
+                ". position)." + ConsoleColors.RESET);
+    }
 }
