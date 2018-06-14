@@ -149,7 +149,7 @@ public class DroneController {
      */
     public void flyThroughRing() {
         cmd.hover().doFor(250);
-        goToMinimumAltitude();
+        goToDetectionAltitude();
         cmd.hover().doFor(250);
         // Change this value to change the distance to fly when flying through rings
         final int FORWARD_TIME = 1500;
@@ -157,7 +157,7 @@ public class DroneController {
         // UP
         System.out.println("          FLYING UP");
         cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 10, 1);
-        goToMaxmimumAltitude();
+        goToRingAltitude();
 
         // WAIT
         cmd.hover().doFor(100);
@@ -172,13 +172,35 @@ public class DroneController {
 
         // DOWN
         System.out.println("          FLYING DOWN");
-        goToMinimumAltitude();
+        goToDetectionAltitude();
 
         // WAIT
         cmd.hover().doFor(250);
     }
 
-    public void goToMinimumAltitude() {
+    /**
+     * Goes to the altitude needed for detecting a direction. For a QrTracker it is the minimum altitude, for a
+     * CircleTracker it is the maximum altitude.
+     */
+    public void goToDetectionAltitude() {
+        if (getCurrentFlightController() instanceof QrTracker) {
+            goToMinimumAltitude();
+        } else if (getCurrentFlightController() instanceof CircleTracker) {
+            goToMaximumAltitude();
+        }
+    }
+
+    /**
+     * Goes to the altitude needed for flying through the ring. This is always the maximum altitude.
+     */
+    public void goToRingAltitude() {
+        goToMaximumAltitude();
+    }
+
+    /**
+     * Flies up or down to the minimum altitude (usually 900)
+     */
+    private void goToMinimumAltitude() {
         if (droneAltitude > MIN_ALTITUDE) {
             while(droneAltitude > MIN_ALTITUDE) {
                 cmd.down(speed).doFor(250);
@@ -190,7 +212,10 @@ public class DroneController {
         }
     }
 
-    public void goToMaxmimumAltitude() {
+    /**
+     * Flies up or down to the maximum altitude (usually 1400)
+     */
+    private void goToMaximumAltitude() {
         if (droneAltitude < MAX_ALTITUDE) {
             while(droneAltitude < MAX_ALTITUDE) {
                 cmd.up(speed).doFor(250);
@@ -201,6 +226,7 @@ public class DroneController {
             }
         }
     }
+
 
 //    public void bum() {
 //        final Direction paperDirection = getPaperDirection();
@@ -221,7 +247,7 @@ public class DroneController {
     public void alignCircle() {
         Direction directionToCircleCenter = null;
 //        Remove this line of code if testing on table.
-//        goToMaxmimumAltitude();
+//        goToRingAltitude();
         System.out.println("IM AT THE TOP");
         while (directionToCircleCenter != Direction.CENTER) {
             Direction tempDirection = Direction.findXDirection(circleFilter.getBiggestCircle().x); // henter enum ud fra fundne stoerste cirkel
@@ -380,7 +406,7 @@ public class DroneController {
     public void searchForQr() {
         String qrString = null;
 
-        goToMinimumAltitude();
+        goToDetectionAltitude();
         qrController.resetLastScan();
 
         for (int i = 0; i < 5; i++) {
@@ -436,7 +462,7 @@ public class DroneController {
         System.out.println(ConsoleColors.CYAN_BOLD_BRIGHT + "I FOUND QR: " + qrString + ConsoleColors.RESET);
         cmd.landing();
 
-        goToMaxmimumAltitude();
+        goToRingAltitude();
     }
 
     public void LEDSuccess() {
