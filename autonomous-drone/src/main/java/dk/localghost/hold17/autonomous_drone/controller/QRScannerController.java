@@ -51,4 +51,9 @@ public class QRScannerController implements TagListener, QrTracker {
         qrDirection = Direction.UNKNOWN;
         resetLastScan();
     }
+
+    @Override
+    public boolean readyForFlyingThroughRing() {
+        return false;
+    }
 }
