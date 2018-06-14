@@ -55,7 +55,7 @@ public class DroneController {
             System.out.println(ConsoleColors.YELLOW_BOLD_BRIGHT + "WARNING: Battery percentage low (" + droneBattery + "%)!" + ConsoleColors.RESET);
         }
 
-//        qrScanner.addListener(qrController);
+        qrScanner.addListener(qrController);
         qrController = new QRScannerController();
         qrScanner = new QRCodeScanner();
 
