@@ -1,5 +1,8 @@
 package dk.localghost.hold17.autonomous_drone.opencv_processing;
 
+import dk.localghost.hold17.autonomous_drone.controller.CircleTracker;
+import dk.localghost.hold17.autonomous_drone.controller.FlightController;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Direction;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
@@ -10,7 +13,7 @@ import static org.opencv.imgproc.Imgproc.GaussianBlur;
 import static org.opencv.imgproc.Imgproc.cvtColor;
 
 // TODO: Clean up unused code
-public class CircleFilter {
+public class CircleFilter implements CircleTracker {
 
     static {
         nu.pattern.OpenCV.loadShared(); // loading maven version of OpenCV
@@ -47,6 +50,8 @@ public class CircleFilter {
     private Point biggestCircle = new Point();
     private Point averageCenter = new Point();
     private List<Point> averageCenterArray = new ArrayList<>();
+    private Direction flightDirection = Direction.UNKNOWN;
+    private Direction lastKnownDirection = Direction.UNKNOWN;
 
     public CircleFilter() {}
 
@@ -143,9 +148,29 @@ public class CircleFilter {
         int arraySize = points.size();
         averageCenter.x = tempx / arraySize;
         averageCenter.y = tempy / arraySize;
+        flightDirection = Direction.findXDirection(averageCenter.x);
+
+        if(flightDirection != Direction.UNKNOWN) {
+            lastKnownDirection = flightDirection;
+        }
         return averageCenter;
     }
 
+
+    @Override
+    public Direction getFlightDirection() {
+        return flightDirection;
+    }
+
+    @Override
+    public Direction getLastKnownDirection() {
+        return lastKnownDirection;
+    }
+
+    @Override
+    public void resetFlightDirection() {
+        flightDirection = Direction.UNKNOWN;
+    }
 
     public void clearAverageArray(){
         averageCenterArray.clear();
