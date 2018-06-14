@@ -59,8 +59,8 @@ public class GUIController {
     private void startRecording() {
         bufferedImage = null;
 //        ardrone.getCommandManager().setVideoChannel(VideoChannel.HORI);
-//        ardrone.getCommandManager().setVideoCodec(VideoCodec.H264_720P);
-//        ardrone.getVideoManager().reinitialize();
+        ardrone.getCommandManager().setVideoCodec(VideoCodec.H264_720P);
+        ardrone.getVideoManager().reinitialize();
 
         ardrone.getVideoManager().addImageListener(newImage -> {
             bufferedImage = newImage;
