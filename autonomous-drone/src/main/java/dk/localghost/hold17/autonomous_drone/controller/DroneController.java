@@ -55,10 +55,10 @@ public class DroneController {
             System.out.println(ConsoleColors.YELLOW_BOLD_BRIGHT + "WARNING: Battery percentage low (" + droneBattery + "%)!" + ConsoleColors.RESET);
         }
 
-        qrScanner.addListener(qrController);
         qrController = new QRScannerController();
         qrScanner = new QRCodeScanner();
 
+        qrScanner.addListener(qrController);
         flightControllers.add(qrController);
 
         writeFlightController();
@@ -294,8 +294,10 @@ public class DroneController {
 //        return rectangleFilter.findPaperPosition(rectangleFilter.getBiggestQRCode());
 //    }
 
-    public void alignQrCode() {
+    public void alignTarget() {
         Direction qrDirection = Direction.UNKNOWN;
+
+        goToDetectionAltitude();
 
         for (int i = 0; i < 10; i++) {
              qrDirection = getCurrentFlightController().getFlightDirection();
@@ -311,15 +313,22 @@ public class DroneController {
                     cmd.forward(speed).doFor(500);
                     break;
                 case UNKNOWN:
-                    searchForUnknownQrLocation();
+                    searchForLostTarget(2);
                     qrController.resetLastScan();
                     break;
 
             }
 
-            cmd.hover().waitFor(1000);
-
             getCurrentFlightController().resetFlightDirection();
+            cmd.hover().waitFor(2000);
+
+            if (getCurrentFlightController().readyForFlyingThroughRing()) break;
+        }
+
+        if (getCurrentFlightController().readyForFlyingThroughRing()) {
+            cmd.spinLeft(100).doFor(250).hover().waitFor(250);
+            cmd.spinRight(100).doFor(250);
+            cmd.landing();
         }
     }
 
@@ -328,18 +337,18 @@ public class DroneController {
      */
     private void searchForLostTarget(int searchCount) {
         final int FLY_SPEED = speed / 2;
-        final int FLY_TIME = 500;
-        final int WAIT_TIME = 250;
+        final int FLY_TIME = 300;
+        final int WAIT_TIME = 1500;
         final int TEST_COUNT = 3;
 
         for (int i = 0; i < searchCount; i++) {
             cmd.backward(FLY_SPEED).doFor(FLY_TIME).hover().waitFor(WAIT_TIME);
-            if (lostQrWasFound()) return;
+            if (targetFound()) return;
 
             testLeft(FLY_SPEED, FLY_TIME, WAIT_TIME, TEST_COUNT);
-            if (lostQrWasFound()) return;
+            if (targetFound()) return;
             testRight(FLY_SPEED, FLY_TIME, WAIT_TIME, TEST_COUNT);
-            if (lostQrWasFound()) return;
+            if (targetFound()) return;
         }
 
         takeoffOrLand();
@@ -352,7 +361,7 @@ public class DroneController {
             cmd.goLeft(SPEED).doFor(FLY_TIME).hover().waitFor(WAIT_TIME);
             resetFlyCount = i + 1;
 
-            if (lostQrWasFound()) break;
+            if (targetFound()) return;
         }
 
         for (int i = 0; i < resetFlyCount; i++) {
@@ -367,7 +376,7 @@ public class DroneController {
             cmd.goRight(SPEED).doFor(FLY_TIME).hover().waitFor(WAIT_TIME);
             resetFlyCount = i + 1;
 
-            if (lostQrWasFound()) break;
+            if (targetFound()) return;
         }
 
         for (int i = 0; i < resetFlyCount; i++) {
@@ -375,8 +384,12 @@ public class DroneController {
         }
     }
 
-    private boolean lostQrWasFound() {
-        return qrController.getLastScan() != null && getCurrentFlightController().getFlightDirection() != Direction.UNKNOWN;
+    private boolean targetFound() {
+        boolean found = qrController.getLastScan() != null && getCurrentFlightController().getFlightDirection() != Direction.UNKNOWN;
+
+        System.out.println(ConsoleColors.CYAN_BRIGHT + "Found: " + found + ConsoleColors.RESET);
+
+        return found;
     }
 
     private void searchForUnknownQrLocation() {
