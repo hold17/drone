@@ -3,7 +3,10 @@ package dk.localghost.hold17.autonomous_drone.gui;
 import dk.localghost.hold17.autonomous_drone.controller.DroneController;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.CircleFilter;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.FilterHelper;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Direction;
 import dk.localghost.hold17.base.IARDrone;
+import dk.localghost.hold17.base.command.VideoCodec;
+import dk.localghost.hold17.base.utils.ConsoleColors;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
@@ -51,14 +54,23 @@ public class GUIController {
         startRecording();
     }
 
+    private boolean videoWidthHasBeenShown = false;
     @FXML
     private void startRecording() {
         bufferedImage = null;
 //        ardrone.getCommandManager().setVideoChannel(VideoChannel.HORI);
-//        ardrone.getCommandManager().setVideoCodec(VideoCodec.H264_720P);
-//        ardrone.getVideoManager().reinitialize();
+        ardrone.getCommandManager().setVideoCodec(VideoCodec.H264_720P);
+        ardrone.getVideoManager().reinitialize();
 
-        ardrone.getVideoManager().addImageListener(newImage -> bufferedImage = newImage);
+        ardrone.getVideoManager().addImageListener(newImage -> {
+            bufferedImage = newImage;
+            if (bufferedImage != null && !videoWidthHasBeenShown) {
+                videoWidthHasBeenShown = true;
+
+                Direction.CAMERA_WIDTH = bufferedImage.getWidth();
+                System.out.println("Video Width: " + ConsoleColors.YELLOW_BRIGHT + Direction.CAMERA_WIDTH + ConsoleColors.RESET + "px.");
+            }
+        });
 
         TimerTask liveFrame = new TimerTask() {
             @Override
