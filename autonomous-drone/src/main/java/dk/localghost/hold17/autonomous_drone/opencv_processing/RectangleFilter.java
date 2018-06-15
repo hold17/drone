@@ -224,6 +224,11 @@ public class RectangleFilter implements QrTracker {
 
         // convert to HSV
         cvtColor(image, image, Imgproc.COLOR_BGR2HSV);
+        List<Mat> channels = new ArrayList<>();
+        Core.split(image, channels);
+        equalizeHist(channels.get(1), channels.get(1));
+        equalizeHist(channels.get(2), channels.get(2));
+        Core.merge(channels, image);
 
         // filter lower and upper red
         Core.inRange(image, HSV_FILTER_LOWER, HSV_FILTER_UPPER, imgbin);
