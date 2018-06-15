@@ -3,15 +3,14 @@ package dk.localghost.hold17.autonomous_drone.controller;
 import com.google.zxing.Result;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Direction;
 
-public class QRScannerController implements TagListener {
+public class QRScannerController implements TagListener, QrTracker {
 
     private String lastScan = null;
     private Direction qrDirection = Direction.UNKNOWN;
+    private Direction lastKnownQrDirection = Direction.UNKNOWN;
 
     @Override
     public void onTag(Result result, float orientation) {
-        final int CAMERA_HALF_WIDTH = DroneController.cameraWidth / 2;
-
         if (result == null) {
             return;
         }
@@ -19,13 +18,10 @@ public class QRScannerController implements TagListener {
         final double X = result.getResultPoints()[0].getX();
         final double Y = result.getResultPoints()[0].getY();
 
-        // Center = 640
-        if (X < CAMERA_HALF_WIDTH)
-            qrDirection = Direction.LEFT;
-        else if (X > CAMERA_HALF_WIDTH)
-            qrDirection = Direction.RIGHT;
-        else
-            qrDirection = Direction.CENTER;
+        qrDirection = Direction.findXDirection(X);
+
+        if (qrDirection != Direction.UNKNOWN)
+            lastKnownQrDirection = qrDirection;
 
         lastScan = result.getText();
 
@@ -40,11 +36,24 @@ public class QRScannerController implements TagListener {
         lastScan = null;
     }
 
-    public Direction getQrDirection() {
+    @Override
+    public Direction getFlightDirection() {
         return qrDirection;
     }
 
-    public void resetQrDirection() {
+    @Override
+    public Direction getLastKnownDirection() {
+        return lastKnownQrDirection;
+    }
+
+    @Override
+    public void resetFlightDirection() {
         qrDirection = Direction.UNKNOWN;
+        resetLastScan();
+    }
+
+    @Override
+    public boolean readyForFlyingThroughRing() {
+        return false;
     }
 }

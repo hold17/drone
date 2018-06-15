@@ -39,7 +39,7 @@ public class RectangleFilter {
 
     private int imagenumber = 1;
 
-    public FilterHelper filterHelperter;
+    private FilterHelper filterHelper;
 
     public RectangleFilter() {
 
@@ -131,7 +131,7 @@ public class RectangleFilter {
      * @param accuracy double
      * @return Mat
      */
-    public Mat drawRectangles(Mat imgcol, List<MatOfPoint> contours, List<MatOfPoint> externalContours, Mat hierarchy, double accuracy) {
+    private Mat drawRectangles(Mat imgcol, List<MatOfPoint> contours, List<MatOfPoint> externalContours, Mat hierarchy, double accuracy) {
         MatOfPoint2f approx = new MatOfPoint2f();
         MatOfPoint2f matOfPoint2f = new MatOfPoint2f();
 

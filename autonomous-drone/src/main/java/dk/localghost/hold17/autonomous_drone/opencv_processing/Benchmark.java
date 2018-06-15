@@ -4,10 +4,9 @@ import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Shape;
 import org.opencv.core.Mat;
 
 public class Benchmark {
-    private FilterHelper filterHelper;
+    private FilterHelper filterHelper = new FilterHelper();
 
     public Benchmark(Shape shape) {
-        filterHelper = new FilterHelper();
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {

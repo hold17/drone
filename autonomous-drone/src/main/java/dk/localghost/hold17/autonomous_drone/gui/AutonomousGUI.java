@@ -2,8 +2,6 @@ package dk.localghost.hold17.autonomous_drone.gui;
 
 import dk.localghost.hold17.autonomous_drone.controller.DroneController;
 import dk.localghost.hold17.autonomous_drone.controller.KeyboardCommandManager;
-import dk.localghost.hold17.autonomous_drone.controller.QRCodeScanner;
-import dk.localghost.hold17.autonomous_drone.controller.QRScannerController;
 import dk.localghost.hold17.base.ARDrone;
 import dk.localghost.hold17.base.IARDrone;
 import javafx.application.Application;
@@ -23,13 +21,9 @@ public class AutonomousGUI extends Application {
             System.err.println("You must assign an ip address as argument.");
             System.exit(-1);
         }
+
         drone = new ARDrone(args[0]);
         drone.start();
-
-        QRCodeScanner qrScanner = new QRCodeScanner();
-        drone.getVideoManager().addImageListener(qrScanner::imageUpdated);
-        qrScanner.addListener(new QRScannerController());
-
 
         launch(args);
     }
@@ -39,17 +33,15 @@ public class AutonomousGUI extends Application {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("AutonomousGUI.fxml"));
             Pane rootElement = loader.load();
-            Scene scene = new Scene(rootElement, 1020, 720);
+            Scene scene = new Scene(rootElement, 1080, 720);
             primaryStage.setTitle("Autonomous GUI for Hold 17");
             primaryStage.setScene(scene);
-
 
             droneController = new DroneController(drone, SPEED);
             KeyboardCommandManager keyboardManager = new KeyboardCommandManager(droneController);
 
             GUIController controller = loader.getController();
-            controller.init(drone);
-
+            controller.init(drone, droneController);
             primaryStage.show();
 
             primaryStage.setOnCloseRequest(event -> {

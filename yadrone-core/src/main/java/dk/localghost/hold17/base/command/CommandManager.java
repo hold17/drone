@@ -24,6 +24,7 @@ import dk.localghost.hold17.base.exception.IExceptionListener;
 import dk.localghost.hold17.base.manager.AbstractUDPManager;
 import dk.localghost.hold17.base.navdata.CadType;
 import dk.localghost.hold17.base.utils.ARDroneUtils;
+import dk.localghost.hold17.base.utils.ConsoleColors;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -803,8 +804,10 @@ public class CommandManager extends AbstractUDPManager {
     }
 
     private synchronized void sendCommand(ATCommand c) throws InterruptedException, IOException {
+        final String ANSI_BLUE = "\u001B[34m";
         if (!(c instanceof KeepAliveCommand)) {
-            System.out.println("CommandManager: send " + c.getCommandString(seq));
+
+            System.out.println(ConsoleColors.BLUE + "CommandManager: send " + c.getCommandString(seq) + ConsoleColors.RESET);
         }
         String config = "AT*CONFIG_IDS=" + (seq++) + ",\"" + CommandManager.SESSION_ID + "\",\"" + CommandManager.PROFILE_ID + "\",\"" + CommandManager.APPLICATION_ID + "\"" + "\r"; // AT*CONFIG_IDS=5,"aabbccdd","bbccddee","ccddeeff"
         byte[] configPrefix = config.getBytes("ASCII");
