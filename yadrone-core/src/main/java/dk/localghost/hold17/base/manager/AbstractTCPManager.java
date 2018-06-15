@@ -55,6 +55,7 @@ public abstract class AbstractTCPManager extends AbstractManager {
             connectionStateEvent.stateDisconnected();
             if (socket != null) {
                 socket.close();
+                System.out.println("TCP socket closed!");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -62,26 +63,26 @@ public abstract class AbstractTCPManager extends AbstractManager {
     }
 
     protected void ticklePort(int port) {
-        byte[] buf = {0x01, 0x00, 0x00, 0x00};
-        try {
-            if (socket != null) {
+        if (socket != null) {
+            byte[] buf = {0x01, 0x00, 0x00, 0x00};
+            try {
                 OutputStream os = socket.getOutputStream();
                 os.write(buf);
                 connectionStateEvent.stateConnected();
+            } catch (IOException e) {
+                e.printStackTrace();
+                connectionStateEvent.stateDisconnected();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            connectionStateEvent.stateDisconnected();
         }
     }
 
     protected InputStream getInputStream() {
-        try {
-            if (socket != null) {
+        if (socket != null) {
+            try {
                 return socket.getInputStream();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         return null;
     }

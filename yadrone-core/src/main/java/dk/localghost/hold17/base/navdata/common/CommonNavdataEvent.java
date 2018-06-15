@@ -3,10 +3,6 @@ package dk.localghost.hold17.base.navdata.common;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author Formicarufa (Tomas Prochazka)
- * 12. 3. 2016
- */
 public final class CommonNavdataEvent {
     private boolean enabled = false;
     List<CommonNavdataListener> listeners = new ArrayList<CommonNavdataListener>();

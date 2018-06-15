@@ -23,7 +23,7 @@ import dk.localghost.hold17.base.command.ControlMode;
 import dk.localghost.hold17.base.exception.ConfigurationException;
 import dk.localghost.hold17.base.exception.IExceptionListener;
 import dk.localghost.hold17.base.manager.AbstractTCPManager;
-import dk.localghost.hold17.base.utils.ARDroneUtils;
+import dk.localghost.hold17.base.utils.ARDronePorts;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,7 +34,7 @@ import java.net.SocketTimeoutException;
 public class ConfigurationManager extends AbstractTCPManager {
     private IExceptionListener excListener;
 
-    private CommandManager manager = null;
+    private CommandManager manager;
 
     public ConfigurationManager(InetAddress inetaddr, CommandManager manager, IExceptionListener excListener) {
         super(inetaddr);
@@ -45,7 +45,7 @@ public class ConfigurationManager extends AbstractTCPManager {
     @Override
     public void run() {
         try {
-            connect(ARDroneUtils.CONTROL_PORT);
+            connect(ARDronePorts.CONTROL_PORT);
         } catch (Exception exc) {
             exc.printStackTrace();
             excListener.exceptionOccurred(new ConfigurationException(exc));
@@ -58,35 +58,32 @@ public class ConfigurationManager extends AbstractTCPManager {
     private String getControlCommandResult(ControlMode p1, int p2, final ConfigurationListener listener) {
         manager.setCommand(new ControlCommand(p1, p2));
 
-        Thread t = new Thread() {
+        Thread t = new Thread(() -> {
+            try {
 
-            public void run() {
-                try {
-
-                    InputStream inputStream = getInputStream();
-                    // TODO better getInputStream throw IOException to fail
-                    if (inputStream != null) {
-                        byte[] buf = new byte[1024];
-                        int n = 0;
-                        StringBuilder builder = new StringBuilder();
-                        try {
-                            while ((n = inputStream.read(buf)) != -1) {
-                                // output: multiple rows of "Parameter = value"
-                                builder.append(new String(buf, 0, n, "ASCII"));
-                            }
-                        } catch (SocketTimeoutException e) {
-                            // happens if the last byte happens to coincide with the end of the buffer
+                InputStream inputStream = getInputStream();
+                // TODO better getInputStream throw IOException to fail
+                if (inputStream != null) {
+                    byte[] buf = new byte[1024];
+                    int n = 0;
+                    StringBuilder builder = new StringBuilder();
+                    try {
+                        while ((n = inputStream.read(buf)) != -1) {
+                            // output: multiple rows of "Parameter = value"
+                            builder.append(new String(buf, 0, n, "ASCII"));
                         }
-                        String s = builder.toString();
-                        if (listener != null) {
-                            listener.result(s);
-                        }
+                    } catch (SocketTimeoutException e) {
+                        // happens if the last byte happens to coincide with the end of the buffer
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    String s = builder.toString();
+                    if (listener != null) {
+                        listener.result(s);
+                    }
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        };
+        });
         t.start();
         return "";
 

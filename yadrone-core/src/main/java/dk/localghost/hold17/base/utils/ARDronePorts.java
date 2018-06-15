@@ -15,34 +15,11 @@ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PRO
  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package dk.localghost.hold17.base.manager;
+package dk.localghost.hold17.base.utils;
 
-import dk.localghost.hold17.base.connection.ConnectionStateEvent;
-import dk.localghost.hold17.base.connection.ConnectionStateListener;
-
-import java.net.InetAddress;
-
-public abstract class AbstractManager implements Runnable {
-
-    protected InetAddress inetaddr;
-    protected Thread thread = null;
-    protected boolean connected = false;
-    protected ConnectionStateEvent connectionStateEvent = new ConnectionStateEvent();
-
-    public AbstractManager(InetAddress inetaddr) {
-        this.inetaddr = inetaddr;
-    }
-
-    public boolean isConnected() {
-        return connected;
-    }
-
-    public void addConnectionStateListener(ConnectionStateListener l) {
-        connectionStateEvent.addListener(l);
-    }
-
-    public void removeConnectionStateListeners(ConnectionStateListener l) {
-        connectionStateEvent.removeListener(l);
-    }
-
+public class ARDronePorts {
+    public static final int COMMAND_PORT = 5556;
+    public static final int NAV_PORT = 5554;
+    public static final int VIDEO_PORT = 5555;
+    public static final int CONTROL_PORT = 5559;
 }

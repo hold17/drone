@@ -1,12 +1,14 @@
 package dk.localghost.hold17.autonomous_drone.controller;
 
 import dk.localghost.hold17.base.IARDrone;
+import dk.localghost.hold17.base.utils.ConsoleColors;
 import javafx.event.EventHandler;
 import javafx.scene.input.KeyEvent;
 
 public class KeyboardCommandManager implements EventHandler<KeyEvent> {
     private DroneController controller;
     private IARDrone drone;
+    private static final int MANUAL_FLIGHT_SPEED = 30;
 
     public KeyboardCommandManager(DroneController controller) {
         this.controller = controller;
@@ -24,17 +26,17 @@ public class KeyboardCommandManager implements EventHandler<KeyEvent> {
                 controller.LEDSuccess();
                 break;
             case W:
-                drone.forward(); break;
+                drone.getCommandManager().forward(MANUAL_FLIGHT_SPEED); break;
             case S:
-                drone.backward(); break;
+                drone.getCommandManager().backward(MANUAL_FLIGHT_SPEED); break;
             case A:
-                drone.goLeft(); break;
+                drone.getCommandManager().goLeft(MANUAL_FLIGHT_SPEED); break;
             case D:
-                drone.goRight(); break;
+                drone.getCommandManager().goRight(MANUAL_FLIGHT_SPEED); break;
             case Q: case LEFT:
-                drone.getCommandManager().spinLeft(DroneController.getSpeed()); break;
+                drone.getCommandManager().spinLeft(50); break;
             case E: case RIGHT:
-                drone.getCommandManager().spinRight(DroneController.getSpeed()); break;
+                drone.getCommandManager().spinRight(50); break;
             case UP:
                 drone.up(); break;
             case DOWN:
@@ -47,7 +49,7 @@ public class KeyboardCommandManager implements EventHandler<KeyEvent> {
                 break;
             case P:
                 System.out.println("DRONE Altitude: " + controller.getDroneAltitude());
-                System.out.println("DRONE Battery: " + controller.getDroneBattery());
+                System.out.println(ConsoleColors.YELLOW_BOLD_BRIGHT + "DRONE Battery: " + controller.getDroneBattery() + ConsoleColors.RESET);
                 break;
             case M:
                 drone.restart(); break;
@@ -55,8 +57,26 @@ public class KeyboardCommandManager implements EventHandler<KeyEvent> {
                 controller.stop();
                 System.exit(0);
                 break;
+            case Z:
+                drone.getCommandManager().schedule(0, controller::alignTarget);
+                break;
+            case COMMA:
+                controller.goToDetectionAltitude();
+                break;
+            case PERIOD:
+                controller.goToRingAltitude();
+                break;
             case X:
-                controller.bum(); break;
+//                controller.flyThroughRing();
+                drone.getCommandManager().schedule(0, controller::flyThroughRing);
+//                drone.getCommandManager().schedule(0, controller::alignCircle);
+                break;
+            case C:
+                controller.nextFlightController();
+                break;
+            case H:
+                drone.getVideoManager().reinitialize();
+                break;
         }
     }
 }

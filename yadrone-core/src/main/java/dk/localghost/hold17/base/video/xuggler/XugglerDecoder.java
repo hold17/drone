@@ -38,6 +38,7 @@ public class XugglerDecoder implements VideoDecoder {
             IStreamCoder coder = stream.getStreamCoder();
 
             if (coder.getCodecType() == ICodec.Type.CODEC_TYPE_VIDEO) {
+                System.out.println("framerate: " + stream.getFrameRate());
                 videoStreamId = i;
                 videoCoder = coder;
                 break;
@@ -52,6 +53,8 @@ public class XugglerDecoder implements VideoDecoder {
          */
         if (videoCoder.open(null, null) < 0)
             throw new RuntimeException("could not open video decoder for container");
+
+        System.out.println("frame dimensions (WxH): " + videoCoder.getWidth() + "x" + videoCoder.getHeight());
 
         IVideoResampler resampler = null;
         if (videoCoder.getPixelType() != IPixelFormat.Type.BGR24) {
@@ -173,6 +176,9 @@ public class XugglerDecoder implements VideoDecoder {
                             if (listener != null)
                                 listener.imageUpdated(javaImage);
                         }
+//                        else {
+//                            System.out.println("frame incomplete!");
+//                        }
                     } // end of while
                 } catch (Exception exc) {
                     // hopefully nothing really bad (probably failed to decode single video frame)
@@ -185,8 +191,6 @@ public class XugglerDecoder implements VideoDecoder {
                  * This packet isn't part of our video stream, so we just
                  * silently drop it.
                  */
-                do {
-                } while (false);
             }
 
         }

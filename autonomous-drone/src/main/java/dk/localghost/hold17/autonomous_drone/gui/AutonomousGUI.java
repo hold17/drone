@@ -13,7 +13,7 @@ import javafx.stage.Stage;
 
 public class AutonomousGUI extends Application {
     private static IARDrone drone;
-    private final static int SPEED = 20;
+    private final static int SPEED = 80;
     private DroneController droneController;
 
     public static void main(String[] args) {
@@ -21,8 +21,10 @@ public class AutonomousGUI extends Application {
             System.err.println("You must assign an ip address as argument.");
             System.exit(-1);
         }
+
         drone = new ARDrone(args[0]);
         drone.start();
+
         launch(args);
     }
 
@@ -31,17 +33,15 @@ public class AutonomousGUI extends Application {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("AutonomousGUI.fxml"));
             Pane rootElement = loader.load();
-            Scene scene = new Scene(rootElement, 1020, 720);
+            Scene scene = new Scene(rootElement, 1080, 720);
             primaryStage.setTitle("Autonomous GUI for Hold 17");
             primaryStage.setScene(scene);
-
 
             droneController = new DroneController(drone, SPEED);
             KeyboardCommandManager keyboardManager = new KeyboardCommandManager(droneController);
 
             GUIController controller = loader.getController();
-            controller.init(drone);
-
+            controller.init(drone, droneController);
             primaryStage.show();
 
             primaryStage.setOnCloseRequest(event -> {
