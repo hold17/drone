@@ -27,4 +27,9 @@ public interface FlightController {
      * the drone moves.
      */
     void resetFlightDirection();
+
+    /**
+     * @return True if the ring is close enough to fly through. Otherwise false.
+     */
+    boolean readyForFlyingThroughRing();
 }
