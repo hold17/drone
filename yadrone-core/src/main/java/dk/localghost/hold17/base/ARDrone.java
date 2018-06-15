@@ -197,7 +197,7 @@ public class ARDrone implements IARDrone, IExceptionListener {
     public void takeOff() {
         if (commandManager != null) {
 
-            // we send emergency command before we take off which will toggle emergency mode off if the drone is actualy in emergency mode
+            // we send emergency command before we take off which will toggle emergency mode off if the drone is actually in emergency mode
             // contributed by Naushad, see post on https://projects.ardrone.org/boards/1/topics/show/5259 from 30.04.2014
             //commandManager.emergency(); //Formicarufa: Problem is if the drone was not in emergency mode, this toggles it on ;-)
 

@@ -2,7 +2,6 @@ package dk.localghost.hold17.apps.controlcenter;
 
 import dk.localghost.hold17.base.ARDrone;
 
-
 public class YADroneControlCenter {
     private ARDrone ardrone = null;
 

@@ -1,4 +1,3 @@
-
 package dk.localghost.hold17.base.command;
 
 import java.io.UnsupportedEncodingException;

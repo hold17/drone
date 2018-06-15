@@ -86,6 +86,7 @@ public class CCFrame extends JFrame {
             public void windowClosing(WindowEvent e) {
                 pluginManager.deactivate();
                 drone.stop();
+                drone.disconnect();
                 System.exit(0);
             }
 

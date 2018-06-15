@@ -18,10 +18,7 @@ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PRO
 package dk.localghost.hold17.base.manager;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
+import java.net.*;
 
 public abstract class AbstractUDPManager extends AbstractManager {
 
@@ -52,6 +49,7 @@ public abstract class AbstractUDPManager extends AbstractManager {
     public void close() {
         if (socket != null) {
             socket.close();
+            System.out.println("UDP socket closed!");
         }
         connected = false;
         connectionStateEvent.stateDisconnected();
@@ -67,16 +65,15 @@ public abstract class AbstractUDPManager extends AbstractManager {
     }
 
     protected void ticklePort(int port) {
-        byte[] buf = {0x01, 0x00, 0x00, 0x00};
-        DatagramPacket packet = new DatagramPacket(buf, buf.length, inetaddr, port);
-        try {
-            if (socket != null) {
+        if (socket != null) {
+            byte[] buf = {0x01, 0x00, 0x00, 0x00};
+            DatagramPacket packet = new DatagramPacket(buf, buf.length, inetaddr, port);
+            try {
                 socket.send(packet);
+            } catch (IOException e) {
+                e.printStackTrace();
+                connectionStateEvent.stateDisconnected();
             }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            connectionStateEvent.stateDisconnected();
         }
     }
 

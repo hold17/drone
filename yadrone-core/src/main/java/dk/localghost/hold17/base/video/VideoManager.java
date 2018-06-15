@@ -20,7 +20,7 @@ package dk.localghost.hold17.base.video;
 import dk.localghost.hold17.base.exception.IExceptionListener;
 import dk.localghost.hold17.base.exception.VideoException;
 import dk.localghost.hold17.base.manager.AbstractTCPManager;
-import dk.localghost.hold17.base.utils.ARDroneUtils;
+import dk.localghost.hold17.base.utils.ARDronePorts;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -84,9 +84,9 @@ public class VideoManager extends AbstractTCPManager implements ImageListener {
             return;
         try {
             System.out.println("VideoManager: connect ");
-            connect(ARDroneUtils.VIDEO_PORT);
+            connect(ARDronePorts.VIDEO_PORT);
             System.out.println("VideoManager: tickle ");
-            ticklePort(ARDroneUtils.VIDEO_PORT);
+            ticklePort(ARDronePorts.VIDEO_PORT);
             // manager.setVideoBitrateControl(VideoBitRateMode.DISABLED); //
             // bitrate set to maximum
             System.out.println("VideoManager: decode ");
