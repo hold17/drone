@@ -17,7 +17,7 @@ public class Benchmark {
 
     private void benchmark(Shape s) {
         int counter = 0;
-        Mat img = filterHelper.openFile("13.jpg");
+        Mat img = filterHelper.openFile("2.jpg");
         long startTime;
 
         if (s == Shape.CIRCLE) {
@@ -33,7 +33,7 @@ public class Benchmark {
             RectangleFilter rectangleFilter = new RectangleFilter();
             startTime = System.currentTimeMillis();
             while (10000 > System.currentTimeMillis() - startTime) {
-                rectangleFilter.filterImage(filterHelper.matToBufferedImage(img));
+                rectangleFilter.filterImage(img);
                 counter++;
             }
             System.out.println("Total time: " + (System.currentTimeMillis() - startTime) + " ms.");
@@ -44,7 +44,7 @@ public class Benchmark {
     }
 
     public static void main(String[] args) {
-        new Benchmark(Shape.CIRCLE);
+        new Benchmark(Shape.RECTANGLE);
     }
 
 }

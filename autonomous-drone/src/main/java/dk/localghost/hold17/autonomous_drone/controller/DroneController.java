@@ -57,6 +57,7 @@ public class DroneController {
 
         qrController = new QRScannerController();
         qrScanner = new QRCodeScanner();
+        qrScanner.addListener(qrController);
 
         qrScanner.addListener(qrController);
         flightControllers.add(qrController);
