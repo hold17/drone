@@ -24,8 +24,6 @@
     <modules>
         <module>yadrone-core</module>
         <module>yadrone-controlcenter</module>
-        <module>yadrone-paperchase</module>
-        <module>yadrone-tutorial</module>
         <module>autonomous-drone</module>
     </modules>
 
@@ -83,7 +81,7 @@
             <dependency>
                 <groupId>org.reflections</groupId>
                 <artifactId>reflections</artifactId>
-                <version>0.9.11</version>
+                <version>0.9.9-RC2</version>
             </dependency>
             <!--openCV-->
             <dependency>

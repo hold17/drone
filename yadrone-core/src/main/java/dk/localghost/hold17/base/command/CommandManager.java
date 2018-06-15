@@ -23,8 +23,7 @@ import dk.localghost.hold17.base.exception.CommandException;
 import dk.localghost.hold17.base.exception.IExceptionListener;
 import dk.localghost.hold17.base.manager.AbstractUDPManager;
 import dk.localghost.hold17.base.navdata.CadType;
-import dk.localghost.hold17.base.utils.ARDroneUtils;
-import dk.localghost.hold17.base.utils.ConsoleColors;
+import dk.localghost.hold17.base.utils.ARDronePorts;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -228,6 +227,7 @@ public class CommandManager extends AbstractUDPManager {
         cQueue.add(new HoverCommand());
         return this;
     }
+
 	public CommandManager hoverSticky() {
 		cQueue.add(new HoverCommand.StickyHover());
 		return this;
@@ -359,11 +359,6 @@ public class CommandManager extends AbstractUDPManager {
         cQueue.add(new ConfigureCommand("detect:enemy_without_shell", (b ? "1" : "0")));
         return this;
     }
-
-//	Only for ARDrone 1.0 with legacy groundstripe detection.
-//	public void setGroundStripeColors(GroundStripeColor c) {
-//		cQueue.add(new ConfigureCommand("detect:groundstripe_colors", c.getValue()));
-//	}
 
     /**
      * The color of the hulls you want to detect.
@@ -506,7 +501,6 @@ public class CommandManager extends AbstractUDPManager {
      */
     public CommandManager setMaxAltitude(Location l, int altitude) {
         altitude = limit(altitude, 0, 100000);
-        System.out.println("CommandManager: setMaxAltitude: " + altitude + " mm");
         String command = "control:" + l.getCommandPrefix() + "altitude_max";
         cQueue.add(new ConfigureCommand(command, altitude));
         return this;
@@ -723,7 +717,8 @@ public class CommandManager extends AbstractUDPManager {
      */
     @Override
     public synchronized void run() {
-        connect(ARDroneUtils.PORT);
+        System.out.println("CommandManager: connect ");
+        connect(ARDronePorts.COMMAND_PORT);
         initARDrone();
         ATCommand c;
         ATCommand cs = null;
@@ -732,7 +727,7 @@ public class CommandManager extends AbstractUDPManager {
         long t0 = 0;
         while (!doStop) {
             try {
-                long dt; //dt seems to be: time elapsed since the last sticky command: i.e. a command which shall be send repeatedly.
+                long dt; //dt seems to be time elapsed since the last sticky command: i.e. a command which shall be send repeatedly.
                 if (cs == null) {
                     // we need to reset the watchdog within 50ms
                     dt = 40;
@@ -791,10 +786,10 @@ public class CommandManager extends AbstractUDPManager {
     }
 
     private void initARDrone() {
-        setMulticonfiguration();
         // pmode parameter and first misc parameter are related
         sendPMode(2);
         sendMisc(2, 20, 2000, 3000);
+        setMulticonfiguration();
         freeze();
         landing();
         setOutdoor(false, false);
@@ -803,22 +798,27 @@ public class CommandManager extends AbstractUDPManager {
         setMaxEulerAngle(0.25f);
     }
 
-    private synchronized void sendCommand(ATCommand c) throws InterruptedException, IOException {
-        final String ANSI_BLUE = "\u001B[34m";
-        if (!(c instanceof KeepAliveCommand)) {
+    private synchronized void sendCommand(ATCommand c) throws IOException {
+        byte[] buffer;
 
-            System.out.println(ConsoleColors.BLUE + "CommandManager: send " + c.getCommandString(seq) + ConsoleColors.RESET);
+        // since MultiConfig is enabled by default, AT*CONFIG_IDS must be sent before AT*CONFIG
+        if (c instanceof ConfigureCommand) {
+            String config = "AT*CONFIG_IDS=" + (seq++) + ",\"" + CommandManager.SESSION_ID + "\",\"" + CommandManager.PROFILE_ID + "\",\"" + CommandManager.APPLICATION_ID + "\"" + "\r"; // AT*CONFIG_IDS=5,"aabbccdd","bbccddee","ccddeeff"
+//            System.out.println(ConsoleColors.BLUE + "CommandManager: " + "[seq #"+(seq-1)+"] " + config + ConsoleColors.RESET);
+            byte[] configPrefix = config.getBytes("ASCII");
+//            System.out.println(ConsoleColors.BLUE + "CommandManager: " + "[seq #"+seq+"] " + c.getCommandString(seq) + ConsoleColors.RESET);
+            byte[] command = c.getPacket(seq++);
+            buffer = new byte[configPrefix.length + command.length];
+            System.arraycopy(configPrefix, 0, buffer, 0, configPrefix.length);
+            System.arraycopy(command, 0, buffer, configPrefix.length, command.length);
+        } else {
+//            if (!(c instanceof KeepAliveCommand)) {
+//                System.out.println(ConsoleColors.BLUE + "CommandManager: " + "[seq #"+seq+"] " + c.getCommandString(seq) + ConsoleColors.RESET);
+//            }
+            buffer = c.getPacket(seq++);
         }
-        String config = "AT*CONFIG_IDS=" + (seq++) + ",\"" + CommandManager.SESSION_ID + "\",\"" + CommandManager.PROFILE_ID + "\",\"" + CommandManager.APPLICATION_ID + "\"" + "\r"; // AT*CONFIG_IDS=5,"aabbccdd","bbccddee","ccddeeff"
-        byte[] configPrefix = config.getBytes("ASCII");
 
-        byte[] command = c.getPacket(seq++);
-
-        byte[] buffer = new byte[configPrefix.length + command.length];
-        System.arraycopy(configPrefix, 0, buffer, 0, configPrefix.length);
-        System.arraycopy(command, 0, buffer, configPrefix.length, command.length);
-
-        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, inetaddr, ARDroneUtils.PORT);
+        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, inetaddr, ARDronePorts.COMMAND_PORT);
         socket.send(packet);
         commandSentEvent.invoke(c);
     }

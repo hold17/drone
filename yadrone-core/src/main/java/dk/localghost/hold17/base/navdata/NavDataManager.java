@@ -25,7 +25,7 @@ import dk.localghost.hold17.base.navdata.common.CommonNavdata;
 import dk.localghost.hold17.base.navdata.common.CommonNavdataEvent;
 import dk.localghost.hold17.base.navdata.common.CommonNavdataListener;
 import dk.localghost.hold17.base.navdata.common.NavdataCollector;
-import dk.localghost.hold17.base.utils.ARDroneUtils;
+import dk.localghost.hold17.base.utils.ARDronePorts;
 
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -435,20 +435,21 @@ public class NavDataManager extends AbstractUDPManager {
 
     @Override
     public synchronized void run() {
-        connect(ARDroneUtils.NAV_PORT);
+        System.out.println("NavDataManager: connect");
+        connect(ARDronePorts.NAV_PORT);
         if (!connected) {
             connectionStateEvent.stateDisconnected();
             return;
         }
-        ticklePort(ARDroneUtils.NAV_PORT);
+        System.out.println("NavDataManager: tickle");
+        ticklePort(ARDronePorts.NAV_PORT);
         boolean bootstrapping = true;
         boolean controlAck = false;
         DatagramPacket packet = new DatagramPacket(new byte[MAX_PACKET_SIZE], MAX_PACKET_SIZE);
         while (!doStop) {
             try {
-
                 socket.receive(packet);
-                // ticklePort(ARDroneUtils.NAV_PORT);
+                // ticklePort(ARDronePorts.NAV_PORT);
                 ByteBuffer buffer = ByteBuffer.wrap(packet.getData(), 0, packet.getLength());
                 connectionStateEvent.stateConnected();
                 DroneState s = parse(buffer);
@@ -491,7 +492,6 @@ public class NavDataManager extends AbstractUDPManager {
                 System.err.println("Navdata reception timeout");
                 excListener.exceptionOccurred(new dk.localghost.hold17.base.exception.NavDataException(t));
                 connectionStateEvent.stateDisconnected();
-                this.ticklePort(ARDroneUtils.NAV_PORT);
             } catch (Throwable t) {
                 // continue whatever goes wrong
                 t.printStackTrace();

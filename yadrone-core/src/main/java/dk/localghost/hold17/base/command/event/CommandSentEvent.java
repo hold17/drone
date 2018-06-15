@@ -6,10 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * @author Formicarufa (Tomas Prochazka)
- * 12. 3. 2016
- */
 public class CommandSentEvent {
     List<CommandSentListener> listeners = Collections.synchronizedList(new ArrayList<CommandSentListener>());
 

@@ -4,7 +4,6 @@ package dk.localghost.hold17.base.navdata.common;
  * I have used a similar format of navdata to that which is used by the ardone_autonomy
  * project.
  *
- * @author Formicarufa (Tomas Prochazka) 11. 3. 2016
  * @see <a href =
  * "http://docs.ros.org/indigo/api/ardrone_autonomy/html/msg/Navdata.html">
  * Specification of the ROS navdata message.</a>

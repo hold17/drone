@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * @author Formicarufa (Tomas Prochazka) 19. 3. 2016
- */
 public class ConnectionStateEvent {
     private ConnectionState currentState = ConnectionState.Disconnected;
     private List<ConnectionStateListener> listeners = Collections
