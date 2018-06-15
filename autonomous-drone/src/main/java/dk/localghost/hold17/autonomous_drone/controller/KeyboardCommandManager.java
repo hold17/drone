@@ -65,7 +65,7 @@ public class KeyboardCommandManager implements EventHandler<KeyEvent> {
                 break;
             case Z:
 //                controller.bum();
-                drone.getCommandManager().schedule(0, controller::alignCircle);
+//                drone.getCommandManager().schedule(0, controller::alignCircle);
                 break;
         }
     }
