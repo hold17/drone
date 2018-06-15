@@ -175,9 +175,10 @@ public class XugglerDecoder implements VideoDecoder {
                             // and display it on the Java Swing window
                             if (listener != null)
                                 listener.imageUpdated(javaImage);
-                        } else {
-                            System.out.println("frame incomplete!");
                         }
+//                        else {
+//                            System.out.println("frame incomplete!");
+//                        }
                     } // end of while
                 } catch (Exception exc) {
                     // hopefully nothing really bad (probably failed to decode single video frame)
