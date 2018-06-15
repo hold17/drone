@@ -29,6 +29,8 @@ public class RectangleFilter implements QrTracker {
     //color filter
     private Scalar HSV_FILTER_LOWER = new Scalar(0, 0, 0);
     private Scalar HSV_FILTER_UPPER = new Scalar(179, 100, 255);
+    private double threshold = 100;
+    private double upperThresh = 200;
 
     private List<Integer> parents = new ArrayList<>();
 
@@ -77,7 +79,7 @@ public class RectangleFilter implements QrTracker {
 
                 /* If the rect area is over 3000 we want to draw it
                  * Might need to add more requirements */
-                if (rectArea > 300 && rectArea < 50000  && squareThreshold > 0.7 && squareThreshold < 1.3) {
+                if (rectArea > 1000 && rectArea < 50000  && squareThreshold > 0.7 && squareThreshold < 1.3) {
 //                    System.out.print("Rectangle detected. Coordinates: " + "(" + centerX + ", " + centerY + ") ");
 //                    System.out.print("Width: " + rect.width + ", Height: " + rect.height);
                     int index = contours.indexOf(contour);
@@ -220,18 +222,21 @@ public class RectangleFilter implements QrTracker {
      */
     private Mat detectWhiteMat(Mat image) {
         Mat imgbin = new Mat();
+        GaussianBlur(image, image, new Size(3, 3), 2.0, 2.0);
+        cvtColor(image, imgbin, COLOR_RGB2GRAY);
+        threshold(imgbin, imgbin, threshold, upperThresh, THRESH_BINARY);
 //        Core.inRange(image, new Scalar(150, 150, 150), new Scalar(255, 255, 255), imgbin);
 
         // convert to HSV
-        cvtColor(image, image, Imgproc.COLOR_BGR2HSV);
-        List<Mat> channels = new ArrayList<>();
-        Core.split(image, channels);
-        equalizeHist(channels.get(1), channels.get(1));
-        equalizeHist(channels.get(2), channels.get(2));
-        Core.merge(channels, image);
+//        cvtColor(image, image, Imgproc.COLOR_BGR2HSV);
+//        List<Mat> channels = new ArrayList<>();
+//        Core.split(image, channels);
+//        equalizeHist(channels.get(1), channels.get(1));
+//        equalizeHist(channels.get(2), channels.get(2));
+//        Core.merge(channels, image);
 
         // filter lower and upper red
-        Core.inRange(image, HSV_FILTER_LOWER, HSV_FILTER_UPPER, imgbin);
+//        Core.inRange(image, HSV_FILTER_LOWER, HSV_FILTER_UPPER, imgbin);
 
         return imgbin;
     }
@@ -379,5 +384,21 @@ public class RectangleFilter implements QrTracker {
 
     public void setFilter1UpperVal(double v2) {
         HSV_FILTER_UPPER.set(new double[]{HSV_FILTER_UPPER.val[0], HSV_FILTER_UPPER.val[1], v2});
+    }
+
+    public double getThreshold() {
+        return threshold;
+    }
+
+    public void setThreshold(double threshold) {
+        this.threshold = threshold;
+    }
+
+    public double getUpperThresh() {
+        return upperThresh;
+    }
+
+    public void setUpperThresh(double upperThresh) {
+        this.upperThresh = upperThresh;
     }
 }

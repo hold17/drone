@@ -45,7 +45,7 @@ public class DroneController {
         drone.start();
 
         drone.setMinAltitude(MIN_ALTITUDE); // TODO Doesn't work..
-        drone.setMaxAltitude(4000);
+        drone.setMaxAltitude(1600);
         initializeListeners();
 
         System.out.println(ConsoleColors.BLUE_BRIGHT + "CURRENT BATTERY: " + droneBattery + "%" + ConsoleColors.RESET);
@@ -160,7 +160,7 @@ public class DroneController {
         goToRingAltitude();
 
         // WAIT
-        cmd.hover().doFor(100);
+//        cmd.hover().doFor(100);
 
         // FORWARD
         System.out.println("          FLYING FORWARD");
@@ -285,10 +285,10 @@ public class DroneController {
 
             switch (targetDirection) {
                 case LEFT:
-                    cmd.goLeft(speed).doFor(250);
+                    cmd.goLeft(speed).doFor(300);
                     break;
                 case RIGHT:
-                    cmd.goRight(speed).doFor(250);
+                    cmd.goRight(speed).doFor(300);
                     break;
                 case CENTER:
                     cmd.forward(speed).doFor(350);
