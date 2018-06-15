@@ -39,6 +39,8 @@ public class RectangleFilter implements QrTracker {
     private Direction qrDirection = Direction.UNKNOWN;
     private Direction lastKnownDirection = Direction.UNKNOWN;
 
+    private boolean readyToFlyThroughRing = false;
+
     public RectangleFilter() {}
 
     /*** Use contours to detect vertices,
@@ -158,17 +160,24 @@ public class RectangleFilter implements QrTracker {
 
         int avgX = 0;
         int avgY = 0;
+        int avgArea = 0;
         for (Rect rect : idenSquares) {
             Imgproc.rectangle(imgcol, rect.br(), rect.tl(), RED, 3, 8, 0);
             avgX += (rect.x + rect.width / 2);
             avgY += (rect.y + rect.height / 2);
+            avgArea += rect.area();
         }
 
         if (!idenSquares.isEmpty() && idenSquares.size() >= 2) {
             avgX = avgX / idenSquares.size();
             avgY = avgY / idenSquares.size();
+            avgArea = avgArea / idenSquares.size();
             Point avg = new Point(avgX, avgY);
             Imgproc.circle(imgcol, avg, 15, NEON_GREEN, Core.FILLED);
+            if(avgArea > 10000) {
+                readyToFlyThroughRing = true;
+            }
+
         }
 
         qrDirection = Direction.findXDirection(avgX);
@@ -191,6 +200,7 @@ public class RectangleFilter implements QrTracker {
         rectangles.clear();
         idenSquares.clear();
         parents.clear();
+        readyToFlyThroughRing = false;
 
         Mat imgbin = detectWhiteMat(originalImage);
         Mat imgcol = new Mat();
@@ -259,7 +269,7 @@ public class RectangleFilter implements QrTracker {
 
     @Override
     public boolean readyForFlyingThroughRing() {
-        return false;
+        return readyToFlyThroughRing;
     }
 
 //    public int averageArea(List<Rect> rects) {
