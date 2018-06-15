@@ -3,7 +3,9 @@ package dk.localghost.hold17.autonomous_drone.gui;
 import dk.localghost.hold17.autonomous_drone.controller.DroneController;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.CircleFilter;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.FilterHelper;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.RectangleFilter;
 import dk.localghost.hold17.base.IARDrone;
+import dk.localghost.hold17.base.command.VideoCodec;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
@@ -22,7 +24,7 @@ public class GUIController {
     private DroneController droneController;
     private static FilterHelper filterHelper = new FilterHelper();
     private CircleFilter circleFilter;
-//    private static RectangleFilter rectangleFilter = new RectangleFilter();
+    private RectangleFilter rectangleFilter = new RectangleFilter();
     private Timer timer;
     private BufferedImage bufferedImage;
 
@@ -46,7 +48,7 @@ public class GUIController {
     void init(IARDrone drone, DroneController droneController) {
         this.ardrone = drone;
         this.droneController = droneController;
-        this. circleFilter = droneController.getCircleFilter();
+        this.circleFilter = droneController.getCircleFilter();
         initSliders();
         startRecording();
     }
@@ -55,8 +57,8 @@ public class GUIController {
     private void startRecording() {
         bufferedImage = null;
 //        ardrone.getCommandManager().setVideoChannel(VideoChannel.HORI);
-//        ardrone.getCommandManager().setVideoCodec(VideoCodec.H264_720P);
-//        ardrone.getVideoManager().reinitialize();
+        ardrone.getCommandManager().setVideoCodec(VideoCodec.H264_720P);
+        ardrone.getVideoManager().reinitialize();
 
         ardrone.getVideoManager().addImageListener(newImage -> bufferedImage = newImage);
 
@@ -84,8 +86,9 @@ public class GUIController {
             public void run() {
                 if (bufferedImage != null) {
                     droneController.updateQR(bufferedImage);
-                    final Mat mat = circleFilter.findCircleAndDraw(filterHelper.bufferedImageToMat(bufferedImage));
+//                    final Mat mat = circleFilter.findCircleAndDraw(filterHelper.bufferedImageToMat(bufferedImage));
 //                    droneController.alignCircle();
+                    final Mat mat = rectangleFilter.filterImage(filterHelper.bufferedImageToMat(bufferedImage));
                     final BufferedImage bf = filterHelper.matToBufferedImage(mat);
                     final Image imageFiltered = SwingFXUtils.toFXImage(bf, null);
                     Platform.runLater(() -> {
@@ -97,27 +100,38 @@ public class GUIController {
             }
         };
 
+        TimerTask QRupdater = new TimerTask() {
+            @Override
+            public void run() {
+                if (bufferedImage != null) {
+                    droneController.updateQR(bufferedImage);
+                }
+            }
+        };
+
         this.timer = new Timer();
         // update imageView with new image every 33ms (30 fps)
         this.timer.schedule(liveFrame, 0, 33);
         // update imageView with new image every 66ms (approx. 15 fps)
-        this.timer.schedule(processedFrame, 0, 66);
+        this.timer.schedule(processedFrame, 0, 33);
+
+        this.timer.schedule(QRupdater, 0, 66);
     }
 
     private void initSliders() {
-        h1_slider.setValue(circleFilter.getFilter1LowerHue());
-        h1_text.textProperty().setValue(String.valueOf(circleFilter.getFilter1LowerHue()));
-        s1_slider.setValue(circleFilter.getFilter1LowerSat());
-        s1_text.textProperty().setValue(String.valueOf(circleFilter.getFilter1LowerSat()));
-        v1_slider.setValue(circleFilter.getFilter1LowerVal());
-        v1_text.textProperty().setValue(String.valueOf(circleFilter.getFilter1LowerVal()));
+        h1_slider.setValue(rectangleFilter.getFilter1LowerHue());
+        h1_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1LowerHue()));
+        s1_slider.setValue(rectangleFilter.getFilter1LowerSat());
+        s1_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1LowerSat()));
+        v1_slider.setValue(rectangleFilter.getFilter1LowerVal());
+        v1_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1LowerVal()));
 
-        h2_slider.setValue(circleFilter.getFilter1UpperHue());
-        h2_text.textProperty().setValue(String.valueOf(circleFilter.getFilter1UpperHue()));
-        s2_slider.setValue(circleFilter.getFilter1UpperSat());
-        s2_text.textProperty().setValue(String.valueOf(circleFilter.getFilter1UpperSat()));
-        v2_slider.setValue(circleFilter.getFilter1UpperVal());
-        v2_text.textProperty().setValue(String.valueOf(circleFilter.getFilter1UpperVal()));
+        h2_slider.setValue(rectangleFilter.getFilter1UpperHue());
+        h2_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1UpperHue()));
+        s2_slider.setValue(rectangleFilter.getFilter1UpperSat());
+        s2_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1UpperSat()));
+        v2_slider.setValue(rectangleFilter.getFilter1UpperVal());
+        v2_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1UpperVal()));
         
         h3_slider.setValue(circleFilter.getFilter2LowerHue());
         h3_text.textProperty().setValue(String.valueOf(circleFilter.getFilter2LowerHue()));
@@ -143,43 +157,43 @@ public class GUIController {
     @FXML
     public void h1SliderUpdate() {
         final double h1_val = h1_slider.getValue();
-        circleFilter.setFilter1LowerHue(h1_val);
-        h1_text.textProperty().setValue(String.valueOf(circleFilter.getFilter1LowerHue()));
+        rectangleFilter.setFilter1LowerHue(h1_val);
+        h1_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1LowerHue()));
     }
 
     @FXML
     public void s1SliderUpdate() {
         final double s1_val = s1_slider.getValue();
-        circleFilter.setFilter1LowerSat(s1_val);
-        s1_text.textProperty().setValue(String.valueOf(circleFilter.getFilter1LowerSat()));
+        rectangleFilter.setFilter1LowerSat(s1_val);
+        s1_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1LowerSat()));
     }
 
     @FXML
     public void v1SliderUpdate() {
         final double v1_val = v1_slider.getValue();
-        circleFilter.setFilter1LowerVal(v1_val);
-        v1_text.textProperty().setValue(String.valueOf(circleFilter.getFilter1LowerVal()));
+        rectangleFilter.setFilter1LowerVal(v1_val);
+        v1_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1LowerVal()));
     }
 
     @FXML
     public void h2SliderUpdate() {
         final double h2_val = h2_slider.getValue();
-        circleFilter.setFilter1UpperHue(h2_val);
-        h2_text.textProperty().setValue(String.valueOf(circleFilter.getFilter1UpperHue()));
+        rectangleFilter.setFilter1UpperHue(h2_val);
+        h2_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1UpperHue()));
     }
 
     @FXML
     public void s2SliderUpdate() {
         final double s2_val = s2_slider.getValue();
-        circleFilter.setFilter1UpperSat(s2_val);
-        s2_text.textProperty().setValue(String.valueOf(circleFilter.getFilter1UpperSat()));
+        rectangleFilter.setFilter1UpperSat(s2_val);
+        s2_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1UpperSat()));
     }
 
     @FXML
     public void v2SliderUpdate() {
         final double v2_val = v2_slider.getValue();
-        circleFilter.setFilter1UpperVal(v2_val);
-        v2_text.textProperty().setValue(String.valueOf(circleFilter.getFilter1UpperVal()));
+        rectangleFilter.setFilter1UpperVal(v2_val);
+        v2_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1UpperVal()));
     }
 
     @FXML
