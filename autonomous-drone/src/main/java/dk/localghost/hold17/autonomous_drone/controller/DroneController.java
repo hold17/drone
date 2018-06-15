@@ -148,9 +148,9 @@ public class DroneController {
      * Autonomous flight: up, forward, down
      */
     public void flyThroughRing() {
-        cmd.hover().doFor(250);
-        goToDetectionAltitude();
-        cmd.hover().doFor(250);
+//        cmd.hover().doFor(250);
+//        goToDetectionAltitude();
+//        cmd.hover().doFor(250);
         // Change this value to change the distance to fly when flying through rings
         final int FORWARD_TIME = 1000;
 
@@ -369,9 +369,9 @@ public class DroneController {
                 testRight(FLY_SPEED, FLY_TIME, WAIT_TIME, TEST_COUNT);
                 if (targetFound(fc)) return;
             }
-
-            takeoffOrLand();
         }
+
+        takeoffOrLand();
     }
 
     private void testLeft(final int SPEED, final int FLY_TIME, final int WAIT_TIME, final int COUNT) {
