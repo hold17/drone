@@ -203,18 +203,30 @@ public class DroneController {
      * @param altitude  the altitude to specify
      */
     private void goToAltitude(int altitude) {
-        if (droneAltitude < MAX_ALTITUDE) {
+        if (droneAltitude < altitude) {
             while(droneAltitude < altitude) {
-                cmd.up(speed / 2).doFor(250);
+                cmd.up(30).doFor(30);
             }
         } else {
             while(droneAltitude > altitude) {
-                cmd.down(speed / 2).doFor(250);
+                cmd.down(30).doFor(30);
             }
             while(droneAltitude < altitude) {
-                cmd.up(speed / 4).doFor(100);
+                cmd.up(30).doFor(30);
             }
         }
+    }
+
+    public void rotateYaw_p00() {
+        cmd.setLedsAnimation(LEDAnimation.RED_SNAKE, 6, 5);
+        cmd.takeOff().doFor(6000);
+        goToDetectionAltitude();
+        cmd.forward(20).doFor(1000);
+        cmd.hover().waitFor(500);
+        cmd.spinLeft(40).doFor(750);
+        cmd.hover().waitFor(250);
+        cmd.forward(speed).doFor(850).hover();
+        alignTarget();
     }
 
 
@@ -288,6 +300,7 @@ public class DroneController {
         Direction targetDirection = Direction.UNKNOWN;
 
         goToDetectionAltitude();
+//        goToRingAltitude();
 
         for (int i = 0; i < 25; i++) {
              targetDirection = getCurrentFlightController().getFlightDirection();
@@ -312,6 +325,9 @@ public class DroneController {
                     break;
                 case UNKNOWN:
                     flyToLastKnownDirection();
+                    if (targetFound(getCurrentFlightController())) break;
+                    cmd.hover().waitFor(3000);
+                    if (targetFound(getCurrentFlightController())) break;
                     searchForLostTarget(2);
                     qrController.resetLastScan();
                     break;
@@ -353,20 +369,25 @@ public class DroneController {
      * @param searchCount  how many iterations the search algorithm should execute
      */
     private void searchForLostTarget(int searchCount) {
-        final int FLY_SPEED = speed / 2;
+        final int FLY_SPEED = (speed / 2) - 20;
         final int FLY_TIME = 300;
         final int WAIT_TIME = 2500;
-        final int TEST_COUNT = 3;
+        final int TEST_COUNT = 1;
 
         for (FlightController fc : flightControllers) {
             for (int i = 0; i < searchCount; i++) {
                 cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 1);
-                cmd.backward(FLY_SPEED).doFor(FLY_TIME).hover().waitFor(WAIT_TIME);
+                testRight(FLY_SPEED, FLY_TIME, WAIT_TIME, TEST_COUNT);
                 if (targetFound(fc)) return;
 
+                cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 1);
                 testLeft(FLY_SPEED, FLY_TIME, WAIT_TIME, TEST_COUNT);
                 if (targetFound(fc)) return;
-                testRight(FLY_SPEED, FLY_TIME, WAIT_TIME, TEST_COUNT);
+
+
+
+                cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 1);
+                cmd.forward(FLY_SPEED).doFor(FLY_TIME).hover().waitFor(WAIT_TIME);
                 if (targetFound(fc)) return;
             }
         }
@@ -389,7 +410,8 @@ public class DroneController {
         }
     }
 
-    private void testRight(final int SPEED, final int FLY_TIME, final int WAIT_TIME, final int COUNT) {
+    private void testRight(final int SPEED, int FLY_TIME, final int WAIT_TIME, final int COUNT) {
+        FLY_TIME += 100;
         int resetFlyCount = 0;
 
         for (int i = 0; i < COUNT; i++) {
