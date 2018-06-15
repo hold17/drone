@@ -19,13 +19,19 @@
 package dk.localghost.hold17.base.video;
 
 import io.humble.video.*;
+import io.humble.video.Container;
 import io.humble.video.awt.MediaPictureConverter;
 import io.humble.video.awt.MediaPictureConverterFactory;
 import io.humble.video.customio.HumbleIO;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 public class HumbleDecoder implements VideoDecoder {
     private ImageListener listener;
@@ -46,7 +52,9 @@ public class HumbleDecoder implements VideoDecoder {
         /*
          * Open the demuxer with the filename passed on.
          */
+//        demuxer.setFlag(Demuxer.Flag.FLA, true);
         demuxer.open(HumbleIO.map(is), DemuxerFormat.findFormat("h264"), false, true, null, null);
+
 
         /*
          * Query how many streams the call to open found
@@ -78,7 +86,45 @@ public class HumbleDecoder implements VideoDecoder {
          * Now we have found the video stream in this file.  Let's open up our decoder so it can
          * do work.
          */
-        videoDecoder.open(null, null);
+        KeyValueBag keyValueBag = KeyValueBag.make();
+
+//        keyValueBag.setValue("minrate", "5000");
+//        keyValueBag.setValue("maxrate", "10000");
+
+//        keyValueBag.setValue("skip_frame", "0");
+//        keyValueBag.setValue("bug", "1");
+//        keyValueBag.setValue("skip_idct", "0");
+//        keyValueBag.setValue("ec", "2");
+//        keyValueBag.setValue("ec", "1");
+//        keyValueBag.setValue("err_detect", "1");
+
+//        videoDecoder.setFlag(Coder.Flag.FLAG_BITEXACT, true);
+//        videoDecoder.setFlag(Coder.Flag.FLAG_INPUT_PRESERVED, true);
+//        videoDecoder.setFlag(Coder.Flag.FLAG_NORMALIZE_AQP, true);
+//        videoDecoder.setFlag(Coder.Flag.FLAG_LOOP_FILTER, true);
+//        videoDecoder.setFlag(Coder.Flag.FLAG_4MV, true);
+//        videoDecoder.setFlag(Coder.Flag.FLAG_INPUT_PRESERVED, true);
+//        videoDecoder.setFlag(Coder.Flag.FLAG_BITEXACT, true);
+//        videoDecoder.setFlag(Coder.Flag.FLAG_AC_PRED, true);
+//        videoDecoder.setFlag(Coder.Flag.FLAG_CLOSED_GOP, true);
+//        videoDecoder.setFlag(Coder.Flag.FLAG_EMU_EDGE, true);
+//        videoDecoder.setFlag(Coder.Flag.FLAG_GMC, true);
+//        videoDecoder.setFlag(Coder.Flag.FLAG_INTERLACED_DCT, true);
+//        videoDecoder.setFlag(Coder.Flag.FLAG_INTERLACED_ME, true);
+//        videoDecoder.setFlag(Coder.Flag.FLAG_MV0, true);
+//        videoDecoder.setFlag(Coder.Flag.FLAG_PASS1, true);
+//        videoDecoder.setFlag(Coder.Flag.FLAG_PASS2, true);
+//        videoDecoder.setFlag(Coder.Flag.FLAG_QPEL, true);
+//        videoDecoder.setFlag(Coder.Flag.FLAG_QSCALE, true);
+//        videoDecoder.setFlag(Coder.Flag.FLAG_TRUNCATED, true);
+//        videoDecoder.setFlag(Coder.Flag.FLAG_UNALIGNED, true);
+        videoDecoder.setFlag(Coder.Flag.FLAG_PSNR, true);
+        videoDecoder.setFlag(Coder.Flag.FLAG_LOW_DELAY, true);
+        videoDecoder.setFlag2(Coder.Flag2.FLAG2_FAST, true);
+        videoDecoder.setFlag2(Coder.Flag2.FLAG2_CHUNKS, true);
+
+        videoDecoder.open(keyValueBag, null);
+
 
         final MediaPicture picture = MediaPicture.make(
                 videoDecoder.getWidth(),
@@ -94,7 +140,10 @@ public class HumbleDecoder implements VideoDecoder {
                 MediaPictureConverterFactory.createConverter(
                         MediaPictureConverterFactory.HUMBLE_BGR_24,
                         picture);
+
         BufferedImage image = null;
+
+//        MediaResampler resampler = MediaPictureResampler.make();
 
         /**
          * Media playback, like comedy, is all about timing. Here we're going to introduce <b>very very basic</b>
@@ -152,8 +201,14 @@ public class HumbleDecoder implements VideoDecoder {
                                 streamTimebase);
 
                         // display it on the Java Swing window
-                        if (listener != null)
-                            listener.imageUpdated(image);
+                        if (listener != null) {
+                            byte[] temp = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+                            byte[] temp2 = Arrays.copyOfRange(temp, 0, 2764800);
+                            BufferedImage img = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
+                            img.setData(Raster.createRaster(img.getSampleModel(), new DataBufferByte(temp2, temp2.length), new Point()));
+
+                            listener.imageUpdated(img);
+                        }
                     }
                     offset += bytesRead;
                 } while (offset < packet.getSize());
