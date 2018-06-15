@@ -190,7 +190,7 @@ public class RectangleFilter implements QrTracker {
         Mat imgcol = new Mat();
         Mat hierarchy = new Mat();
 
-        //Denoise binary image using medianBlur and OPEN
+        //Widen contrasts (hence contours) with dilate
         Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3));
         dilate(imgbin, imgbin, kernel);
 
