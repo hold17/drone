@@ -4,8 +4,10 @@ import dk.localghost.hold17.autonomous_drone.controller.DroneController;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.CircleFilter;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.FilterHelper;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.RectangleFilter;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Direction;
 import dk.localghost.hold17.base.IARDrone;
 import dk.localghost.hold17.base.command.VideoCodec;
+import dk.localghost.hold17.base.utils.ConsoleColors;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
@@ -53,6 +55,7 @@ public class GUIController {
         startRecording();
     }
 
+    private boolean videoWidthHasBeenShown = false;
     @FXML
     private void startRecording() {
         bufferedImage = null;
@@ -60,7 +63,15 @@ public class GUIController {
         ardrone.getCommandManager().setVideoCodec(VideoCodec.H264_720P);
         ardrone.getVideoManager().reinitialize();
 
-        ardrone.getVideoManager().addImageListener(newImage -> bufferedImage = newImage);
+        ardrone.getVideoManager().addImageListener(newImage -> {
+            bufferedImage = newImage;
+            if (bufferedImage != null && !videoWidthHasBeenShown) {
+                videoWidthHasBeenShown = true;
+
+                Direction.CAMERA_WIDTH = bufferedImage.getWidth();
+                System.out.println("Video Width: " + ConsoleColors.YELLOW_BRIGHT + Direction.CAMERA_WIDTH + ConsoleColors.RESET + "px.");
+            }
+        });
 
         TimerTask liveFrame = new TimerTask() {
             @Override
@@ -85,7 +96,6 @@ public class GUIController {
             @Override
             public void run() {
                 if (bufferedImage != null) {
-                    droneController.updateQR(bufferedImage);
 //                    final Mat mat = circleFilter.findCircleAndDraw(filterHelper.bufferedImageToMat(bufferedImage));
 //                    droneController.alignCircle();
                     final Mat mat = rectangleFilter.filterImage(filterHelper.bufferedImageToMat(bufferedImage));
@@ -112,9 +122,9 @@ public class GUIController {
         this.timer = new Timer();
         // update imageView with new image every 33ms (30 fps)
         this.timer.schedule(liveFrame, 0, 33);
-        // update imageView with new image every 66ms (approx. 15 fps)
+        // update imageView with new image every 33ms
         this.timer.schedule(processedFrame, 0, 33);
-
+        // update QRcode with new image every 66ms (approx. 15 fps)
         this.timer.schedule(QRupdater, 0, 66);
     }
 

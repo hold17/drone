@@ -13,7 +13,7 @@ import javafx.stage.Stage;
 
 public class AutonomousGUI extends Application {
     private static IARDrone drone;
-    private final static int SPEED = 20;
+    private final static int SPEED = 80;
     private DroneController droneController;
 
     public static void main(String[] args) {
