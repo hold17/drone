@@ -46,7 +46,7 @@ public class DroneController {
         drone.getCommandManager().flatTrim();
 
         drone.setMinAltitude(MIN_ALTITUDE); // TODO Doesn't work..
-        drone.setMaxAltitude(MAX_ALTITUDE);
+        drone.setMaxAltitude(4000);
         initializeListeners();
 
         System.out.println(ConsoleColors.BLUE_BRIGHT + "CURRENT BATTERY: " + droneBattery + "%" + ConsoleColors.RESET);
@@ -133,8 +133,8 @@ public class DroneController {
      * Interrupts and resets the drone. Emergency land
      */
     public void reset() {
-        cmd.stop();
         drone.reset();
+        cmd.flatTrim();
     }
 
     /**
@@ -152,7 +152,7 @@ public class DroneController {
         goToDetectionAltitude();
         cmd.hover().doFor(250);
         // Change this value to change the distance to fly when flying through rings
-        final int FORWARD_TIME = 1500;
+        final int FORWARD_TIME = 1000;
 
         // UP
         System.out.println("          FLYING UP");
@@ -184,9 +184,9 @@ public class DroneController {
      */
     public void goToDetectionAltitude() {
         if (getCurrentFlightController() instanceof QrTracker) {
-            goToMinimumAltitude();
+            goToAltitude(MIN_ALTITUDE);
         } else if (getCurrentFlightController() instanceof CircleTracker) {
-            goToMaximumAltitude();
+            goToAltitude(MAX_ALTITUDE);
         }
     }
 
@@ -194,35 +194,25 @@ public class DroneController {
      * Goes to the altitude needed for flying through the ring. This is always the maximum altitude.
      */
     public void goToRingAltitude() {
-        goToMaximumAltitude();
+        goToAltitude(MAX_ALTITUDE);
     }
 
     /**
-     * Flies up or down to the minimum altitude (usually 900)
+     * Goes up or down to a specified altitude
+     *
+     * @param altitude  the altitude to specify
      */
-    private void goToMinimumAltitude() {
-        if (droneAltitude > MIN_ALTITUDE) {
-            while(droneAltitude > MIN_ALTITUDE) {
-                cmd.down(speed).doFor(250);
-            }
-        } else {
-            while(droneAltitude < MIN_ALTITUDE) {
-                cmd.up(speed).doFor(250);
-            }
-        }
-    }
-
-    /**
-     * Flies up or down to the maximum altitude (usually 1400)
-     */
-    private void goToMaximumAltitude() {
+    private void goToAltitude(int altitude) {
         if (droneAltitude < MAX_ALTITUDE) {
-            while(droneAltitude < MAX_ALTITUDE) {
-                cmd.up(speed).doFor(250);
+            while(droneAltitude < altitude) {
+                cmd.up(speed / 2).doFor(250);
             }
         } else {
-            while(droneAltitude > MAX_ALTITUDE) {
-                cmd.down(speed).doFor(250);
+            while(droneAltitude > altitude) {
+                cmd.down(speed / 2).doFor(250);
+            }
+            while(droneAltitude < altitude) {
+                cmd.up(speed / 4).doFor(100);
             }
         }
     }
@@ -295,28 +285,36 @@ public class DroneController {
 //    }
 
     public void alignTarget() {
-        Direction qrDirection = Direction.UNKNOWN;
+        Direction targetDirection = Direction.UNKNOWN;
 
         goToDetectionAltitude();
 
-        for (int i = 0; i < 10; i++) {
-             qrDirection = getCurrentFlightController().getFlightDirection();
+        for (int i = 0; i < 25; i++) {
+             targetDirection = getCurrentFlightController().getFlightDirection();
 
-            switch (qrDirection) {
+             if (getCurrentFlightController().readyForFlyingThroughRing()) {
+                 System.out.println(ConsoleColors.YELLOW_BRIGHT + "Ready to fly through the ring!!!" + ConsoleColors.RESET);
+                 flyThroughRing();
+                 cmd.hover();
+//                 cmd.landing();
+                 return;
+             }
+
+            switch (targetDirection) {
                 case LEFT:
-                    cmd.goRight(speed).doFor(500);
+                    cmd.goLeft(speed).doFor(250);
                     break;
                 case RIGHT:
-                    cmd.goLeft(speed).doFor(500);
+                    cmd.goRight(speed).doFor(250);
                     break;
                 case CENTER:
-                    cmd.forward(speed).doFor(500);
+                    cmd.forward(speed).doFor(350);
                     break;
                 case UNKNOWN:
+                    flyToLastKnownDirection();
                     searchForLostTarget(2);
                     qrController.resetLastScan();
                     break;
-
             }
 
             getCurrentFlightController().resetFlightDirection();
@@ -326,32 +324,54 @@ public class DroneController {
         }
 
         if (getCurrentFlightController().readyForFlyingThroughRing()) {
-            cmd.spinLeft(100).doFor(250).hover().waitFor(250);
-            cmd.spinRight(100).doFor(250);
-            cmd.landing();
+            System.out.println(ConsoleColors.YELLOW_BRIGHT + "Ready to fly through the ring!!! 2nd time" + ConsoleColors.RESET);
+//            cmd.spinLeft(100).doFor(250).hover().waitFor(250);
+//            cmd.spinRight(100).doFor(250);
+            flyThroughRing();
+            cmd.hover();
+//            cmd.landing();
+        }
+    }
+
+    private void flyToLastKnownDirection() {
+        switch (getCurrentFlightController().getLastKnownDirection()) {
+            case LEFT:
+                cmd.goLeft(speed).doFor(250);
+                break;
+            case RIGHT:
+                cmd.goRight(speed).doFor(250);
+                break;
+            case CENTER:
+                cmd.forward(speed).doFor(350);
+                break;
         }
     }
 
     /**
      * Makes minor adjustments to find the target that was recently lost
+     *
+     * @param searchCount  how many iterations the search algorithm should execute
      */
     private void searchForLostTarget(int searchCount) {
         final int FLY_SPEED = speed / 2;
         final int FLY_TIME = 300;
-        final int WAIT_TIME = 1500;
+        final int WAIT_TIME = 2500;
         final int TEST_COUNT = 3;
 
-        for (int i = 0; i < searchCount; i++) {
-            cmd.backward(FLY_SPEED).doFor(FLY_TIME).hover().waitFor(WAIT_TIME);
-            if (targetFound()) return;
+        for (FlightController fc : flightControllers) {
+            for (int i = 0; i < searchCount; i++) {
+                cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 1);
+                cmd.backward(FLY_SPEED).doFor(FLY_TIME).hover().waitFor(WAIT_TIME);
+                if (targetFound(fc)) return;
 
-            testLeft(FLY_SPEED, FLY_TIME, WAIT_TIME, TEST_COUNT);
-            if (targetFound()) return;
-            testRight(FLY_SPEED, FLY_TIME, WAIT_TIME, TEST_COUNT);
-            if (targetFound()) return;
+                testLeft(FLY_SPEED, FLY_TIME, WAIT_TIME, TEST_COUNT);
+                if (targetFound(fc)) return;
+                testRight(FLY_SPEED, FLY_TIME, WAIT_TIME, TEST_COUNT);
+                if (targetFound(fc)) return;
+            }
+
+            takeoffOrLand();
         }
-
-        takeoffOrLand();
     }
 
     private void testLeft(final int SPEED, final int FLY_TIME, final int WAIT_TIME, final int COUNT) {
@@ -361,7 +381,7 @@ public class DroneController {
             cmd.goLeft(SPEED).doFor(FLY_TIME).hover().waitFor(WAIT_TIME);
             resetFlyCount = i + 1;
 
-            if (targetFound()) return;
+            if (targetFound(getCurrentFlightController())) return;
         }
 
         for (int i = 0; i < resetFlyCount; i++) {
@@ -376,7 +396,7 @@ public class DroneController {
             cmd.goRight(SPEED).doFor(FLY_TIME).hover().waitFor(WAIT_TIME);
             resetFlyCount = i + 1;
 
-            if (targetFound()) return;
+            if (targetFound(getCurrentFlightController())) return;
         }
 
         for (int i = 0; i < resetFlyCount; i++) {
@@ -384,15 +404,15 @@ public class DroneController {
         }
     }
 
-    private boolean targetFound() {
-        boolean found = qrController.getLastScan() != null && getCurrentFlightController().getFlightDirection() != Direction.UNKNOWN;
+    private boolean targetFound(FlightController flightController) {
+        boolean found = qrController.getLastScan() != null && flightController.getFlightDirection() != Direction.UNKNOWN;
 
         System.out.println(ConsoleColors.CYAN_BRIGHT + "Found: " + found + ConsoleColors.RESET);
 
         return found;
     }
 
-    private void searchForUnknownQrLocation() {
+//    private void searchForUnknownQrLocation() {
 //        Direction lastKnownQrLocation;
 //        boolean qrWasFound = false;
 //
@@ -412,70 +432,70 @@ public class DroneController {
 //
 ////            if (lastKnownQrLocation == Direction.CENTER) break; // don't break, we need to fly randomly to the right and to the left
 //        }
-    }
+//public void searchForQr() {
+//    String qrString = null;
+//
+//    goToDetectionAltitude();
+//    qrController.resetLastScan();
+//
+//    for (int i = 0; i < 5; i++) {
+//        System.out.println("Iteration: " + i);
+//
+//        // FORWARD
+//        cmd.forward(speed).doFor(1000);
+//        cmd.hover().doFor(1000);
+//        qrString = qrController.getLastScan();
+//        if (qrString != null) break;
+//
+//        // SPIN LEFT
+//        cmd.spinLeft(100).doFor(100);
+//        cmd.hover().doFor(1000);
+//        qrString = qrController.getLastScan();
+//        if (qrString != null) {
+//            cmd.goRight(100).doFor(100);
+//            break;
+//        }
+//
+//        // SPIN RIGHT
+//        cmd.spinRight(100).doFor(100);
+//        cmd.spinRight(100).doFor(100);
+//        cmd.hover().doFor(1000);
+//        qrString = qrController.getLastScan();
+//        // SPIN BACK (reset)
+//        cmd.spinLeft(100).doFor(100);
+//        if (qrString != null) break;
+//
+//        // PAN LEFT
+//        cmd.goLeft(speed).doFor(500);
+//        cmd.hover().doFor(1000);
+//        qrString = qrController.getLastScan();
+//        if (qrString != null) {
+//            cmd.goRight(speed).doFor(250);
+//            break;
+//        }
+//
+//        // PAN RIGHT
+//        cmd.goRight(speed).doFor(500);
+//        cmd.hover().doFor(500);
+//        cmd.goRight(speed).doFor(500);
+//        cmd.hover().doFor(1000);
+//        qrString = qrController.getLastScan();
+//        // PAN BACK (reset)
+//        cmd.goLeft(speed).doFor(500);
+//        if (qrString != null) break;
+//
+//        cmd.hover().doFor(1000);
+//    }
+//
+//    qrController.resetLastScan();
+//    System.out.println(ConsoleColors.CYAN_BOLD_BRIGHT + "I FOUND QR: " + qrString + ConsoleColors.RESET);
+//    cmd.landing();
+//
+//    goToRingAltitude();
+//}
 
+//    }
 
-    public void searchForQr() {
-        String qrString = null;
-
-        goToDetectionAltitude();
-        qrController.resetLastScan();
-
-        for (int i = 0; i < 5; i++) {
-            System.out.println("Iteration: " + i);
-
-            // FORWARD
-            cmd.forward(speed).doFor(1000);
-            cmd.hover().doFor(1000);
-            qrString = qrController.getLastScan();
-            if (qrString != null) break;
-
-            // SPIN LEFT
-            cmd.spinLeft(100).doFor(100);
-            cmd.hover().doFor(1000);
-            qrString = qrController.getLastScan();
-            if (qrString != null) {
-                cmd.goRight(100).doFor(100);
-                break;
-            }
-
-            // SPIN RIGHT
-            cmd.spinRight(100).doFor(100);
-            cmd.spinRight(100).doFor(100);
-            cmd.hover().doFor(1000);
-            qrString = qrController.getLastScan();
-            // SPIN BACK (reset)
-            cmd.spinLeft(100).doFor(100);
-            if (qrString != null) break;
-
-            // PAN LEFT
-            cmd.goLeft(speed).doFor(500);
-            cmd.hover().doFor(1000);
-            qrString = qrController.getLastScan();
-            if (qrString != null) {
-                cmd.goRight(speed).doFor(250);
-                break;
-            }
-
-            // PAN RIGHT
-            cmd.goRight(speed).doFor(500);
-            cmd.hover().doFor(500);
-            cmd.goRight(speed).doFor(500);
-            cmd.hover().doFor(1000);
-            qrString = qrController.getLastScan();
-            // PAN BACK (reset)
-            cmd.goLeft(speed).doFor(500);
-            if (qrString != null) break;
-
-            cmd.hover().doFor(1000);
-        }
-
-        qrController.resetLastScan();
-        System.out.println(ConsoleColors.CYAN_BOLD_BRIGHT + "I FOUND QR: " + qrString + ConsoleColors.RESET);
-        cmd.landing();
-
-        goToRingAltitude();
-    }
 
     public void LEDSuccess() {
         drone.getCommandManager().setLedsAnimation(LEDAnimation.BLINK_GREEN, 10, 1);
