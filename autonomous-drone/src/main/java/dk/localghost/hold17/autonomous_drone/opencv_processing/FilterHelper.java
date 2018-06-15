@@ -21,7 +21,7 @@ public class FilterHelper {
      * @param fileName path and appending filename
      * @param mat      The mat of an image
      */
-    public void saveFile(String fileName, Mat mat) {
+    public static void saveFile(String fileName, Mat mat) {
         final String path = Paths.get("").toAbsolutePath().toString();
         final String filePath = (path + "/DroneImagesFiltered/" + fileName).replace('/', '\\');
         Imgcodecs.imwrite(filePath, mat);
@@ -33,10 +33,10 @@ public class FilterHelper {
      * @param fileName file
      * @return Mat
      */
-    public Mat openFile(String fileName) {
+    public static Mat openFile(String fileName) {
         try {
             final String path = Paths.get("").toAbsolutePath().toString();
-            final String filePath = (path + "/DroneImages/" + fileName).replace('/', '\\');
+            final String filePath = (path + "/NewDroneImages/" + fileName).replace('/', '\\');
 
             Mat newImage = Imgcodecs.imread(filePath);
             if (newImage.dataAddr() == 0) {
@@ -55,7 +55,7 @@ public class FilterHelper {
      * @param img BufferedImage
      * @return Mat
      */
-    public Mat bufferedImageToMat(BufferedImage img) {
+    public static Mat bufferedImageToMat(BufferedImage img) {
         byte[] data = ((DataBufferByte) img.getRaster().getDataBuffer()).getData();
         Mat mat = new Mat(img.getHeight(), img.getWidth(), CvType.CV_8UC3);
         mat.put(0, 0, data);
@@ -67,7 +67,7 @@ public class FilterHelper {
      * @param mat Mat
      * @return BufferedImage
      */
-    public BufferedImage matToBufferedImage(Mat mat) {
+    public static BufferedImage matToBufferedImage(Mat mat) {
         BufferedImage image = new BufferedImage(mat.width(), mat.height(), BufferedImage.TYPE_3BYTE_BGR);
         WritableRaster raster = image.getRaster();
         DataBufferByte dataBuffer = (DataBufferByte) raster.getDataBuffer();
