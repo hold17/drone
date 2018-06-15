@@ -1,6 +1,7 @@
 package dk.localghost.hold17.autonomous_drone.controller;
 
 import dk.localghost.hold17.autonomous_drone.opencv_processing.CircleFilter;
+import dk.localghost.hold17.autonomous_drone.opencv_processing.RectangleFilter;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Direction;
 import dk.localghost.hold17.base.IARDrone;
 import dk.localghost.hold17.base.command.CommandManager;
@@ -24,15 +25,14 @@ public class DroneController {
     private List<FlightController> flightControllers = new ArrayList<>();
 
     private static CircleFilter circleFilter = new CircleFilter();
+    private static RectangleFilter rectangleFilter = new RectangleFilter();
 
     private final static int MAX_ALTITUDE = 1400;
     private final static int MIN_ALTITUDE = 900;
     private int droneAltitude = 0;
     private int droneBattery = 0;
     private boolean droneFlying = false;
-    private static int speed;
-    public static int cameraWidth = 1280;
-    public static int cameraHeight = 720;
+    private int speed;
 
     public DroneController(IARDrone drone, int speed) {
         this.drone = drone;
@@ -43,7 +43,6 @@ public class DroneController {
 
     private void initializeDrone() {
         drone.start();
-        drone.getCommandManager().flatTrim();
 
         drone.setMinAltitude(MIN_ALTITUDE); // TODO Doesn't work..
         drone.setMaxAltitude(4000);
@@ -61,6 +60,7 @@ public class DroneController {
 
         qrScanner.addListener(qrController);
         flightControllers.add(qrController);
+        flightControllers.add(rectangleFilter);
 
         writeFlightController();
 
@@ -69,6 +69,10 @@ public class DroneController {
 
     public void updateQR(BufferedImage bufferedImage) {
         qrScanner.lookForQRCode(bufferedImage);
+    }
+
+    public RectangleFilter getRectangleFilter() {
+        return rectangleFilter;
     }
 
     public CircleFilter getCircleFilter() {
@@ -83,9 +87,7 @@ public class DroneController {
             }
 
             @Override
-            public void receivedExtendedAltitude(Altitude d) {
-
-            }
+            public void receivedExtendedAltitude(Altitude d) {}
         });
 
         drone.getNavDataManager().addBatteryListener(new BatteryListener() {
@@ -95,9 +97,7 @@ public class DroneController {
             }
 
             @Override
-            public void voltageChanged(int vbat_raw) {
-
-            }
+            public void voltageChanged(int vbat_raw) {}
         });
     }
 
@@ -135,7 +135,6 @@ public class DroneController {
      */
     public void reset() {
         drone.reset();
-        cmd.flatTrim();
     }
 
     /**
@@ -217,23 +216,6 @@ public class DroneController {
             }
         }
     }
-
-
-//    public void bum() {
-//        final Direction paperDirection = getPaperDirection();
-//
-//        switch (paperDirection) {
-//            case LEFT:
-//                System.out.println("Left"); break;
-//            case RIGHT:
-//                System.out.println("Right"); break;
-//            case CENTER:
-//                System.out.println("Center"); break;
-//            case UNKNOWN:
-//                System.out.println("Unknown"); break;
-//        }
-//    }
-
 
 //    public void alignCircle() {
 //        Direction directionToCircleCenter = null;
@@ -433,6 +415,7 @@ public class DroneController {
 //
 ////            if (lastKnownQrLocation == Direction.CENTER) break; // don't break, we need to fly randomly to the right and to the left
 //        }
+
 //public void searchForQr() {
 //    String qrString = null;
 //
@@ -502,12 +485,12 @@ public class DroneController {
         drone.getCommandManager().setLedsAnimation(LEDAnimation.BLINK_GREEN, 10, 1);
     }
 
-    public static int getSpeed() {
+    public int getSpeed() {
         return speed;
     }
 
-    public static void setSpeed(int speed) {
-        DroneController.speed = speed;
+    public void setSpeed(int speed) {
+        this.speed = speed;
     }
 
     public int getDroneAltitude() {

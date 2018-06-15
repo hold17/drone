@@ -26,7 +26,7 @@ public class GUIController {
     private DroneController droneController;
     private static FilterHelper filterHelper = new FilterHelper();
     private CircleFilter circleFilter;
-    private RectangleFilter rectangleFilter = new RectangleFilter();
+    private RectangleFilter rectangleFilter;
     private Timer timer;
     private BufferedImage bufferedImage;
 
@@ -51,6 +51,7 @@ public class GUIController {
         this.ardrone = drone;
         this.droneController = droneController;
         this.circleFilter = droneController.getCircleFilter();
+        this.rectangleFilter = droneController.getRectangleFilter();
         initSliders();
         startRecording();
     }
@@ -81,10 +82,6 @@ public class GUIController {
                     // show the image
                     Platform.runLater(() -> {
                         live.setImage(image);
-                        // set fixed width
-//                        live.setFitWidth(640);
-                        // preserve bufferedImage ratio
-//                        live.setPreserveRatio(true);
                     });
                 } else {
                    // System.out.println("bufferedImage was null"); // SILENCED UNTIL NEEDED
@@ -97,14 +94,11 @@ public class GUIController {
             public void run() {
                 if (bufferedImage != null) {
 //                    final Mat mat = circleFilter.findCircleAndDraw(filterHelper.bufferedImageToMat(bufferedImage));
-//                    droneController.alignCircle();
                     final Mat mat = rectangleFilter.filterImage(filterHelper.bufferedImageToMat(bufferedImage));
                     final BufferedImage bf = filterHelper.matToBufferedImage(mat);
                     final Image imageFiltered = SwingFXUtils.toFXImage(bf, null);
                     Platform.runLater(() -> {
                         filtered.setImage(imageFiltered);
-//                        filtered.setFitWidth(640);
-//                        filtered.setPreserveRatio(true);
                     });
                 }
             }
