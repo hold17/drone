@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1080.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dk.localghost.hold17.autonomous_drone.gui.GUIController">
    <children>
       <VBox prefHeight="720.0" prefWidth="640.0">
@@ -21,8 +26,8 @@
                     <items>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                            <children>
-                              <Slider fx:id="h1_slider" blockIncrement="1.0" layoutX="35.0" layoutY="30.0" max="179.0" onMouseDragged="#h1SliderUpdate" orientation="VERTICAL" prefHeight="300.0" />
-                              <Slider fx:id="s1_slider" blockIncrement="1.0" layoutX="88.0" layoutY="30.0" max="255.0" onMouseDragged="#s1SliderUpdate" orientation="VERTICAL" prefHeight="300.0" />
+                              <Slider fx:id="h1_slider" blockIncrement="1.0" layoutX="35.0" layoutY="30.0" max="300.0" onMouseDragged="#h1SliderUpdate" orientation="VERTICAL" prefHeight="300.0" />
+                              <Slider fx:id="s1_slider" blockIncrement="1.0" layoutX="88.0" layoutY="30.0" max="300.0" onMouseDragged="#s1SliderUpdate" orientation="VERTICAL" prefHeight="300.0" />
                               <Slider fx:id="v1_slider" blockIncrement="1.0" layoutX="140.0" layoutY="30.0" max="255.0" onMouseDragged="#v1SliderUpdate" orientation="VERTICAL" prefHeight="300.0" />
                               <Label fx:id="h1_text" layoutX="31.0" layoutY="335.0" text="H" />
                               <Label fx:id="s1_text" layoutX="84.0" layoutY="335.0" text="S" />
@@ -77,14 +82,14 @@
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                <children>
-                  <Slider fx:id="param1_slider" blockIncrement="10.0" layoutX="22.0" layoutY="30.0" min="1" max="500.0" onMouseDragged="#param1SliderUpdate" orientation="VERTICAL" prefHeight="300.0" />
+                  <Slider fx:id="param1_slider" blockIncrement="1.0" layoutX="22.0" layoutY="30.0" max="255.0" min="1" onMouseDragged="#param1SliderUpdate" orientation="VERTICAL" prefHeight="300.0" />
                   <Label layoutX="15.0" layoutY="14.0" text="Param1" />
                   <Label fx:id="param1_text" layoutX="15.0" layoutY="335.0" text="1" />
                </children>
             </AnchorPane>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                <children>
-                  <Slider fx:id="param2_slider" blockIncrement="10.0" layoutX="22.0" layoutY="30.0" min="1" max="250.0" onMouseDragged="#param2SliderUpdate" orientation="VERTICAL" prefHeight="300.0" />
+                  <Slider fx:id="param2_slider" blockIncrement="1.0" layoutX="22.0" layoutY="30.0" max="255.0" min="1" onMouseDragged="#param2SliderUpdate" orientation="VERTICAL" prefHeight="300.0" />
                   <Label layoutX="15.0" layoutY="14.0" text="Param2" />
                   <Label fx:id="param2_text" layoutX="15.0" layoutY="335.0" text="2" />
                </children>

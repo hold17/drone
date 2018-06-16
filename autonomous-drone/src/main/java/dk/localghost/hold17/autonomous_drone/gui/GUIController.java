@@ -123,17 +123,12 @@ public class GUIController {
     }
 
     private void initSliders() {
-
-        h1_slider.setValue(rectangleFilter.getThreshold());
-        h1_text.textProperty().setValue(String.valueOf(rectangleFilter.getThreshold()));
-        s1_slider.setValue(rectangleFilter.getUpperThresh());
-        s1_text.textProperty().setValue(String.valueOf(rectangleFilter.getUpperThresh()));
-//        h1_slider.setValue(rectangleFilter.getFilter1LowerHue());
-//        h1_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1LowerHue()));
-//        s1_slider.setValue(rectangleFilter.getFilter1LowerSat());
-//        s1_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1LowerSat()));
-//        v1_slider.setValue(rectangleFilter.getFilter1LowerVal());
-//        v1_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1LowerVal()));
+        h1_slider.setValue(rectangleFilter.getFilter1LowerHue());
+        h1_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1LowerHue()));
+        s1_slider.setValue(rectangleFilter.getFilter1LowerSat());
+        s1_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1LowerSat()));
+        v1_slider.setValue(rectangleFilter.getFilter1LowerVal());
+        v1_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1LowerVal()));
 
         h2_slider.setValue(rectangleFilter.getFilter1UpperHue());
         h2_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1UpperHue()));
@@ -156,31 +151,25 @@ public class GUIController {
         v4_slider.setValue(circleFilter.getFilter2UpperVal());
         v4_text.textProperty().setValue(String.valueOf(circleFilter.getFilter2UpperVal()));
 
-        param1_slider.setValue(circleFilter.getParam1());
-        param1_text.textProperty().setValue(String.valueOf(circleFilter.getParam1()));
+        param1_slider.setValue(rectangleFilter.getLowerThresh());
+        param1_text.textProperty().setValue(String.valueOf(rectangleFilter.getLowerThresh()));
 
-        param2_slider.setValue(circleFilter.getParam2());
-        param2_text.textProperty().setValue(String.valueOf(circleFilter.getParam2()));
+        param2_slider.setValue(rectangleFilter.getUpperThresh());
+        param2_text.textProperty().setValue(String.valueOf(rectangleFilter.getUpperThresh()));
     }
 
     @FXML
     public void h1SliderUpdate() {
         final double h1_val = h1_slider.getValue();
-        rectangleFilter.setThreshold(h1_val);
-        h1_text.textProperty().setValue(String.valueOf(rectangleFilter.getThreshold()));
-//        final double h1_val = h1_slider.getValue();
-//        rectangleFilter.setFilter1LowerHue(h1_val);
-//        h1_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1LowerHue()));
+        rectangleFilter.setFilter1LowerHue(h1_val);
+        h1_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1LowerHue()));
     }
 
     @FXML
     public void s1SliderUpdate() {
         final double s1_val = s1_slider.getValue();
-        rectangleFilter.setUpperThresh(s1_val);
-        s1_text.textProperty().setValue(String.valueOf(rectangleFilter.getUpperThresh()));
-//        final double s1_val = s1_slider.getValue();
-//        rectangleFilter.setFilter1LowerSat(s1_val);
-//        s1_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1LowerSat()));
+        rectangleFilter.setFilter1LowerSat(s1_val);
+        s1_text.textProperty().setValue(String.valueOf(rectangleFilter.getFilter1LowerSat()));
     }
 
     @FXML
@@ -256,15 +245,21 @@ public class GUIController {
     @FXML
     public void param1SliderUpdate() {
         final double param1_val = param1_slider.getValue();
-        circleFilter.setParam1((int) param1_val);
-        param1_text.textProperty().setValue(String.valueOf(circleFilter.getParam1()));
+        rectangleFilter.setLowerThresh(param1_val);
+        param1_text.textProperty().setValue(String.valueOf(rectangleFilter.getLowerThresh()));
+//        final double param1_val = param1_slider.getValue();
+//        circleFilter.setParam1((int) param1_val);
+//        param1_text.textProperty().setValue(String.valueOf(circleFilter.getParam1()));
     }
 
     @FXML
     public void param2SliderUpdate() {
         final double param2_val = param2_slider.getValue();
-        circleFilter.setParam2((int) param2_val);
-        param2_text.textProperty().setValue(String.valueOf(circleFilter.getParam2()));
+        rectangleFilter.setUpperThresh(param2_val);
+        param2_text.textProperty().setValue(String.valueOf(rectangleFilter.getUpperThresh()));
+//        final double param2_val = param2_slider.getValue();
+//        circleFilter.setParam2((int) param2_val);
+//        param2_text.textProperty().setValue(String.valueOf(circleFilter.getParam2()));
     }
 
 }
