@@ -4,6 +4,7 @@ import dk.localghost.hold17.autonomous_drone.controller.QrTracker;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Direction;
 import dk.localghost.hold17.autonomous_drone.opencv_processing.util.Rectangle;
 
+import dk.localghost.hold17.base.utils.ConsoleColors;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
@@ -29,8 +30,8 @@ public class RectangleFilter implements QrTracker {
     //color filter
     private Scalar HSV_FILTER_LOWER = new Scalar(0, 0, 0);
     private Scalar HSV_FILTER_UPPER = new Scalar(179, 255, 254);
-    private double lowerThresh = 175;
-    private double upperThresh = 200;
+    private double lowerThresh = 145;
+    private double upperThresh = 47;
 
     private List<Integer> parents = new ArrayList<>();
 
@@ -41,15 +42,39 @@ public class RectangleFilter implements QrTracker {
 
     private boolean readyToFlyThroughRing = false;
 
-    public RectangleFilter() {}
+    private static final int QR_POSITIONS_COUNT = 30;
+
+    private Rect[] qrPositions;
+    private int qrPositionsIterator = QR_POSITIONS_COUNT - 1;
+
+    public RectangleFilter() {
+        qrPositions = new Rect[QR_POSITIONS_COUNT];
+    }
 
     private RectangleFilter(String image) {
+        this();
         filterImage(FilterHelper.openFile(image));
     }
 
     public static void main(String[] args) {
         new RectangleFilter("13.jpg");
+    }
 
+    private void setQrPosition(Rect rect) {
+        decrementQrPositionsIterator();
+        qrPositions[qrPositionsIterator] = rect;
+    }
+
+    private Rect getQrPosition() {
+        return qrPositions[qrPositionsIterator];
+    }
+
+    private void decrementQrPositionsIterator() {
+        if (qrPositionsIterator > 0) {
+            qrPositionsIterator--;
+        } else {
+            qrPositionsIterator = QR_POSITIONS_COUNT - 1;
+        }
     }
 
     /*** Use contours to detect vertices,
@@ -84,15 +109,58 @@ public class RectangleFilter implements QrTracker {
                     if (total == 4) {
 //                        System.out.println("FOUND QR CODE! LEVEL 4 HIERARCHY!");
                         Rect rect = Imgproc.boundingRect(contours.get(parent));
+
+                        setQrPosition(rect);
+
+                        double ratio = rect.height/rect.width;
+
+//                        if(ratio > 0.8 && ratio < 1.2) {
+//                            continue;
+//                        }
+
+//                        int x = rect.x + (rect.width/2);
+//                        qrDirection = Direction.findXDirection(x);
                         Imgproc.rectangle(imgcol, rect.br(), rect.tl(), NEON_GREEN, 2);
                     }
                 }
 
                 parent = checkParents(hierarchy, parent);
             }
+
         }
 
+
+        int avg = findAverageQrDirection();
+        if (avg == 0) return imgcol;
+        qrDirection = Direction.findXDirection(avg);
+        System.out.println(ConsoleColors.CYAN_BRIGHT + "Average: " + avg + "\tAverage Direction: " + qrDirection);
+
         return imgcol;
+    }
+
+    private int findAverageQrDirection() {
+        int x = 0;
+
+        for (Rect rect : qrPositions) {
+            if (rect == null) continue;
+            x += rect.x + (rect.width / 2);
+        }
+
+        if (x == 0) return 0;
+
+        return x / (qrPositions.length - qrPositionsNullCount());
+    }
+
+    private int qrPositionsNullCount() {
+        int count = 0;
+
+        for (Rect rect : qrPositions) {
+            if (rect == null) {
+                count++;
+            }
+        }
+
+        return count;
     }
 
     public int checkParents(Mat hierarchy, int contourIndex) {
@@ -290,16 +358,17 @@ public class RectangleFilter implements QrTracker {
     private Mat detectWhiteMat(Mat image) {
         Mat imgbin = new Mat();
         Mat imghsv = new Mat();
-        Mat imgfinal = new Mat();
+//        Mat imgfinal = new Mat();
+        Mat edges = new Mat();
 
         GaussianBlur(image, image, new Size(3, 3), 2.0, 2.0);
 
         cvtColor(image, imgbin, COLOR_BGR2GRAY);
-
+        Canny(imgbin, edges, lowerThresh, upperThresh, 3, false);
 //        Core.bitwise_and(imgbin, imgbin, imgfinal, imghsv);
 //        equalizeHist(imgfinal, imgfinal);
 
-        threshold(imgbin, imgbin, lowerThresh, upperThresh, THRESH_BINARY_INV);
+//        threshold(imgbin, imgbin, lowerThresh, upperThresh, THRESH_BINARY_INV);
 //        Core.inRange(image, new Scalar(150, 150, 150), new Scalar(255, 255, 255), imgbin);
 
         // convert to HSV
@@ -313,7 +382,7 @@ public class RectangleFilter implements QrTracker {
         // filter lower and upper red
 //        Core.inRange(imghsv, HSV_FILTER_LOWER, HSV_FILTER_UPPER, imghsv);
 
-        return imgbin;
+        return edges;
     }
 
 

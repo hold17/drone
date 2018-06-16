@@ -215,7 +215,7 @@ public class DroneController {
         cmd.setLedsAnimation(LEDAnimation.RED_SNAKE, 6, 5);
         cmd.takeOff().doFor(6000);
         goToDetectionAltitude();
-        cmd.forward(20).doFor(1000);
+        cmd.forward(20).doFor(800);
         cmd.hover().waitFor(500);
         cmd.spinLeft(40).doFor(750);
         cmd.hover().waitFor(250);
