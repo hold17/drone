@@ -201,9 +201,6 @@ public class RectangleFilter implements QrTracker {
         }
     }
 
-    public void checkHierarchy(List<MatOfPoint> contours, Mat hi) {
-    }
-
     public void detectSquares (Mat imgcol, List<Rectangle> rectangles) {
         idenSquares.clear();
         for (int i = 0; i < rectangles.size(); i++) {
@@ -278,12 +275,11 @@ public class RectangleFilter implements QrTracker {
          * is not currently used. Use RETR_EXTERNAL if you only want to find parent contours. */
         cvtColor(imgbin, imgcol, COLOR_GRAY2RGB);
         Imgproc.findContours(imgbin, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-        drawContours(imgcol, contours, -1, YELLOW, 2);
+        //drawContours(imgcol, contours, -1, YELLOW, 2);
         //Detect and draw rectangles on RGB image
         imgcol = drawRectangles(imgcol, contours, hierarchy);
         defineQRCode(imgcol);
 
-//        FilterHelper.saveFile("13filtered.jpg", imgcol);
         return imgcol;
     }
 
@@ -338,10 +334,20 @@ public class RectangleFilter implements QrTracker {
 
     @Override
     public boolean readyForFlyingThroughRing() {
+        return farFromTarget() && qrDirection == Direction.CENTER;
+    }
+
+    @Override
+    public boolean farFromTarget() {
         return readyToFlyThroughRing;
     }
 
-//    public int averageArea(List<Rect> rects) {
+    @Override
+    public double distanceFromTarget() {
+        return 0;
+    }
+
+    //    public int averageArea(List<Rect> rects) {
 //        int avg = 0;
 //        for(int i = 0; i < rects.size(); i++) {
 //            avg += rects.get(i).area();

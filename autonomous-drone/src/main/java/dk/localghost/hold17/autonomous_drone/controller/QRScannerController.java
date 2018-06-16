@@ -69,6 +69,17 @@ public class QRScannerController implements TagListener, QrTracker {
 
     @Override
     public boolean readyForFlyingThroughRing() {
-        return horizontalTopDistance > 125 && qrDirection != Direction.UNKNOWN;
+//        return farFromTarget() && qrDirection != Direction.UNKNOWN;
+        return farFromTarget() && qrDirection == Direction.CENTER;
+    }
+
+    @Override
+    public boolean farFromTarget() {
+        return distanceFromTarget() > 80;
+    }
+
+    @Override
+    public double distanceFromTarget() {
+        return horizontalTopDistance;
     }
 }
