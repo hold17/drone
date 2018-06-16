@@ -259,10 +259,20 @@ public class RectangleFilter implements QrTracker {
 
     @Override
     public boolean readyForFlyingThroughRing() {
+        return farFromTarget() && qrDirection == Direction.CENTER;
+    }
+
+    @Override
+    public boolean farFromTarget() {
         return false;
     }
 
-//    public int averageArea(List<Rect> rects) {
+    @Override
+    public double distanceFromTarget() {
+        return 0;
+    }
+
+    //    public int averageArea(List<Rect> rects) {
 //        int avg = 0;
 //        for(int i = 0; i < rects.size(); i++) {
 //            avg += rects.get(i).area();
