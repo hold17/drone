@@ -43,15 +43,15 @@ public class RectangleFilter implements QrTracker {
 
     public RectangleFilter() {}
 
-//    public RectangleFilter() {
-//        filterImage(FilterHelper.openFile("13.jpg"));
-//    }
+    private RectangleFilter(String image) {
+        filterImage(FilterHelper.openFile(image));
+    }
 
+    public static void main(String[] args) {
+        new RectangleFilter("13.jpg");
 
-//    public static void main(String[] args) {
-//        new RectangleFilter();
-//
-//    }
+    }
+
     /*** Use contours to detect vertices,
      *   Check for all contours with approximately 4 vertices (rectangle),
      *   Surround rectangle with a boundingrect,
