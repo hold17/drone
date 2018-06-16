@@ -18,6 +18,7 @@
  *******************************************************************************/
 package dk.localghost.hold17.base.video;
 
+import com.sun.org.apache.bcel.internal.classfile.Code;
 import io.humble.video.*;
 import io.humble.video.Container;
 import io.humble.video.awt.MediaPictureConverter;
@@ -49,6 +50,8 @@ public class HumbleDecoder implements VideoDecoder {
          */
         Demuxer demuxer = Demuxer.make();
 
+        demuxer.setFlag(Container.Flag.FLAG_DISCARD_CORRUPT, true);
+        demuxer.setFlag(Container.Flag.FLAG_CUSTOM_IO, true);
         /*
          * Open the demuxer with the filename passed on.
          */
@@ -88,15 +91,15 @@ public class HumbleDecoder implements VideoDecoder {
          */
         KeyValueBag keyValueBag = KeyValueBag.make();
 
-//        keyValueBag.setValue("minrate", "5000");
-//        keyValueBag.setValue("maxrate", "10000");
+        keyValueBag.setValue("minrate", "5000");
+        keyValueBag.setValue("maxrate", "10000");
 
 //        keyValueBag.setValue("skip_frame", "0");
 //        keyValueBag.setValue("bug", "1");
 //        keyValueBag.setValue("skip_idct", "0");
 //        keyValueBag.setValue("ec", "2");
 //        keyValueBag.setValue("ec", "1");
-//        keyValueBag.setValue("err_detect", "1");
+        keyValueBag.setValue("err_detect", "1");
 
 //        videoDecoder.setFlag(Coder.Flag.FLAG_BITEXACT, true);
 //        videoDecoder.setFlag(Coder.Flag.FLAG_INPUT_PRESERVED, true);
@@ -119,11 +122,20 @@ public class HumbleDecoder implements VideoDecoder {
 //        videoDecoder.setFlag(Coder.Flag.FLAG_TRUNCATED, true);
 //        videoDecoder.setFlag(Coder.Flag.FLAG_UNALIGNED, true);
         videoDecoder.setFlag(Coder.Flag.FLAG_PSNR, true);
-        videoDecoder.setFlag(Coder.Flag.FLAG_LOW_DELAY, true);
+        videoDecoder.setFlag(Coder.Flag.FLAG_LOW_DELAY, false);
+
+//        videoDecoder.setFlag2(Coder.Flag2.FLAG2_CHUNKS, true);
         videoDecoder.setFlag2(Coder.Flag2.FLAG2_FAST, true);
-        videoDecoder.setFlag2(Coder.Flag2.FLAG2_CHUNKS, true);
 
         videoDecoder.open(keyValueBag, null);
+
+        System.out.println("minrate = " + videoDecoder.getPropertyAsString("minrate"));
+        System.out.println("maxrate = " + videoDecoder.getPropertyAsString("maxrate"));
+        System.out.println("err_detect = " + videoDecoder.getPropertyAsString("err_detect"));
+        System.out.println("skip_frame = " + videoDecoder.getPropertyAsString("skip_frame"));
+        System.out.println("bug = " + videoDecoder.getPropertyAsString("bug"));
+        System.out.println("skip_idct = " + videoDecoder.getPropertyAsString("skip_idct"));
+        System.out.println("ec = " + videoDecoder.getPropertyAsString("ec"));
 
 
         final MediaPicture picture = MediaPicture.make(
