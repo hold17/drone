@@ -44,12 +44,12 @@ public class KeyboardCommandManager implements EventHandler<KeyEvent> {
             case SPACE:
                 controller.takeoffOrLand();
                 break;
-            case H:
-                drone.getCommandManager().goRight(2);
-                break;
-            case G:
-                drone.getCommandManager().goLeft(2);
-                break;
+//            case H:
+//                drone.getCommandManager().goRight(2);
+//                break;
+//            case G:
+//                drone.getCommandManager().goLeft(2);
+//                break;
             case ENTER:
                 drone.getCommandManager().schedule(0, controller::flyThroughRing);
                 break;
