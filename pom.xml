@@ -44,16 +44,6 @@
             </dependency>
             <!--logging for xuggler DO NOT DELETE!!!!!1!!-->
             <dependency>
-                <groupId>io.humble</groupId>
-                <artifactId>humble-video-all</artifactId>
-                <version>0.2.1</version>
-            </dependency>
-            <dependency>
-                <groupId>io.humble</groupId>
-                <artifactId>humble-video-all</artifactId>
-                <version>0.2.1</version>
-            </dependency>
-            <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-jdk14</artifactId>
                 <version>1.7.25</version>
@@ -68,6 +58,25 @@
                 <groupId>xuggle</groupId>
                 <artifactId>xuggle-xuggler</artifactId>
                 <version>5.4</version>
+            </dependency>
+            <dependency>
+                <groupId>io.humble</groupId>
+                <artifactId>humble-video-all</artifactId>
+                <version>0.2.1</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>io.humble</groupId>
+                        <artifactId>humble-video-arch-i686-apple-darwin12</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>io.humble</groupId>
+                        <artifactId>humble-video-arch-i686-pc-linux-gnu6</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>io.humble</groupId>
+                        <artifactId>humble-video-arch-i686-w64-mingw32</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <!--charts-->
             <dependency>
@@ -99,79 +108,6 @@
                 <artifactId>opencv</artifactId>
                 <version>3.2.0-1</version>
             </dependency>
-            <!--different openCV (exclusions are stuff we don't need)-->
-            <!--<dependency>-->
-                <!--<groupId>org.bytedeco</groupId>-->
-                <!--<artifactId>javacv-platform</artifactId>-->
-                <!--<version>1.4.1</version>-->
-                <!--<exclusions>-->
-                    <!--<exclusion>-->
-                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-                        <!--<artifactId>flycapture-platform</artifactId>-->
-                    <!--</exclusion>-->
-                    <!--<exclusion>-->
-                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-                        <!--<artifactId>libdc1394-platform</artifactId>-->
-                    <!--</exclusion>-->
-                    <!--<exclusion>-->
-                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-                        <!--<artifactId>libfreenect-platform</artifactId>-->
-                    <!--</exclusion>-->
-                    <!--<exclusion>-->
-                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-                        <!--<artifactId>libfreenect2-platform</artifactId>-->
-                    <!--</exclusion>-->
-                    <!--<exclusion>-->
-                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-                        <!--<artifactId>librealsense-platform</artifactId>-->
-                    <!--</exclusion>-->
-                    <!--<exclusion>-->
-                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-                        <!--<artifactId>artoolkitplus-platform</artifactId>-->
-                    <!--</exclusion>-->
-                    <!--<exclusion>-->
-                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-                        <!--<artifactId>flandmark-platform</artifactId>-->
-                    <!--</exclusion>-->
-                    <!--<exclusion>-->
-                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-                        <!--<artifactId>videoinput-platform</artifactId>-->
-                    <!--</exclusion>-->
-                    <!--<exclusion>-->
-                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-                        <!--<artifactId>flycapture</artifactId>-->
-                    <!--</exclusion>-->
-                    <!--<exclusion>-->
-                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-                        <!--<artifactId>libdc1394</artifactId>-->
-                    <!--</exclusion>-->
-                    <!--<exclusion>-->
-                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-                        <!--<artifactId>libfreenect</artifactId>-->
-                    <!--</exclusion>-->
-                    <!--<exclusion>-->
-                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-                        <!--<artifactId>libfreenect2</artifactId>-->
-                    <!--</exclusion>-->
-                    <!--<exclusion>-->
-                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-                        <!--<artifactId>librealsense</artifactId>-->
-                    <!--</exclusion>-->
-                    <!--<exclusion>-->
-                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-                        <!--<artifactId>artoolkitplus</artifactId>-->
-                    <!--</exclusion>-->
-                    <!--<exclusion>-->
-                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-                        <!--<artifactId>flandmark</artifactId>-->
-                    <!--</exclusion>-->
-                    <!--<exclusion>-->
-                        <!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-                        <!--<artifactId>videoinput</artifactId>-->
-                    <!--</exclusion>-->
-                <!--</exclusions>-->
-            <!--</dependency>-->
-
         </dependencies>
     </dependencyManagement>
 
