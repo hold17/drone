@@ -28,8 +28,8 @@ public class RectangleFilter implements QrTracker {
 
     //color filter
     private Scalar HSV_FILTER_LOWER = new Scalar(0, 0, 0);
-    private Scalar HSV_FILTER_UPPER = new Scalar(179, 100, 255);
-    private double threshold = 100;
+    private Scalar HSV_FILTER_UPPER = new Scalar(179, 255, 254);
+    private double lowerThresh = 175;
     private double upperThresh = 200;
 
     private List<Integer> parents = new ArrayList<>();
@@ -39,7 +39,18 @@ public class RectangleFilter implements QrTracker {
     private Direction qrDirection = Direction.UNKNOWN;
     private Direction lastKnownDirection = Direction.UNKNOWN;
 
+    private boolean readyToFlyThroughRing = false;
+
     public RectangleFilter() {}
+
+    private RectangleFilter(String image) {
+        filterImage(FilterHelper.openFile(image));
+    }
+
+    public static void main(String[] args) {
+        new RectangleFilter("13.jpg");
+
+    }
 
     /*** Use contours to detect vertices,
      *   Check for all contours with approximately 4 vertices (rectangle),
@@ -53,62 +64,111 @@ public class RectangleFilter implements QrTracker {
      */
     private Mat drawRectangles(Mat imgcol, List<MatOfPoint> contours, Mat hierarchy) {
         MatOfPoint2f approx = new MatOfPoint2f();
-        MatOfPoint2f matOfPoint2f = new MatOfPoint2f();
+        MatOfPoint2f parentContour = new MatOfPoint2f();
         double accuracy = 0.06;
 
         /* Look through contours */
         for (MatOfPoint contour : contours) {
-            matOfPoint2f.fromList(contour.toList());
+            int index = contours.indexOf(contour);
+            int level = 0;
+            int parent = checkParents(hierarchy, index);
 
-            /* Check if current contour has approximately approx.total() vertices. We check for 4 = rectangle. */
-            Imgproc.approxPolyDP(matOfPoint2f, approx, Imgproc.arcLength(matOfPoint2f, true) * accuracy, true);
+            while (parent != -1) {
+                level++;
+//                System.out.println("Level: " + level);
+                if (level == 4) {
+                    parentContour.fromList(contours.get(parent).toList());
+                    Imgproc.approxPolyDP(parentContour, approx, Imgproc.arcLength(parentContour, true) * 0.05, true);
 
-            long total = approx.total();
-
-            /* If 4 vertices are found, the contour is approximately a rectangle */
-            if (total == 4) {
-                /* Create a boundingRect from the current contour. A boundingRect is the smallest
-                 * possible rectangle in which the contour will fit */
-                Rect rect = Imgproc.boundingRect(contour);
-
-                /* Find the centerpoints and area */
-                double centerX = rect.x + (rect.width / 2);
-                double centerY = rect.y + (rect.height / 2);
-                double rectArea = rect.width * rect.height;
-                double squareThreshold = (double) rect.width / (double) rect.height;
-
-                /* If the rect area is over 3000 we want to draw it
-                 * Might need to add more requirements */
-                if (rectArea > 1000 && rectArea < 50000  && squareThreshold > 0.7 && squareThreshold < 1.3) {
-//                    System.out.print("Rectangle detected. Coordinates: " + "(" + centerX + ", " + centerY + ") ");
-//                    System.out.print("Width: " + rect.width + ", Height: " + rect.height);
-                    int index = contours.indexOf(contour);
-                    Mat sub = hierarchy.col(index);
-                    int[] subArray = new int[(int) sub.total() * sub.channels()];
-                    sub.get(0, 0, subArray);
-                    int parent = subArray[3];
-//                    System.out.println("Hierarchy index " + index + ": " + hierarchy.col(index).dump() + " || PARENT: " + subArray[3]);
-                    Rectangle rectangle = new Rectangle(rect);
-                    rectangle.setParent(parent);
-                    if (rectangle.getParent() != -1) {
-                        if (!parents.contains(parent)) {
-                            parents.add(parent);
-                        }
-//                        System.out.print(" || CONTOUR " + index);
-//                        System.out.println(" || PARENT: " + rectangle.getParent());
-                        rectangles.add(rectangle);
-
-//                        /*** Debug contour index ***/
-//                        String idxstr = "" + index;
-//                        Point start = new Point(rect.x, rect.y);
-//                        Imgproc.putText(imgcol, idxstr, start, Core.FONT_HERSHEY_SCRIPT_SIMPLEX, 0.5, CYAN, 1);
+                    long total = approx.total();
+                    if (total == 4) {
+//                        System.out.println("FOUND QR CODE! LEVEL 4 HIERARCHY!");
+                        Rect rect = Imgproc.boundingRect(contours.get(parent));
+                        Imgproc.rectangle(imgcol, rect.br(), rect.tl(), NEON_GREEN, 2);
                     }
                 }
+
+                parent = checkParents(hierarchy, parent);
             }
         }
 
         return imgcol;
     }
+
+    public int checkParents(Mat hierarchy, int contourIndex) {
+
+        Mat sub = hierarchy.col(contourIndex);
+        int[] subArray = new int[(int) sub.total() * sub.channels()];
+        sub.get(0, 0, subArray);
+        int parent = subArray[3];
+//        System.out.println("Hierarchy index " + contourIndex + ": " + hierarchy.col(contourIndex).dump() + " || PARENT: " + subArray[3]);
+
+        if (parent != -1) {
+            return parent;
+        }
+
+        return -1;
+    }
+
+
+
+//            matOfPoint2f.fromList(contour.toList());
+//
+//            /* Check if current contour has approximately approx.total() vertices. We check for 4 = rectangle. */
+//            Imgproc.approxPolyDP(matOfPoint2f, approx, Imgproc.arcLength(matOfPoint2f, true) * accuracy, true);
+//
+//            long total = approx.total();
+//
+//            /* If 4 vertices are found, the contour is approximately a rectangle */
+//            if (total == 4) {
+//                /* Create a boundingRect from the current contour. A boundingRect is the smallest
+//                 * possible rectangle in which the contour will fit */
+//                Rect rect = Imgproc.boundingRect(contour);
+//
+//                /* Find the centerpoints and area */
+//                double centerX = rect.x + (rect.width / 2);
+//                double centerY = rect.y + (rect.height / 2);
+//                double rectArea = rect.width * rect.height;
+//                double squareThreshold = (double) rect.width / (double) rect.height;
+//
+//                /* If the rect area is over 3000 we want to draw it
+//                 * Might need to add more requirements */
+//                if (rectArea > 1000 && rectArea < 50000  && squareThreshold > 0.7 && squareThreshold < 1.3) {
+////                    System.out.print("Rectangle detected. Coordinates: " + "(" + centerX + ", " + centerY + ") ");
+////                    System.out.print("Width: " + rect.width + ", Height: " + rect.height);
+//                    int index = contours.indexOf(contour);
+//                    Mat sub = hierarchy.col(index);
+//                    int[] subArray = new int[(int) sub.total() * sub.channels()];
+//                    sub.get(0, 0, subArray);
+//                    int parent = subArray[3];
+//                    int child = subArray[2];
+//                    System.out.println("Hierarchy index " + index + ": " + hierarchy.col(index).dump() + " || PARENT: " + subArray[3]);
+//                    Rectangle rectangle = new Rectangle(rect);
+//                    rectangle.setParent(parent);
+//
+//
+//
+//                    if (rectangle.getParent() != -1) {
+//                        if (!parents.contains(parent)) {
+//                            parents.add(parent);
+//                        }
+////                        System.out.print(" || CONTOUR " + index);
+////                        System.out.println(" || PARENT: " + rectangle.getParent());
+//                       rectangles.add(rectangle);
+//
+////                         Debug contour index
+////                        String idxstr = "" + index;
+////                        Point start = new Point(rect.x, rect.y);
+////                        Imgproc.putText(imgcol, idxstr, start, Core.FONT_HERSHEY_SCRIPT_SIMPLEX, 0.5, CYAN, 1);
+//                    }
+//                }
+//            }
+//        }
+//
+//        return imgcol;
+//    }
+//
+
 
     private void defineQRCode(Mat imgcol) {
         List<Rectangle> temp = new ArrayList<>();
@@ -141,7 +201,6 @@ public class RectangleFilter implements QrTracker {
         }
     }
 
-
     public void detectSquares (Mat imgcol, List<Rectangle> rectangles) {
         idenSquares.clear();
         for (int i = 0; i < rectangles.size(); i++) {
@@ -158,17 +217,24 @@ public class RectangleFilter implements QrTracker {
 
         int avgX = 0;
         int avgY = 0;
+        int avgArea = 0;
         for (Rect rect : idenSquares) {
             Imgproc.rectangle(imgcol, rect.br(), rect.tl(), RED, 3, 8, 0);
             avgX += (rect.x + rect.width / 2);
             avgY += (rect.y + rect.height / 2);
+            avgArea += rect.area();
         }
 
         if (!idenSquares.isEmpty() && idenSquares.size() >= 2) {
             avgX = avgX / idenSquares.size();
             avgY = avgY / idenSquares.size();
+            avgArea = avgArea / idenSquares.size();
             Point avg = new Point(avgX, avgY);
             Imgproc.circle(imgcol, avg, 15, NEON_GREEN, Core.FILLED);
+            if(avgArea > 10000) {
+                readyToFlyThroughRing = true;
+            }
+
         }
 
         qrDirection = Direction.findXDirection(avgX);
@@ -191,6 +257,7 @@ public class RectangleFilter implements QrTracker {
         rectangles.clear();
         idenSquares.clear();
         parents.clear();
+        readyToFlyThroughRing = false;
 
         Mat imgbin = detectWhiteMat(originalImage);
         Mat imgcol = new Mat();
@@ -208,7 +275,7 @@ public class RectangleFilter implements QrTracker {
          * is not currently used. Use RETR_EXTERNAL if you only want to find parent contours. */
         cvtColor(imgbin, imgcol, COLOR_GRAY2RGB);
         Imgproc.findContours(imgbin, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-
+        //drawContours(imgcol, contours, -1, YELLOW, 2);
         //Detect and draw rectangles on RGB image
         imgcol = drawRectangles(imgcol, contours, hierarchy);
         defineQRCode(imgcol);
@@ -222,21 +289,29 @@ public class RectangleFilter implements QrTracker {
      */
     private Mat detectWhiteMat(Mat image) {
         Mat imgbin = new Mat();
+        Mat imghsv = new Mat();
+        Mat imgfinal = new Mat();
+
         GaussianBlur(image, image, new Size(3, 3), 2.0, 2.0);
-        cvtColor(image, imgbin, COLOR_RGB2GRAY);
-        threshold(imgbin, imgbin, threshold, upperThresh, THRESH_BINARY);
+
+        cvtColor(image, imgbin, COLOR_BGR2GRAY);
+
+//        Core.bitwise_and(imgbin, imgbin, imgfinal, imghsv);
+//        equalizeHist(imgfinal, imgfinal);
+
+        threshold(imgbin, imgbin, lowerThresh, upperThresh, THRESH_BINARY_INV);
 //        Core.inRange(image, new Scalar(150, 150, 150), new Scalar(255, 255, 255), imgbin);
 
         // convert to HSV
-//        cvtColor(image, image, Imgproc.COLOR_BGR2HSV);
+//        cvtColor(image, imghsv, Imgproc.COLOR_BGR2HSV);
 //        List<Mat> channels = new ArrayList<>();
-//        Core.split(image, channels);
+//        Core.split(imghsv, channels);
 //        equalizeHist(channels.get(1), channels.get(1));
 //        equalizeHist(channels.get(2), channels.get(2));
-//        Core.merge(channels, image);
+//        Core.merge(channels, imghsv);
 
         // filter lower and upper red
-//        Core.inRange(image, HSV_FILTER_LOWER, HSV_FILTER_UPPER, imgbin);
+//        Core.inRange(imghsv, HSV_FILTER_LOWER, HSV_FILTER_UPPER, imghsv);
 
         return imgbin;
     }
@@ -264,7 +339,7 @@ public class RectangleFilter implements QrTracker {
 
     @Override
     public boolean farFromTarget() {
-        return false;
+        return readyToFlyThroughRing;
     }
 
     @Override
@@ -396,12 +471,12 @@ public class RectangleFilter implements QrTracker {
         HSV_FILTER_UPPER.set(new double[]{HSV_FILTER_UPPER.val[0], HSV_FILTER_UPPER.val[1], v2});
     }
 
-    public double getThreshold() {
-        return threshold;
+    public double getLowerThresh() {
+        return lowerThresh;
     }
 
-    public void setThreshold(double threshold) {
-        this.threshold = threshold;
+    public void setLowerThresh(double lowerThresh) {
+        this.lowerThresh = lowerThresh;
     }
 
     public double getUpperThresh() {
