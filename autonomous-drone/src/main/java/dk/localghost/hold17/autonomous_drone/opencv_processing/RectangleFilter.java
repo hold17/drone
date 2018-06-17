@@ -129,7 +129,6 @@ public class RectangleFilter implements QrTracker {
 
         }
 
-
         int avg = findAverageQrDirection();
         if (avg == 0) return imgcol;
         qrDirection = Direction.findXDirection(avg);
@@ -177,8 +176,6 @@ public class RectangleFilter implements QrTracker {
 
         return -1;
     }
-
-
 
 //            matOfPoint2f.fromList(contour.toList());
 //
@@ -236,7 +233,6 @@ public class RectangleFilter implements QrTracker {
 //        return imgcol;
 //    }
 //
-
 
     private void defineQRCode(Mat imgcol) {
         List<Rectangle> temp = new ArrayList<>();
@@ -320,7 +316,6 @@ public class RectangleFilter implements QrTracker {
      *   Run determinePaperOrientation;
      * @return Mat
      */
-
     public Mat filterImage(Mat originalImage) {
         rectangles.clear();
         idenSquares.clear();
@@ -384,7 +379,6 @@ public class RectangleFilter implements QrTracker {
 
         return edges;
     }
-
 
     @Override
     public Direction getFlightDirection() {
