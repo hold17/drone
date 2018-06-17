@@ -32,4 +32,14 @@ public interface FlightController {
      * @return True if the ring is close enough to fly through. Otherwise false.
      */
     boolean readyForFlyingThroughRing();
+
+    /**
+     * @return True if the drone is too long away from the target to fly through (i.e., the drone needs to go forward)
+     */
+    boolean farFromTarget();
+
+    /**
+     * @return Current distance to the target
+     */
+    double distanceFromTarget();
 }

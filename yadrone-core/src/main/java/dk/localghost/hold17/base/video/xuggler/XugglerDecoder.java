@@ -47,10 +47,15 @@ public class XugglerDecoder implements VideoDecoder {
         if (videoStreamId == -1)
             throw new RuntimeException("could not find video stream");
 
+        videoCoder.setFlag(IStreamCoder.Flags.FLAG_LOW_DELAY, true);
+        videoCoder.setFlag(IStreamCoder.Flags.FLAG2_FAST, true);
+
         /*
          * Now we have found the video stream in this file. Let's open up our
          * decoder so it can do work.
          */
+        videoCoder.setFlag(IStreamCoder.Flags.FLAG2_FAST, true);
+        videoCoder.setFlag(IStreamCoder.Flags.FLAG_LOW_DELAY, true);
         if (videoCoder.open(null, null) < 0)
             throw new RuntimeException("could not open video decoder for container");
 

@@ -45,7 +45,7 @@ public class DroneController {
         drone.start();
 
         drone.setMinAltitude(MIN_ALTITUDE); // TODO Doesn't work..
-        drone.setMaxAltitude(4000);
+        drone.setMaxAltitude(1600);
         initializeListeners();
 
         System.out.println(ConsoleColors.BLUE_BRIGHT + "CURRENT BATTERY: " + droneBattery + "%" + ConsoleColors.RESET);
@@ -58,7 +58,6 @@ public class DroneController {
         qrScanner = new QRCodeScanner();
         qrScanner.addListener(qrController);
 
-        qrScanner.addListener(qrController);
         flightControllers.add(qrController);
         flightControllers.add(rectangleFilter);
 
@@ -148,34 +147,29 @@ public class DroneController {
      * Autonomous flight: up, forward, down
      */
     public void flyThroughRing() {
-        cmd.hover().doFor(250);
-        goToDetectionAltitude();
-        cmd.hover().doFor(250);
+        System.out.println("GOING THROUGH TARGET!");
         // Change this value to change the distance to fly when flying through rings
-        final int FORWARD_TIME = 1000;
+        int forwardTime = 1000;
+//        double distance = getCurrentFlightController().distanceFromTarget();
+
+//        if (distance > 60 && distance < 80) {
+//            forwardTime = 1500;
+//        }
 
         // UP
-        System.out.println("          FLYING UP");
         cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 10, 1);
         goToRingAltitude();
 
-        // WAIT
-        cmd.hover().doFor(100);
-
         // FORWARD
-        System.out.println("          FLYING FORWARD");
         cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 1);
-        cmd.forward(speed).doFor(FORWARD_TIME);
+        cmd.forward(speed).doFor(forwardTime);
 
-        // WAIT
         cmd.hover().doFor(250);
 
         // DOWN
-        System.out.println("          FLYING DOWN");
         goToDetectionAltitude();
-
-        // WAIT
         cmd.hover().doFor(250);
+        System.out.println("WENT THROUGH TARGET!");
     }
 
     /**
@@ -203,18 +197,58 @@ public class DroneController {
      * @param altitude  the altitude to specify
      */
     private void goToAltitude(int altitude) {
-        if (droneAltitude < MAX_ALTITUDE) {
+        if (droneAltitude < altitude) {
             while(droneAltitude < altitude) {
-                cmd.up(speed / 2).doFor(250);
+                cmd.up(30).doFor(30);
             }
         } else {
             while(droneAltitude > altitude) {
-                cmd.down(speed / 2).doFor(250);
+                cmd.down(30).doFor(30);
             }
             while(droneAltitude < altitude) {
-                cmd.up(speed / 4).doFor(100);
+                cmd.up(30).doFor(30);
             }
         }
+    }
+
+    public void rotateYaw_p00() {
+        cmd.setLedsAnimation(LEDAnimation.RED_SNAKE, 6, 5);
+        cmd.takeOff().doFor(6000);
+        goToDetectionAltitude();
+        cmd.forward(20).doFor(800);
+        cmd.hover().waitFor(500);
+        cmd.spinLeft(40).doFor(750);
+        cmd.hover().waitFor(250);
+        cmd.forward(speed).doFor(700).hover();
+        alignTarget();
+
+        System.out.println(ConsoleColors.GREEN_BRIGHT + "alginTarget() just finished." + ConsoleColors.RESET);
+        cmd.setLedsAnimation(LEDAnimation.SNAKE_GREEN_RED, 5, 2);
+
+        cmd.hover().waitFor(2500);
+        rotateYaw_p01();
+    }
+
+    public void rotateYaw_p01() {
+        cmd.spinRight(40).doFor(950);
+        cmd.hover().waitFor(250);
+        alignTarget();
+
+        cmd.setLedsAnimation(LEDAnimation.SNAKE_GREEN_RED, 5, 2);
+
+        cmd.hover().waitFor(2500);
+        rotateYaw_p02();
+    }
+
+    public void rotateYaw_p02() {
+        cmd.spinRight(40).doFor(900);
+        cmd.hover().waitFor(250);
+        alignTarget();
+
+        cmd.setLedsAnimation(LEDAnimation.SNAKE_GREEN_RED, 5, 2);
+
+        cmd.hover().waitFor(500);
+        cmd.landing();
     }
 
 //    public void alignCircle() {
@@ -271,10 +305,13 @@ public class DroneController {
         Direction targetDirection = Direction.UNKNOWN;
 
         goToDetectionAltitude();
+//        goToRingAltitude();
 
         for (int i = 0; i < 25; i++) {
-             targetDirection = getCurrentFlightController().getFlightDirection();
+            System.out.println(ConsoleColors.CYAN_BRIGHT + "==== Iteration " + i + " ====" + ConsoleColors.RESET);
+            targetDirection = getCurrentFlightController().getFlightDirection();
 
+//            if (getCurrentFlightController().readyForFlyingThroughRing()) break;
              if (getCurrentFlightController().readyForFlyingThroughRing()) {
                  System.out.println(ConsoleColors.YELLOW_BRIGHT + "Ready to fly through the ring!!!" + ConsoleColors.RESET);
                  flyThroughRing();
@@ -285,16 +322,22 @@ public class DroneController {
 
             switch (targetDirection) {
                 case LEFT:
-                    cmd.goLeft(speed).doFor(250);
+                    cmd.goLeft(speed).doFor(400);
+//                    goForward();
                     break;
                 case RIGHT:
-                    cmd.goRight(speed).doFor(250);
+                    cmd.goRight(speed).doFor(400);
+//                    goForward();
                     break;
                 case CENTER:
-                    cmd.forward(speed).doFor(350);
+//                    cmd.forward(speed).doFor(350);
+                    goForward();
                     break;
                 case UNKNOWN:
                     flyToLastKnownDirection();
+                    if (targetFound(getCurrentFlightController())) break;
+                    cmd.hover().waitFor(3000);
+                    if (targetFound(getCurrentFlightController())) break;
                     searchForLostTarget(2);
                     qrController.resetLastScan();
                     break;
@@ -308,11 +351,17 @@ public class DroneController {
 
         if (getCurrentFlightController().readyForFlyingThroughRing()) {
             System.out.println(ConsoleColors.YELLOW_BRIGHT + "Ready to fly through the ring!!! 2nd time" + ConsoleColors.RESET);
-//            cmd.spinLeft(100).doFor(250).hover().waitFor(250);
-//            cmd.spinRight(100).doFor(250);
             flyThroughRing();
             cmd.hover();
-//            cmd.landing();
+        }
+//        System.out.println(ConsoleColors.RED_BRIGHT + "I failed, sorry my lort :(" + ConsoleColors.RESET);
+//        cmd.landing();
+
+    }
+
+    void goForward() {
+        if (getCurrentFlightController().farFromTarget()) {
+            cmd.forward(speed).doFor(350);
         }
     }
 
@@ -336,25 +385,30 @@ public class DroneController {
      * @param searchCount  how many iterations the search algorithm should execute
      */
     private void searchForLostTarget(int searchCount) {
-        final int FLY_SPEED = speed / 2;
+        final int FLY_SPEED = (speed / 2) - 20;
         final int FLY_TIME = 300;
         final int WAIT_TIME = 2500;
-        final int TEST_COUNT = 3;
+        final int TEST_COUNT = 1;
 
         for (FlightController fc : flightControllers) {
             for (int i = 0; i < searchCount; i++) {
                 cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 1);
-                cmd.backward(FLY_SPEED).doFor(FLY_TIME).hover().waitFor(WAIT_TIME);
-                if (targetFound(fc)) return;
-
-                testLeft(FLY_SPEED, FLY_TIME, WAIT_TIME, TEST_COUNT);
-                if (targetFound(fc)) return;
                 testRight(FLY_SPEED, FLY_TIME, WAIT_TIME, TEST_COUNT);
                 if (targetFound(fc)) return;
-            }
 
-            takeoffOrLand();
+                cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 1);
+                testLeft(FLY_SPEED, FLY_TIME, WAIT_TIME, TEST_COUNT);
+                if (targetFound(fc)) return;
+
+
+
+                cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 1);
+                cmd.forward(FLY_SPEED).doFor(FLY_TIME).hover().waitFor(WAIT_TIME);
+                if (targetFound(fc)) return;
+            }
         }
+
+        takeoffOrLand();
     }
 
     private void testLeft(final int SPEED, final int FLY_TIME, final int WAIT_TIME, final int COUNT) {
@@ -372,7 +426,8 @@ public class DroneController {
         }
     }
 
-    private void testRight(final int SPEED, final int FLY_TIME, final int WAIT_TIME, final int COUNT) {
+    private void testRight(final int SPEED, int FLY_TIME, final int WAIT_TIME, final int COUNT) {
+        FLY_TIME += 100;
         int resetFlyCount = 0;
 
         for (int i = 0; i < COUNT; i++) {
