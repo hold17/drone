@@ -60,7 +60,7 @@ public class RectangleFilter implements QrTracker {
         new RectangleFilter("13.jpg");
     }
 
-    private void setQrPosition(Rect rect) {
+    private void addQrPosition(Rect rect) {
         decrementQrPositionsIterator();
         qrPositions[qrPositionsIterator] = rect;
     }
@@ -75,6 +75,11 @@ public class RectangleFilter implements QrTracker {
         } else {
             qrPositionsIterator = QR_POSITIONS_COUNT - 1;
         }
+    }
+
+    private void resetKnownTargetLocation() {
+        decrementQrPositionsIterator();
+        qrPositions[qrPositionsIterator] = null;
     }
 
     /*** Use contours to detect vertices,
@@ -110,7 +115,7 @@ public class RectangleFilter implements QrTracker {
 //                        System.out.println("FOUND QR CODE! LEVEL 4 HIERARCHY!");
                         Rect rect = Imgproc.boundingRect(contours.get(parent));
 
-                        setQrPosition(rect);
+                        addQrPosition(rect);
 
                         double ratio = rect.height/rect.width;
 
@@ -132,7 +137,9 @@ public class RectangleFilter implements QrTracker {
         int avg = findAverageQrDirection();
         if (avg == 0) return imgcol;
         qrDirection = Direction.findXDirection(avg);
-        System.out.println(ConsoleColors.CYAN_BRIGHT + "Average: " + avg + "\tAverage Direction: " + qrDirection);
+        System.out.println(ConsoleColors.CYAN_BRIGHT + "Average: " + avg + "\tAverage Direction: " + qrDirection + "\tNulls: " + qrPositionsNullCount() + ConsoleColors.RESET);
+
+        resetKnownTargetLocation();
 
         return imgcol;
     }
@@ -328,7 +335,7 @@ public class RectangleFilter implements QrTracker {
 
         //Widen contrasts (hence contours) with dilate
         Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3));
-        dilate(imgbin, imgbin, kernel);
+//        dilate(imgbin, imgbin, kernel);
 
         //Contours are matrices of points. We store all of them in this list.
         List<MatOfPoint> contours = new ArrayList<>();
@@ -397,17 +404,18 @@ public class RectangleFilter implements QrTracker {
 
     @Override
     public boolean readyForFlyingThroughRing() {
-        return farFromTarget() && qrDirection == Direction.CENTER;
+        return false;
     }
 
     @Override
     public boolean farFromTarget() {
-        return readyToFlyThroughRing;
+//        return readyToFlyThroughRing;
+        return false;
     }
 
     @Override
     public double distanceFromTarget() {
-        return 0;
+        return -1;
     }
 
     //    public int averageArea(List<Rect> rects) {

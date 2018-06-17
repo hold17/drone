@@ -24,6 +24,7 @@ import dk.localghost.hold17.base.exception.IExceptionListener;
 import dk.localghost.hold17.base.manager.AbstractUDPManager;
 import dk.localghost.hold17.base.navdata.CadType;
 import dk.localghost.hold17.base.utils.ARDronePorts;
+import dk.localghost.hold17.base.utils.ConsoleColors;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -153,8 +154,17 @@ public class CommandManager extends AbstractUDPManager {
         return this;
     }
 
+    public CommandManager calibrateMagneto() {
+        cQueue.add(new CalibrationCommand(Device.MAGNETOMETER));
+        return this;
+    }
+
     public CommandManager forward(int speed) {
         return move(0f, -perc2float(speed), 0f, 0f);
+    }
+
+    public CommandManager upAndForward(int speed) {
+        return move(0f, -perc2float(speed), perc2float(speed), 0f);
     }
 
     public CommandManager backward(int speed) {
@@ -804,9 +814,9 @@ public class CommandManager extends AbstractUDPManager {
         // since MultiConfig is enabled by default, AT*CONFIG_IDS must be sent before AT*CONFIG
         if (c instanceof ConfigureCommand) {
             String config = "AT*CONFIG_IDS=" + (seq++) + ",\"" + CommandManager.SESSION_ID + "\",\"" + CommandManager.PROFILE_ID + "\",\"" + CommandManager.APPLICATION_ID + "\"" + "\r"; // AT*CONFIG_IDS=5,"aabbccdd","bbccddee","ccddeeff"
-//            System.out.println(ConsoleColors.BLUE + "CommandManager: " + "[seq #"+(seq-1)+"] " + config + ConsoleColors.RESET);
+            System.out.println(ConsoleColors.BLUE + "CommandManager: " + "[seq #"+(seq-1)+"] " + config + ConsoleColors.RESET);
             byte[] configPrefix = config.getBytes("ASCII");
-//            System.out.println(ConsoleColors.BLUE + "CommandManager: " + "[seq #"+seq+"] " + c.getCommandString(seq) + ConsoleColors.RESET);
+            System.out.println(ConsoleColors.BLUE + "CommandManager: " + "[seq #"+seq+"] " + c.getCommandString(seq) + ConsoleColors.RESET);
             byte[] command = c.getPacket(seq++);
             buffer = new byte[configPrefix.length + command.length];
             System.arraycopy(configPrefix, 0, buffer, 0, configPrefix.length);

@@ -66,7 +66,7 @@ public class KeyboardCommandManager implements EventHandler<KeyEvent> {
                 System.exit(0);
                 break;
             case Z:
-                drone.getCommandManager().schedule(0, controller::alignTarget);
+                drone.getCommandManager().schedule(0, drone.getCommandManager().calibrateMagneto());
                 break;
             case COMMA:
                 controller.goToDetectionAltitude();
@@ -85,6 +85,8 @@ public class KeyboardCommandManager implements EventHandler<KeyEvent> {
             case H:
                 drone.getVideoManager().reinitialize();
                 break;
+            case N:
+                drone.getCommandManager().schedule(0, controller::alignYawCC);
         }
     }
 }
