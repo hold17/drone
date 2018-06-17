@@ -61,7 +61,7 @@ public class GUIController {
         bufferedImage = null;
 //        ardrone.getCommandManager().setVideoChannel(VideoChannel.HORI);
         ardrone.getCommandManager().setVideoCodec(VideoCodec.H264_720P);
-        ardrone.getCommandManager().setVideoBitrate(4000);
+//        ardrone.getCommandManager().setVideoBitrate(4000);
         ardrone.getVideoManager().reinitialize();
 
         ardrone.getVideoManager().addImageListener(newImage -> {

@@ -50,8 +50,8 @@ public class HumbleDecoder implements VideoDecoder {
          */
         Demuxer demuxer = Demuxer.make();
 
-        demuxer.setFlag(Container.Flag.FLAG_DISCARD_CORRUPT, true);
-        demuxer.setFlag(Container.Flag.FLAG_CUSTOM_IO, true);
+//        demuxer.setFlag(Container.Flag.FLAG_DISCARD_CORRUPT, true);
+//        demuxer.setFlag(Container.Flag.FLAG_CUSTOM_IO, true);
         /*
          * Open the demuxer with the filename passed on.
          */
@@ -91,7 +91,7 @@ public class HumbleDecoder implements VideoDecoder {
          */
         KeyValueBag keyValueBag = KeyValueBag.make();
 
-        keyValueBag.setValue("minrate", "5000");
+        keyValueBag.setValue("minrate", "3000");
         keyValueBag.setValue("maxrate", "10000");
 
 //        keyValueBag.setValue("skip_frame", "0");
@@ -121,11 +121,11 @@ public class HumbleDecoder implements VideoDecoder {
 //        videoDecoder.setFlag(Coder.Flag.FLAG_QSCALE, true);
 //        videoDecoder.setFlag(Coder.Flag.FLAG_TRUNCATED, true);
 //        videoDecoder.setFlag(Coder.Flag.FLAG_UNALIGNED, true);
-        videoDecoder.setFlag(Coder.Flag.FLAG_PSNR, true);
-        videoDecoder.setFlag(Coder.Flag.FLAG_LOW_DELAY, false);
+//        videoDecoder.setFlag(Coder.Flag.FLAG_PSNR, true);
+        videoDecoder.setFlag(Coder.Flag.FLAG_LOW_DELAY, true);
 
 //        videoDecoder.setFlag2(Coder.Flag2.FLAG2_CHUNKS, true);
-        videoDecoder.setFlag2(Coder.Flag2.FLAG2_FAST, true);
+//        videoDecoder.setFlag2(Coder.Flag2.FLAG2_FAST, true);
 
         videoDecoder.open(keyValueBag, null);
 
