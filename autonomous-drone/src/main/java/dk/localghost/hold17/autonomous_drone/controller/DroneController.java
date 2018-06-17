@@ -121,13 +121,6 @@ public class DroneController {
         }
     }
 
-    /**
-     * Interrupts any thread (i think)
-     */
-    public void interrupt() {
-        cmd.stop();
-    }
-
     public void hover() {
         // TODO: Test if doFor is really necessary here
         cmd.hover().doFor(100);
@@ -153,31 +146,28 @@ public class DroneController {
     public void flyThroughRing() {
         System.out.println("GOING THROUGH TARGET!");
         // Change this value to change the distance to fly when flying through rings
-        int forwardTime = 1000;
-//        double distance = getCurrentFlightController().distanceFromTarget();
-
-//        if (distance > 60 && distance < 80) {
-//            forwardTime = 1500;
-//        }
+        int forwardTime = 1250;
 
         // UP
-        cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 10, 1);
+        cmd.setLedsAnimation(LEDAnimation.BLINK_GREEN, 10, 6);
         goToRingAltitude();
 
         // ALIGN
         Direction direction = getFlightController(FlightControllerType.OpenCV_QR).getFlightDirection();
-        while (direction != Direction.CENTER) {
-            switch (direction) {
-                case LEFT:
-                    cmd.goLeft(speed).doFor(100); break;
-                case RIGHT:
-                    cmd.goRight(speed).doFor(100); break;
-            }
-            cmd.hover().waitFor(150);
-        }
+//        while (direction != Direction.CENTER) {
+//            switch (direction) {
+//                case LEFT:
+////                    cmd.goLeft(speed).doFor(100); break;
+//                    cmd.spinLeft(20).doFor(100); break;
+//                case RIGHT:
+////                    cmd.goRight(speed).doFor(100); break;
+//                    cmd.spinRight(20).doFor(100); break;
+//            }
+//            cmd.hover().waitFor(150);
+//        }
 
         // FORWARD
-        cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 1);
+//        cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 1);
         cmd.forward(100).doFor(forwardTime);
 
         cmd.hover().doFor(3000);
@@ -254,19 +244,19 @@ public class DroneController {
      */
     private void goToAltitude(int altitude) {
         System.out.println(ConsoleColors.YELLOW_BRIGHT + "Going to altitude: " + altitude + ConsoleColors.RESET);
-        cmd.hover().waitFor(2000);
         if (droneAltitude < altitude) {
             while(droneAltitude < altitude) {
                 cmd.up(50).doFor(30);
             }
         } else {
             while(droneAltitude > altitude) {
-                cmd.down(50).doFor(30);
+                cmd.down(20).doFor(30);
             }
             while(droneAltitude < altitude) {
                 cmd.up(50).doFor(30);
             }
         }
+        cmd.hover().waitFor(2000);
     }
 
     public void rotateYaw_p00() {
@@ -332,6 +322,10 @@ public class DroneController {
         return currentDirection;
     }
 
+    private boolean readyForTarget() {
+        return getFlightController(FlightControllerType.ZX_QR).readyForFlyingThroughRing() && getFlightController(FlightControllerType.OpenCV_QR).getFlightDirection() == Direction.CENTER;
+    }
+
     public void alignTarget() {
         Direction targetDirection;
 //        boolean secondUnknown = false;
@@ -344,7 +338,7 @@ public class DroneController {
             targetDirection = getTargetDirection();
 
 //            if (getCurrentFlightController().readyForFlyingThroughRing()) break;
-             if (getFlightController(FlightControllerType.ZX_QR).readyForFlyingThroughRing()) {
+             if (readyForTarget()) {
                  System.out.println(ConsoleColors.YELLOW_BRIGHT + "Ready to fly through the ring!!!" + ConsoleColors.RESET);
                  flyThroughRing();
                  cmd.hover();
@@ -354,17 +348,17 @@ public class DroneController {
 
             switch (targetDirection) {
                 case LEFT:
-                    cmd.goLeft(speed).doFor(650);
+                    cmd.goLeft(speed).doFor(700);
 //                    cmd.spinRight(20).doFor(100);
 //                    goForward();
                     break;
                 case RIGHT:
-                    cmd.goRight(speed).doFor(650);
+                    cmd.goRight(speed).doFor(700);
 //                    cmd.spinRight(20).doFor(100);
 //                    goForward();
                     break;
                 case CENTER:
-                    cmd.forward(speed).doFor(800);
+                    cmd.forward(speed).doFor(1000);
 //                    goForward();
                     break;
                 case UNKNOWN:
@@ -388,10 +382,10 @@ public class DroneController {
             getCurrentFlightController().resetFlightDirection();
             cmd.hover().waitFor(2000);
 
-            if (getFlightController(FlightControllerType.ZX_QR).readyForFlyingThroughRing()) break;
+            if (readyForTarget()) break;
         }
 
-        if (getCurrentFlightController().readyForFlyingThroughRing()) {
+        if (readyForTarget()) {
             System.out.println(ConsoleColors.YELLOW_BRIGHT + "Ready to fly through the ring!!! 2nd time" + ConsoleColors.RESET);
             flyThroughRing();
             cmd.hover();
