@@ -153,7 +153,7 @@ public class DroneController {
         goToRingAltitude();
 
         // ALIGN
-        Direction direction = getFlightController(FlightControllerType.OpenCV_QR).getFlightDirection();
+//        Direction direction = getFlightController(FlightControllerType.OpenCV_QR).getFlightDirection();
 //        while (direction != Direction.CENTER) {
 //            switch (direction) {
 //                case LEFT:
@@ -170,7 +170,7 @@ public class DroneController {
 //        cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 1);
         cmd.forward(100).doFor(forwardTime);
 
-        cmd.hover().doFor(3000);
+        cmd.hover().doFor(2000);
 
         // DOWN
         goToDetectionAltitude();
@@ -212,6 +212,16 @@ public class DroneController {
             flightDirection = getCurrentFlightController().getFlightDirection();
 
             cmd.spinRight(15).doFor(100);
+            cmd.hover().waitFor(250);
+        }
+
+        cmd.hover().waitFor(1500);
+
+        while (flightDirection == Direction.LEFT) {
+            System.out.println("Flight direction: " + flightDirection);
+            flightDirection = getCurrentFlightController().getFlightDirection();
+
+            cmd.spinLeft(15).doFor(100);
             cmd.hover().waitFor(250);
         }
 
@@ -337,14 +347,14 @@ public class DroneController {
             System.out.println(ConsoleColors.CYAN_BRIGHT + "==== Iteration " + i + " ====" + ConsoleColors.RESET);
             targetDirection = getTargetDirection();
 
-//            if (getCurrentFlightController().readyForFlyingThroughRing()) break;
-             if (readyForTarget()) {
-                 System.out.println(ConsoleColors.YELLOW_BRIGHT + "Ready to fly through the ring!!!" + ConsoleColors.RESET);
-                 flyThroughRing();
-                 cmd.hover();
-//                 cmd.landing();
-                 return;
-             }
+            if (readyForTarget()) break;
+//             if (readyForTarget()) {
+//                 System.out.println(ConsoleColors.YELLOW_BRIGHT + "Ready to fly through the ring!!!" + ConsoleColors.RESET);
+//                 flyThroughRing();
+//                 cmd.hover();
+////                 cmd.landing();
+//                 return;
+//             }
 
             switch (targetDirection) {
                 case LEFT:
@@ -372,14 +382,16 @@ public class DroneController {
 //                        secondUnknown = false;
 //                        setFlightController(FlightControllerType.ZX_QR);
 //                    }
-                    cmd.hover().waitFor(3000);
+                    cmd.hover().waitFor(2000);
                     if (targetFound(getCurrentFlightController())) break;
                     searchForLostTarget(2);
                     qrController.resetLastScan();
                     break;
             }
 
-            getCurrentFlightController().resetFlightDirection();
+            getFlightController(FlightControllerType.ZX_QR).resetFlightDirection();
+            getFlightController(FlightControllerType.OpenCV_QR).resetFlightDirection();
+
             cmd.hover().waitFor(2000);
 
             if (readyForTarget()) break;
@@ -388,6 +400,8 @@ public class DroneController {
         if (readyForTarget()) {
             System.out.println(ConsoleColors.YELLOW_BRIGHT + "Ready to fly through the ring!!! 2nd time" + ConsoleColors.RESET);
             flyThroughRing();
+                getFlightController(FlightControllerType.ZX_QR).resetFlightDirection();
+                getFlightController(FlightControllerType.OpenCV_QR).resetFlightDirection();
             cmd.hover();
         }
 //        System.out.println(ConsoleColors.RED_BRIGHT + "I failed, sorry my lort :(" + ConsoleColors.RESET);
@@ -415,25 +429,24 @@ public class DroneController {
      * @param searchCount  how many iterations the search algorithm should execute
      */
     private void searchForLostTarget(int searchCount) {
-        final int FLY_SPEED = (speed / 2) - 20;
-        final int FLY_TIME = 450;
+        final int FLY_SPEED = speed;
+        final int FLY_TIME = 800;
         final int WAIT_TIME = 2000;
         final int TEST_COUNT = 1;
 
         for (FlightController fc : flightControllers) {
             for (int i = 0; i < searchCount; i++) {
                 cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 1);
+                cmd.backward(FLY_SPEED).doFor(FLY_TIME).hover().waitFor(WAIT_TIME);
+                if (targetFound(fc)) return;
+
+
+                cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 1);
                 testRight(FLY_SPEED, FLY_TIME, WAIT_TIME, TEST_COUNT);
                 if (targetFound(fc)) return;
 
                 cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 1);
                 testLeft(FLY_SPEED, FLY_TIME, WAIT_TIME, TEST_COUNT);
-                if (targetFound(fc)) return;
-
-
-
-                cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 1);
-                cmd.forward(FLY_SPEED).doFor(FLY_TIME).hover().waitFor(WAIT_TIME);
                 if (targetFound(fc)) return;
             }
         }
