@@ -27,7 +27,7 @@ public class DroneController {
     private static CircleFilter circleFilter = new CircleFilter();
     private static RectangleFilter rectangleFilter = new RectangleFilter();
 
-    private final static int MAX_ALTITUDE = 1400;
+    private final static int MAX_ALTITUDE = 1500;
     private final static int MIN_ALTITUDE = 975;
     private int droneAltitude = 0;
     private int droneBattery = 0;
@@ -146,7 +146,7 @@ public class DroneController {
     public void flyThroughRing() {
         System.out.println("GOING THROUGH TARGET!");
         // Change this value to change the distance to fly when flying through rings
-        int forwardTime = 1250;
+        int forwardTime = 1400;
 
         // UP
         cmd.setLedsAnimation(LEDAnimation.BLINK_GREEN, 10, 6);
@@ -187,7 +187,7 @@ public class DroneController {
             flightDirection = getCurrentFlightController().getFlightDirection();
 
             cmd.spinLeft(15).doFor(100);
-            cmd.hover().waitFor(250);
+            cmd.hover().waitFor(150);
         }
 
         cmd.hover().waitFor(1500);
@@ -197,7 +197,7 @@ public class DroneController {
             flightDirection = getCurrentFlightController().getFlightDirection();
 
             cmd.spinRight(15).doFor(100);
-            cmd.hover().waitFor(250);
+            cmd.hover().waitFor(150);
         }
 
         setFlightController(FlightControllerType.ZX_QR);
@@ -212,7 +212,7 @@ public class DroneController {
             flightDirection = getCurrentFlightController().getFlightDirection();
 
             cmd.spinRight(15).doFor(100);
-            cmd.hover().waitFor(250);
+            cmd.hover().waitFor(150);
         }
 
         cmd.hover().waitFor(1500);
@@ -222,7 +222,7 @@ public class DroneController {
             flightDirection = getCurrentFlightController().getFlightDirection();
 
             cmd.spinLeft(15).doFor(100);
-            cmd.hover().waitFor(250);
+            cmd.hover().waitFor(150);
         }
 
         setFlightController(FlightControllerType.ZX_QR);
@@ -310,7 +310,49 @@ public class DroneController {
         cmd.setLedsAnimation(LEDAnimation.SNAKE_GREEN_RED, 5, 2);
 
         cmd.hover().waitFor(500);
-        cmd.landing();
+
+        rotateYaw_p03();
+    }
+
+    public void rotateYaw_p03() {
+        cmd.hover().waitFor(500);
+        cmd.forward(speed).doFor(3000);
+        cmd.hover().waitFor(500);
+        cmd.spinRight(100).doFor(800);
+        cmd.hover().waitFor(1000);
+        alignYawC();
+        cmd.hover().waitFor(250);
+        alignTarget();
+
+        cmd.setLedsAnimation(LEDAnimation.SNAKE_GREEN_RED, 5, 2);
+
+        cmd.hover().waitFor(500);
+
+        rotateYaw_p04();
+    }
+
+    public void rotateYaw_p04() {
+//        cmd.spinRight(40).doFor(900);
+        alignYawC();
+        cmd.hover().waitFor(250);
+        alignTarget();
+
+        cmd.setLedsAnimation(LEDAnimation.SNAKE_GREEN_RED, 5, 2);
+
+        cmd.hover().waitFor(500);
+
+        rotateYaw_p05();
+    }
+
+    public void rotateYaw_p05() {
+//        cmd.spinRight(40).doFor(900);
+        alignYawC();
+        cmd.hover().waitFor(250);
+        alignTarget();
+
+        cmd.setLedsAnimation(LEDAnimation.SNAKE_GREEN_RED, 5, 2);
+
+        cmd.hover().waitFor(500);
     }
 
     private Direction getTargetDirection() {
@@ -423,6 +465,9 @@ public class DroneController {
         }
     }
 
+    public void testSpin() {
+    }
+
     /**
      * Makes minor adjustments to find the target that was recently lost
      *
@@ -433,6 +478,8 @@ public class DroneController {
         final int FLY_TIME = 800;
         final int WAIT_TIME = 2000;
         final int TEST_COUNT = 1;
+
+        goToDetectionAltitude();
 
         for (FlightController fc : flightControllers) {
             for (int i = 0; i < searchCount; i++) {

@@ -86,7 +86,7 @@ public class KeyboardCommandManager implements EventHandler<KeyEvent> {
                 drone.getVideoManager().reinitialize();
                 break;
             case N:
-                drone.getCommandManager().schedule(0, controller::alignYawCC);
+                drone.getCommandManager().schedule(0, controller::rotateYaw_p02);
         }
     }
 }
