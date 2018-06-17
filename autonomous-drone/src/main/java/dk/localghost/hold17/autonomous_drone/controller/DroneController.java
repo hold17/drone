@@ -117,13 +117,6 @@ public class DroneController {
         }
     }
 
-    /**
-     * Interrupts any thread (i think)
-     */
-    public void interrupt() {
-        cmd.stop();
-    }
-
     public void hover() {
         // TODO: Test if doFor is really necessary here
         cmd.hover().doFor(100);
@@ -150,11 +143,6 @@ public class DroneController {
         System.out.println("GOING THROUGH TARGET!");
         // Change this value to change the distance to fly when flying through rings
         int forwardTime = 1000;
-//        double distance = getCurrentFlightController().distanceFromTarget();
-
-//        if (distance > 60 && distance < 80) {
-//            forwardTime = 1500;
-//        }
 
         // UP
         cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 10, 1);
@@ -251,67 +239,15 @@ public class DroneController {
         cmd.landing();
     }
 
-//    public void alignCircle() {
-//        Direction directionToCircleCenter = null;
-////        Remove this line of code if testing on table.
-////        goToRingAltitude();
-//        System.out.println("IM AT THE TOP");
-//        while (directionToCircleCenter != Direction.CENTER) {
-//            Direction tempDirection = Direction.findXDirection(circleFilter.getBiggestCircle().x); // henter enum ud fra fundne stoerste cirkel
-//            if (tempDirection != Direction.UNKNOWN) {
-//                directionToCircleCenter = tempDirection;
-//            }
-//
-//            System.out.println(ConsoleColors.WHITE_UNDERLINED + ConsoleColors.GREEN + "CIRCLE IS TO THE " + directionToCircleCenter + ConsoleColors.RESET);
-//            if (directionToCircleCenter != null) {
-//                switch (directionToCircleCenter) {
-//                    case LEFT:
-//                    case LEFTDOWN:
-//                    case LEFTUP:
-//                        cmd.setLedsAnimation(LEDAnimation.BLINK_RED, 6, 1);
-//                        cmd.goLeft(speed).doFor(500);
-//                        break;
-//                    case RIGHT:
-//                    case RIGHTUP:
-//                    case RIGHTDOWN:
-//                        cmd.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 6, 1);
-//                        cmd.goRight(speed).doFor(500);
-//                        break;
-//                    case DOWN:
-//                    case UP:
-//                    case CENTER:
-//                        LEDSuccess();
-//                        cmd.forward(speed).doFor(500);
-//                        System.out.println(ConsoleColors.GREEN_BOLD_BRIGHT + "Found circle" + ConsoleColors.RESET);
-//                        break;
-//                }
-//            }
-//            cmd.hover();
-//            cmd.waitFor(1000);
-//        }
-//
-//        cmd.setLedsAnimation(LEDAnimation.SNAKE_GREEN_RED, 1, 10);
-////        drone.landing();
-//    }
-
-//    private Direction getPaperDirection() {
-//        RectangleFilter rectangleFilter = new RectangleFilter();
-//
-//        rectangleFilter.findBiggestQRCode(rectangleFilter.filterImage(droneCamera));
-//        return rectangleFilter.findPaperPosition(rectangleFilter.getBiggestQRCode());
-//    }
-
     public void alignTarget() {
         Direction targetDirection = Direction.UNKNOWN;
 
         goToDetectionAltitude();
-//        goToRingAltitude();
 
         for (int i = 0; i < 25; i++) {
             System.out.println(ConsoleColors.CYAN_BRIGHT + "==== Iteration " + i + " ====" + ConsoleColors.RESET);
             targetDirection = getCurrentFlightController().getFlightDirection();
 
-//            if (getCurrentFlightController().readyForFlyingThroughRing()) break;
              if (getCurrentFlightController().readyForFlyingThroughRing()) {
                  System.out.println(ConsoleColors.YELLOW_BRIGHT + "Ready to fly through the ring!!!" + ConsoleColors.RESET);
                  flyThroughRing();
@@ -354,9 +290,6 @@ public class DroneController {
             flyThroughRing();
             cmd.hover();
         }
-//        System.out.println(ConsoleColors.RED_BRIGHT + "I failed, sorry my lort :(" + ConsoleColors.RESET);
-//        cmd.landing();
-
     }
 
     void goForward() {
@@ -450,102 +383,8 @@ public class DroneController {
         return found;
     }
 
-//    private void searchForUnknownQrLocation() {
-//        Direction lastKnownQrLocation;
-//        boolean qrWasFound = false;
-//
-//        for (int i = 0; i < 3; i++) {
-//            lastKnownQrLocation = qrController.getLastKnownQrDirection();
-//
-//            switch (lastKnownQrLocation) {
-//                case LEFT:
-//                    cmd.goRight(speed / 2).doFor(500); break;
-//                case RIGHT:
-//                    cmd.goLeft(speed / 2).doFor(500); break;
-//                case CENTER:
-//                    cmd.backward(speed / 2).doFor(500); break;
-//            }
-//
-//            if (qrController.getLastScan() != null && qrController.getQrDirection() != Direction.UNKNOWN) break;
-//
-////            if (lastKnownQrLocation == Direction.CENTER) break; // don't break, we need to fly randomly to the right and to the left
-//        }
-
-//public void searchForQr() {
-//    String qrString = null;
-//
-//    goToDetectionAltitude();
-//    qrController.resetLastScan();
-//
-//    for (int i = 0; i < 5; i++) {
-//        System.out.println("Iteration: " + i);
-//
-//        // FORWARD
-//        cmd.forward(speed).doFor(1000);
-//        cmd.hover().doFor(1000);
-//        qrString = qrController.getLastScan();
-//        if (qrString != null) break;
-//
-//        // SPIN LEFT
-//        cmd.spinLeft(100).doFor(100);
-//        cmd.hover().doFor(1000);
-//        qrString = qrController.getLastScan();
-//        if (qrString != null) {
-//            cmd.goRight(100).doFor(100);
-//            break;
-//        }
-//
-//        // SPIN RIGHT
-//        cmd.spinRight(100).doFor(100);
-//        cmd.spinRight(100).doFor(100);
-//        cmd.hover().doFor(1000);
-//        qrString = qrController.getLastScan();
-//        // SPIN BACK (reset)
-//        cmd.spinLeft(100).doFor(100);
-//        if (qrString != null) break;
-//
-//        // PAN LEFT
-//        cmd.goLeft(speed).doFor(500);
-//        cmd.hover().doFor(1000);
-//        qrString = qrController.getLastScan();
-//        if (qrString != null) {
-//            cmd.goRight(speed).doFor(250);
-//            break;
-//        }
-//
-//        // PAN RIGHT
-//        cmd.goRight(speed).doFor(500);
-//        cmd.hover().doFor(500);
-//        cmd.goRight(speed).doFor(500);
-//        cmd.hover().doFor(1000);
-//        qrString = qrController.getLastScan();
-//        // PAN BACK (reset)
-//        cmd.goLeft(speed).doFor(500);
-//        if (qrString != null) break;
-//
-//        cmd.hover().doFor(1000);
-//    }
-//
-//    qrController.resetLastScan();
-//    System.out.println(ConsoleColors.CYAN_BOLD_BRIGHT + "I FOUND QR: " + qrString + ConsoleColors.RESET);
-//    cmd.landing();
-//
-//    goToRingAltitude();
-//}
-
-//    }
-
-
     public void LEDSuccess() {
         drone.getCommandManager().setLedsAnimation(LEDAnimation.BLINK_GREEN, 10, 1);
-    }
-
-    public int getSpeed() {
-        return speed;
-    }
-
-    public void setSpeed(int speed) {
-        this.speed = speed;
     }
 
     public int getDroneAltitude() {
