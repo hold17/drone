@@ -27,7 +27,7 @@ public class DroneController {
     private static CircleFilter circleFilter = new CircleFilter();
     private static RectangleFilter rectangleFilter = new RectangleFilter();
 
-    private final static int MAX_ALTITUDE = 1500;
+    private final static int MAX_ALTITUDE = 1400;
     private final static int MIN_ALTITUDE = 975;
     private int droneAltitude = 0;
     private int droneBattery = 0;
@@ -475,7 +475,7 @@ public class DroneController {
      */
     private void searchForLostTarget(int searchCount) {
         final int FLY_SPEED = speed;
-        final int FLY_TIME = 800;
+        final int FLY_TIME = 1500;
         final int WAIT_TIME = 2000;
         final int TEST_COUNT = 1;
 
