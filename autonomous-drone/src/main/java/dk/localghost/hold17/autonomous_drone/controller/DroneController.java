@@ -187,7 +187,9 @@ public class DroneController {
             flightDirection = getCurrentFlightController().getFlightDirection();
 
             cmd.spinLeft(15).doFor(100);
-            cmd.hover().waitFor(150);
+            cmd.freeze().doFor(250);
+//            cmd.freeze().doFor(100).hover().doFor(150);
+//            cmd.hover().waitFor(250);
         }
 
         cmd.hover().waitFor(1500);
@@ -197,8 +199,13 @@ public class DroneController {
             flightDirection = getCurrentFlightController().getFlightDirection();
 
             cmd.spinRight(15).doFor(100);
-            cmd.hover().waitFor(150);
+            cmd.freeze().doFor(250);
+//            cmd.freeze().doFor(100).hover().doFor(150);
+//            cmd.hover().waitFor(250);
         }
+
+        cmd.spinRight(15).doFor(100);
+        cmd.hover().waitFor(150);
 
         setFlightController(FlightControllerType.ZX_QR);
     }
@@ -212,7 +219,9 @@ public class DroneController {
             flightDirection = getCurrentFlightController().getFlightDirection();
 
             cmd.spinRight(15).doFor(100);
-            cmd.hover().waitFor(150);
+            cmd.freeze().doFor(250);
+//            cmd.freeze().doFor(100).hover().doFor(150);
+//            cmd.hover().waitFor(250);
         }
 
         cmd.hover().waitFor(1500);
@@ -222,8 +231,13 @@ public class DroneController {
             flightDirection = getCurrentFlightController().getFlightDirection();
 
             cmd.spinLeft(15).doFor(100);
-            cmd.hover().waitFor(150);
+            cmd.freeze().doFor(250);
+//            cmd.freeze().doFor(100).hover().doFor(150);
+//            cmd.hover().waitFor(250);
         }
+
+        cmd.spinLeft(15).doFor(100);
+        cmd.hover().waitFor(150);
 
         setFlightController(FlightControllerType.ZX_QR);
     }
@@ -385,8 +399,9 @@ public class DroneController {
 //        goToDetectionAltitude();
 //        goToRingAltitude();
 
-        for (int i = 0; i < 25; i++) {
-            System.out.println(ConsoleColors.CYAN_BRIGHT + "==== Iteration " + i + " ====" + ConsoleColors.RESET);
+//        for (int i = 0; i < 25; i++) {
+        while (true) {
+//            System.out.println(ConsoleColors.CYAN_BRIGHT + "==== Iteration " + i + " ====" + ConsoleColors.RESET);
             targetDirection = getTargetDirection();
 
             if (readyForTarget()) break;

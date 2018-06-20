@@ -44,12 +44,6 @@ public class KeyboardCommandManager implements EventHandler<KeyEvent> {
             case SPACE:
                 controller.takeoffOrLand();
                 break;
-//            case H:
-//                drone.getCommandManager().goRight(2);
-//                break;
-//            case G:
-//                drone.getCommandManager().goLeft(2);
-//                break;
             case ENTER:
                 drone.getCommandManager().schedule(0, controller::flyThroughRing);
                 break;
@@ -59,7 +53,6 @@ public class KeyboardCommandManager implements EventHandler<KeyEvent> {
                 break;
             case M:
                 drone.getCommandManager().schedule(0, controller::rotateYaw_p00);
-//                controller.rotateYaw_p00();
                 break;
             case BACK_SPACE:
                 controller.stop();
@@ -74,19 +67,12 @@ public class KeyboardCommandManager implements EventHandler<KeyEvent> {
             case PERIOD:
                 controller.goToRingAltitude();
                 break;
-            case X:
-//                controller.flyThroughRing();
-                drone.getCommandManager().schedule(0, controller::flyThroughRing);
-//                drone.getCommandManager().schedule(0, controller::alignCircle);
-                break;
             case C:
                 controller.nextFlightController();
                 break;
             case H:
                 drone.getVideoManager().reinitialize();
                 break;
-            case N:
-                drone.getCommandManager().schedule(0, controller::rotateYaw_p02);
         }
     }
 }
