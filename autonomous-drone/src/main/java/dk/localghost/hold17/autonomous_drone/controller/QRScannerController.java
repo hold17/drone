@@ -75,7 +75,7 @@ public class QRScannerController implements TagListener, QrTracker {
 
     @Override
     public boolean farFromTarget() {
-        return distanceFromTarget() > 80;
+        return distanceFromTarget() > 70;
     }
 
     @Override

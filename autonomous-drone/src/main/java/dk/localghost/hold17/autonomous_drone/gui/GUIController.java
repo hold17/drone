@@ -27,7 +27,6 @@ public class GUIController {
     private static FilterHelper filterHelper = new FilterHelper();
     private CircleFilter circleFilter;
     private RectangleFilter rectangleFilter;
-    private Timer timer;
     private BufferedImage bufferedImage;
 
     @FXML
@@ -62,6 +61,7 @@ public class GUIController {
         bufferedImage = null;
 //        ardrone.getCommandManager().setVideoChannel(VideoChannel.HORI);
         ardrone.getCommandManager().setVideoCodec(VideoCodec.H264_720P);
+//        ardrone.getCommandManager().setVideoBitrate(4000);
         ardrone.getVideoManager().reinitialize();
 
         ardrone.getVideoManager().addImageListener(newImage -> {
@@ -78,6 +78,7 @@ public class GUIController {
             @Override
             public void run() {
                 if (bufferedImage != null) {
+
                     Image image = SwingFXUtils.toFXImage(bufferedImage, null);
                     // show the image
                     Platform.runLater(() -> {
@@ -93,6 +94,7 @@ public class GUIController {
             @Override
             public void run() {
                 if (bufferedImage != null) {
+//                    System.out.println(bufferedImage.toString());
 //                    final Mat mat = circleFilter.findCircleAndDraw(filterHelper.bufferedImageToMat(bufferedImage));
                     final Mat mat = rectangleFilter.filterImage(filterHelper.bufferedImageToMat(bufferedImage));
                     final BufferedImage bf = filterHelper.matToBufferedImage(mat);
@@ -113,13 +115,13 @@ public class GUIController {
             }
         };
 
-        this.timer = new Timer();
+//        this.timer = new Timer();
         // update imageView with new image every 33ms (30 fps)
-        this.timer.schedule(liveFrame, 0, 33);
+        new Timer().schedule(liveFrame, 0, 33);
         // update imageView with new image every 33ms
-        this.timer.schedule(processedFrame, 0, 33);
+        new Timer().schedule(processedFrame, 0, 33);
         // update QRcode with new image every 66ms (approx. 15 fps)
-        this.timer.schedule(QRupdater, 0, 66);
+        new Timer().schedule(QRupdater, 0, 66);
     }
 
     private void initSliders() {

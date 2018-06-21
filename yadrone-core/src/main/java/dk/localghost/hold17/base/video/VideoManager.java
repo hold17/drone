@@ -70,10 +70,10 @@ public class VideoManager extends AbstractTCPManager implements ImageListener {
 
     public void reinitialize() {
         System.out.println("VideoManager: reinitialize video stream ...");
-        close();
-        System.out.println("VideoManager: previous stream closed ...");
         System.out.println("VideoManager: resetting decoder");
         decoder.reset();
+        close();
+        System.out.println("VideoManager: previous stream closed ...");
         System.out.println("VideoManager: start connecting again ...");
         new Thread(this).start();
     }

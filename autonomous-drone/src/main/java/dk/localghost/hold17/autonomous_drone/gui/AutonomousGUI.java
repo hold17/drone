@@ -4,6 +4,7 @@ import dk.localghost.hold17.autonomous_drone.controller.DroneController;
 import dk.localghost.hold17.autonomous_drone.controller.KeyboardCommandManager;
 import dk.localghost.hold17.base.ARDrone;
 import dk.localghost.hold17.base.IARDrone;
+import dk.localghost.hold17.base.video.HumbleDecoder;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -13,7 +14,7 @@ import javafx.stage.Stage;
 
 public class AutonomousGUI extends Application {
     private static IARDrone drone;
-    private final static int SPEED = 80;
+    private final static int SPEED = 10;
     private DroneController droneController;
 
     public static void main(String[] args) {
@@ -22,7 +23,7 @@ public class AutonomousGUI extends Application {
             System.exit(-1);
         }
 
-        drone = new ARDrone(args[0]);
+        drone = new ARDrone(args[0], new HumbleDecoder());
         drone.start();
 
         launch(args);
